@@ -830,218 +830,127 @@ Write the message in the log file (logs/gameserver.log)
 
 * If the GA joins after some krags are revealed, it should be reflected.
 
-**Field Agent**
+## Field Agent
 
-- UI
-
+### UI
 - Dropdown to choose a name
-
 - Join Game? Yes/No (GS port hard coded)
-
 - In game screen
-
 - Name
-
 - Team
-
 - Time since game started
-
 - Latitude
-
 - Longitude
-
 - KRAGS Left
-
 - Decoded as of now
-
 - Hints you’ve received (NEW SCREEN)
-
 - Clues you’ve received (NEW SCREEN)
-
 - Input box to enter 4-digit hex KRAG code (NEW SCREEN)
-
 - When you receive a hint/clue: buzzes and shows hint/clue for 10 seconds
-
 - Game over screen
 
 
-
-- Inputs & Outputs
-
-- Inputs
-
+### Inputs & Outputs
+#### Inputs
 - Choose a name from a presented list
-
 - Join the game with the selected name
-
 - Get hints from the GA (through the GS) and display them
-
 - Enter a KRAG code when they find one by entering its 4-digit hex code
-
 - Receive a game status update from the GS (upon request)
-
 - Receive messages from the GS
-
-- Outputs
-
+- 
+#### Outputs
 - Send the Game Server the player’s current location four times per minute
-
 - The first location-update message is how it introduces itself to the GS
-
 - Inform the Game Server when this player claims a krag (by providing a 4-digit hex code)
-
 - Write to the logs with all activities
 
-- Functional Decomposition Into Modules
+### Functional Decomposition Into Modules
 
-- Main: setup, attempt to connect to server, choose name screen, join game screen, and game over screen
-
-- Base Screen: main screen user will interact with, as well as the 5 other minor screens (hints, clues, KRAG input)
-
-- Message Handler: deals with messages it receives from GS, sends messages to GS
-
+- Main
+    - setup, attempt to connect to server, choose name screen, join game screen, and game over screen
+- Base Screen
+    - main screen user will interact with, as well as the 5 other minor screens (hints, clues, KRAG input)
+- Message Handler
+    - deals with messages it receives from GS, sends messages to GS
 - Pebble Subscriptions: Timer
+ 
 
-- Dataflow Through Modules
-
+### Dataflow Through Modules
 1. The pebble displays the UI, has the user choose a name and join the game
-
 2. The game tries to send the FA_LOCATION to the server to join (if it can’t contact the server the game is not joined)
-
 3. The user now sees the Base Screen where they can see information about themselves, see clues and hints they’ve received, and enter a KRAG code
-
-1. Receive and display hints and clues
-
-2. Enter KRAG codes and show whether it was accepted or if it failed
-
+    1. Receive and display hints and clues
+    2. Enter KRAG codes and show whether it was accepted or if it failed
 4. Upon receiving a GAME_OVER, clean up and exit
 
-- Major Data Structures
-
-- Struct FA
-
+### Major Data Structures
+#### Struct FA
 - hex PebbleID
-
 - char *name
-
 - char *team
-
 - signed double latitude
-
 - signed double longitude
-
 - int num_claimed
-
 - int num_left
-
 - char *known_chars (from entering KRAG codes)
-
 - Bag *clues_received
-
 - Bag *hints_received
 
-- Pseudo Code for Logic/Algorithmic Flow
-
-- Subscribe to Pebble funcs, setup the windows
-
+### Pseudo Code for Logic/Algorithmic Flow
+- Subscribe to Pebble funcs
+- Setup the windows
 - Start a timer
-
 - Setup the bluetooth inbox and outboxes
-
-- Choose a name from 2-4 options
-
-- Team name hard coded (view6)
-
-- Join the game by sending a (FA_LOCATION) indirectly to the GS over the proxy with the GS info (server and port name)
-
-- Start displaying game data
-
-- While it hasn’t received a GAME_OVER
-
-- If it’s a quarter of a minute
-
-- send an FA_LOCATION to the GS
-
-- send an FA_LOG to the GS
-
-- If the GS is sending a GA_HINT
-
-- alert the user of the notification (maybe a vibration)
-
-- display the hint
-
-- send an FA_LOG to the GS
-
-- If the GS is sending a GS_CLUE
-
-- alert the user of the notification (maybe a vibration)
-
-- display the clue
-
-- send an FA_LOG to the GS
-
-- If the GS is sending a GS_SECRET
-
-- alert the user of the notification (maybe a vibration)
-
-- display the secret with some characters revealed
-
-- send an FA_LOG to the GS
-
-- If the GS is sending a GAME_OVER
-
-- alert the user of the notification (maybe a vibration)
-
-- display the game status at the end and that the game is ending
-
-- send an FA_LOG to the GS
-
-- exit the loop and end the game
-
-If the GS is sending a GS_RESPONSE
-
-- If the GS is sending an SH_CLAIMED
-
-- alert the user of the notification (maybe a vibration)
-
-- display a success message
-
-- send an FA_LOG to the GS
-
-- If the GS is sending an SH_CLAIMED_ALREADY
-
-- alert the user of the notification (maybe a vibration)
-
-- display a failed message
-
-- send an FA_LOG to the GS
-
-- If the GS is sending any type of SH_ERROR
-
-- Call a function errorHandle() to deal with errors
-
-- If the user enters a KRAG code
-
-- send a FA_CLAIM to the GS
-
-- send an FA_LOG to the GS
+- App Event Loop
+    - Choose a name from 2-4 options
+    - Team name hard coded (view6)
+    - Join the game by sending a (FA_LOCATION) indirectly to the GS over the proxy with the GS info (server and port name)
+    - Start displaying game data
+    - While it hasn’t received a GAME_OVER
+        - If it’s a quarter of a minute
+            - send an FA_LOCATION to the GS
+            - send an FA_LOG to the GS
+        - If the GS is sending a GA_HINT
+            - alert the user of the notification (maybe a vibration)
+            - display the hint
+            - send an FA_LOG to the GS
+        - If the GS is sending a GS_CLUE
+            - alert the user of the notification (maybe a vibration)
+            - display the clue
+            - send an FA_LOG to the GS
+        - If the GS is sending a GS_SECRET
+            - alert the user of the notification (maybe a vibration)
+            - display the secret with some characters revealed
+            - send an FA_LOG to the GS
+        - If the GS is sending a GAME_OVER
+            - alert the user of the notification (maybe a vibration)
+            - display the game status at the end and that the game is ending
+            - send an FA_LOG to the GS
+            - exit the loop and end the game
+       - If the GS is sending a GS_RESPONSE
+            - If the GS is sending an SH_CLAIMED
+                - alert the user of the notification (maybe a vibration)
+                - display a success message
+                - send an FA_LOG to the GS
+            - If the GS is sending an SH_CLAIMED_ALREADY
+                - alert the user of the notification (maybe a vibration)
+                - display a failed message
+                - send an FA_LOG to the GS
+            - If the GS is sending any type of SH_ERROR
+                - Call a function errorHandle() to deal with errors
+            - If the user enters a KRAG code
+                - send a FA_CLAIM to the GS
+                - send an FA_LOG to the GS
 
 - Test Plan
-
 	- Test on the emulator and the pebble
-
 	- Test when bluetooth connection cannot be established
-
 	- Test with various user entered KRAG codes
-
 	- Test with various GS messages, including ill formatted and non-existant ones
-
 	- Test individual methods separately with bad input
-
 	- Check messages sent
-
 	- Check the logs to make sure logging is done correctly
-
 	- Test the UI going through all combinations of buttons and selections
 
 
