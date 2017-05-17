@@ -1,8 +1,8 @@
-#Views From The 6 - Final Project
-###Kazuma Honjo, Morgan Sorbaro, Isaac Gluck
+# Views From The 6 - Final Project
+### Kazuma Honjo, Morgan Sorbaro, Isaac Gluck
 
 
-##Major Design Decisions:
+## Major Design Decisions:
 * Team: views6
 * Players
     * Isaac
@@ -17,7 +17,7 @@
     * guide-server
 
 
-##Common file Functions
+## Common file Functions
 * hex_to_int (char *hex);
     returns int
 
@@ -48,7 +48,7 @@
 * socket-parse (used by GA, and GS)
 
 
-##Group Member Roles:
+## Group Member Roles:
 1. Game Server - Kazuma Honjo
 2. Game Agent - Morgan Sorbaro
 3. Field Agent - Isaac Gluck
