@@ -1,88 +1,39 @@
-Views From The 6 - Final Project
+#Views From The 6 - Final Project
+###Kazuma Honjo, Morgan Sorbaro, Isaac Gluck
 
-Kazuma Honjo, Morgan Sorbaro, Isaac Gluck
 
-[https://github.com/mangini/gdocs2md](https://github.com/mangini/gdocs2md)
-
-Your design document (written in Markdown) shall
-
-* describe the major design decisions,
-
-* describe the design of your Game Server,
-
-* describe the design of your Guide Agent,
-
-* describe the design of your Field Agent, and
-
-* describe the roles of each member of your group.
-
-*For each of the three programs,* describe the
-
-* User interface (including command-line parameters and stdin/stdout/graphical interface);
-
-* Inputs and outputs;
-
-* Functional decomposition into modules;
-
-* Dataflow through modules;
-
-* Major data structures;
-
-* Pseudo code (plain English-like language) for logic/algorithmic flow;
-
-* Testing plan, including unit tests, integration tests, system tests.
-
-Major Design Decisions:
-
+##Major Design Decisions:
 * Team: views6
-
 * Players
-
-* Isaac
-
-* Kazuma
-
-* Morgan
-
-* Laya
-
+    * Isaac
+    * Kazuma
+    * Morgan
+    * Laya
 * Proxy Server Port: 2144
-
 * Game Server Port: 2872
-
 * Modules
+    * field-agent
+    * guide-agent
+    * guide-server
 
-* field-agent
 
-* guide-agent
-
-* guide-server
-
+##Common file Functions
+* hex_to_int (char *hex);
+    returns int
+* int _to_hex (int);
+    returns char *
 * message-parse (used by FA, GA, and GS)
-
 * Checks message syntax
-
 * Validates opCode type
-
 * socket-parse (used by GA, and GS)
 
-Group Member Roles:
 
+##Group Member Roles:
 1. Game Server - Kazuma Honjo
-
 2. Game Agent - Morgan Sorbaro
-
 3. Field Agent - Isaac Gluck
 
 Common File Functions
-
-* hex_to_int (char *hex);
-
-* returns int
-
-* int _to_hex (int);
-
-* returns char *
 
 * parse_message(char *message);
 
