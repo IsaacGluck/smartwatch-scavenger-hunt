@@ -944,11 +944,12 @@ Write the message in the log file (logs/gameserver.log)
                 - send an FA_LOG to the GS
 
 ### Test Plan
-	- Test on the emulator and the pebble
-	- Test when bluetooth connection cannot be established
-	- Test with various user entered KRAG codes
-	- Test with various GS messages, including ill formatted and non-existant ones
-	- Test individual methods separately with bad input
-	- Check messages sent
-	- Check the logs to make sure logging is done correctly
-	- Test the UI going through all combinations of buttons and selections
+- Test on the emulator and the pebble
+- Test when bluetooth connection cannot be established
+- Test with various user entered KRAG codes
+- Test with various GS messages, including ill formatted and non-existant ones
+- Test individual methods separately with bad input
+- Check messages sent
+- Check the logs to make sure logging is done correctly
+- Test the UI going through all combinations of buttons and selections
+
