@@ -886,16 +886,16 @@ Write the message in the log file (logs/gameserver.log)
 
 ### Major Data Structures
 #### Struct FA
-- hex PebbleID
-- char *name
-- char *team
-- signed double latitude
-- signed double longitude
-- int num_claimed
-- int num_left
-- char *known_chars (from entering KRAG codes)
-- Bag *clues_received
-- Bag *hints_received
+- `hex PebbleID`
+- `char *name`
+- `char *team`
+- `signed double latitude`
+- `signed double longitude`
+- `int num_claimed`
+- `int num_left`
+- `char *known_chars` (from entering KRAG codes)
+- `Bag *clues_received`
+- `Bag *hints_received`
 
 ### Pseudo Code for Logic/Algorithmic Flow
 - Subscribe to Pebble funcs
@@ -952,6 +952,3 @@ Write the message in the log file (logs/gameserver.log)
 	- Check messages sent
 	- Check the logs to make sure logging is done correctly
 	- Test the UI going through all combinations of buttons and selections
-
-
-
