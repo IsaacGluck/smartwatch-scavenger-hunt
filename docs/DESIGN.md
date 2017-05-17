@@ -278,16 +278,24 @@ Command-line
         - kiff provides the path to the krag file, which contains coordinates and clues for each krag
         - sf provides the path to the secret file, which contains a single line of text representing the secret.
         - Port provides the port number of the Game Server
-    Guide Agent
-        Inputs
-            - Messages (See below)
-        Outputs
-            - Messages (See below)
-    Field Agent
-        Inputs
-            - Messages (See below)
-        Outputs
+
+Guide Agent
+    Inputs
         - Messages (See below)
+    Outputs
+        - Messages (See below)
+    
+Field Agent
+    Inputs
+        - Messages (See below)
+    Outputs
+    - Messages (See below)
+
+stdin
+    - "GAMEOVER". This terminates the game.
+
+stdout
+    - N/A
 
 ####Functional decomposition into modules
 Main
@@ -297,11 +305,6 @@ Handle message
 *Handle message* takes char *opCode and char *message(without the opCode). By using the dispatch table, it performs what opCode and message specifies. Returns nothing.
 
 ####Major data structures;
-Local Global Variable
-    Is_game_ongoing
-        - 1: Yes
-        - 0: No
-
 Struct game_info
     - Time the game has started (indicates the elapsed time since start of the game)
     - Number of krags
@@ -347,7 +350,7 @@ For managing several teams, I will use set.
         3. Handle message ()
         4. Present summary
     3. Otherwise ignore
-    4. If game over:
+    4. If game over (All krags revieled or by input GAMEOVER):
         1. Send a game summary (TEAM_RECORD) to all players
         2. Send a message indicating the end-of-game (GAME_OVER) to all players
         3. Break
