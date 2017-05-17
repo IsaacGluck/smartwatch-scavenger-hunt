@@ -113,7 +113,7 @@ It is essential that you and your team have a good understanding of how all of t
 ***=>*** *In summary: your Game Server needs to (1) open a single UDP socket which it will read from, and (2) keep track of the remote client's address (IP/port) for all known agents (both Guide Agents and Field Agents).* 
 
 
-#### Guide Agent: Communicating over Bluetooth
+#### Field Agent: Communicating over Bluetooth
 
 The Pebble has no Wi-Fi interface and cannot connect directly to the Internet. To reach the Internet, it must send messages through some companion device (e.g., your smartphone) over Bluetooth, and then messages can be sent to the Game Server over your companion device's Wi-Fi or Cellular connection to the Internet. To use Bluetooth, you'll need to use Pebble's `AppMessage` API.
 
@@ -254,7 +254,7 @@ To add the *original* repo to the remotes that you are tracking, use the `git re
 $ git remote add upstream https://gitlab.cs.dartmouth.edu/CS50/project-starter-kit-17s.git
 ```
 
-where `upstream` is a human readable alias for the new remote you are adding, where `traviswpeters` is the original owner of the repo which you `fork`ed, and `project-starter-kit-17s.git` is the original name of the repository which you `fork`ed.
+where `upstream` is a human readable alias for the new remote you are adding, where `CS50` is the original owner of the repo which you `fork`ed, and `project-starter-kit-17s.git` is the original name of the repository which you `fork`ed.
 
 You can verify that the remote was added by again running `git remote -v`. For example:
 
@@ -262,8 +262,8 @@ You can verify that the remote was added by again running `git remote -v`. For e
 $ git remote -v
 origin	https://gitlab.cs.dartmouth.edu/USERNAME/project-starter-kit-17s.git (fetch)
 origin	https://gitlab.cs.dartmouth.edu/USERNAME/project-starter-kit-17s.git (push)
-upstream	https://gitlab.cs.dartmouth.edu/traviswpeters/project-starter-kit-17s.git (fetch)
-upstream	https://gitlab.cs.dartmouth.edu/traviswpeters/project-starter-kit-17s.git (push)
+upstream	https://gitlab.cs.dartmouth.edu/CS50/project-starter-kit-17s.git (fetch)
+upstream	https://gitlab.cs.dartmouth.edu/CS50/project-starter-kit-17s.git (push)
 ```
 
 Suppose you post a message about updating the provided code.
