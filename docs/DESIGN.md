@@ -943,7 +943,7 @@ Write the message in the log file (logs/gameserver.log)
                 - send a FA_CLAIM to the GS
                 - send an FA_LOG to the GS
 
-- Test Plan
+### Test Plan
 	- Test on the emulator and the pebble
 	- Test when bluetooth connection cannot be established
 	- Test with various user entered KRAG codes
