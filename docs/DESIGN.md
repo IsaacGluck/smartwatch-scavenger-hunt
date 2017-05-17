@@ -266,387 +266,230 @@ Hint:__ To:__
 
 
 
-
-
-
-
-**Game Server**
-
-* UI	N/A 
-
-* Inputs and Outputs
-
-* Command-line 
-
-* ./gameserver gameID=... kiff=... sf=... port=...
-
-* Where:
-
-* gmaeId provides the hexadecimal ID number of this game
-
-* Kiff provides the path to the krag file, which contains coordinates and clues for each krag
-
-* Sf provides the path to the secret file, which contains a single line of text representing the secret.
-
-* Port provides the port number of the Game Server
-
-* Guide Agent
-
-* Inputs
-
-* Messages (See below)
-
-* Outputs
-
-* Messages (See below)
-
-* Field Agent
-
-* Inputs
-
-* Messages (See below)
-
-* Outputs
-
-* Messages (See below)
-
-* Functional decomposition into modules
-
-* Main
-
-* Handle message
-
-* Dataflow through modules;
-
-* *Handle message* takes char *opCode and char *message(without the opCode). By using the dispatch table, it performs what opCode and message specifies. Returns nothing.
-
-* Major data structures;
-
-* Local Global Variable
-
-* Is_game_ongoing
-
-* 1: Yes
-
-* 0: No
-
-* Struct game_info
-
-* Time the game has started (indicates the elapsed time since start of the game)
-
-* number of krags
-
-* number of agents (#FA + #GA)
-
-* number of teams (# of Struct Team)
-
-* Secret file name
-
-* Bag of krags
-
-* Struct Team
-
-* Name of guide (char *)
-
-* Name and location of each field agent (list of FA, struct FA **)
-
-* # of krags claimed (int)
-
-* Partly revealed secret string (char *)
-
-* Struct FA (FA_t)
-
-* Name (char *)
-
-* pebbleId (int)
-
-* Longitude (float)
-
-* Latitude (float)
-
-* Last-contact-time (time_t)
-
-* Struct GA (GA_t)
-
-* Name (char *)
-
-* guideId (int)
-
-* Last-contact-time (time_t)
-
-* Struct krag
-
-* Latitude (float)
-
-* Longitude (float)
-
-* kragId (int)
-
-* Clue (char *)
-
-* Pseudo code (plain English-like language) for logic/algorithmic flow;
-
-* Parse command line argument ()
-
-* While the game is not over, perform the following
-
-* Listen to message
-
-* If successfully received message:
-
-* Write the message in the log file (logs/gameserver.log) () 
-
-* Parse message ()
-
-* Handle message ()
-
-* Present summary
-
-* Otherwise ignore
-
-* If game over:
-
-* Send a game summary (TEAM_RECORD) to all players
-
-* Send a message indicating the end-of-game (GAME_OVER) to all players
-
-* Break
-
-* Otherwise continue loop
-
-* Free all memory
-
-* Exit with 0 status
-
-* Functions
-
-* Parse command line argument(){
-
-* If any error:
-
-* Print message
-
-* Exit with non-zero status
-
-* Otherwise:
-
-* Create a DGRAM socket
-
-* Bind it to the given port number
-
-* Build bag of krags
-
+##Game Server
+####UI	
+N/A 
+
+####Inputs and Outputs
+Command-line 
+./gameserver gameID=... kiff=... sf=... port=...
+Where:
+- gmaeId provides the hexadecimal ID number of this game
+- kiff provides the path to the krag file, which contains coordinates and clues for each krag
+- sf provides the path to the secret file, which contains a single line of text representing the secret.
+- Port provides the port number of the Game Server
+Guide Agent
+Inputs
+- Messages (See below)
+Outputs
+- Messages (See below)
+Field Agent
+Inputs
+- Messages (See below)
+Outputs
+- Messages (See below)
+
+####Functional decomposition into modules
+Main
+Handle message
+
+####Dataflow through modules;
+*Handle message* takes char *opCode and char *message(without the opCode). By using the dispatch table, it performs what opCode and message specifies. Returns nothing.
+
+####Major data structures;
+Local Global Variable
+Is_game_ongoing
+- 1: Yes
+- 0: No
+
+Struct game_info
+- Time the game has started (indicates the elapsed time since start of the game)
+- Number of krags
+- Number of agents (#FA + #GA)
+- Number of teams (# of Struct Team)
+- Secret file name
+- Bag of krags
+
+Struct Team
+- Name of guide (char *)
+- Name and location of each field agent (list of FA, struct FA **)
+- Number of krags claimed (int)
+- Partly revealed secret string (char *)
+
+Struct FA (FA_t)
+- Name (char *)
+- pebbleId (int)
+- Longitude (float)
+- Latitude (float)
+- Last-contact-time (time_t)
+
+Struct GA (GA_t)
+- Name (char *)
+- guideId (int)
+- Last-contact-time (time_t)
+
+Struct krag
+- Latitude (float)
+- Longitude (float)
+- kragId (int)
+- Clue (char *)
+
+####Pseudo code
+1. Parse command line argument ()
+2. While the game is not over, perform the following
+1. Listen to message
+2. If successfully received message:
+1. Write the message in the log file (logs/gameserver.log) () 
+2. Parse message ()
+3. Handle message ()
+4. Present summary
+3. Otherwise ignore
+4. If game over:
+1. Send a game summary (TEAM_RECORD) to all players
+2. Send a message indicating the end-of-game (GAME_OVER) to all players
+3. Break
+5. Otherwise continue loop
+3. Free all memory
+4. Exit with 0 status
+
+**Functions**
+Parse command line argument(){
+If any error:
+Print message
+Exit with non-zero status
+Otherwise:
+Create a DGRAM socket
+Bind it to the given port number
+Build bag of krags
 }
 
-* void handle_message(){ // Use dispatch table and common function
-
+handle_message(){ // Use dispatch table and common function
 If opCode=
-
 FA_LOCATION
-
 Validate the message fields; ignore the invalid messages
-
 If gameId == 0
-
 If team is not known, register team
-
 If pebbleId is not known, register pebbleId and associate it with given player and team
-
 If there is already a player with the same name in the team, ignore
-
 Respond with GAME_STATUS
-
 If gameId != 0
-
 Validate gameId, pabbleId, team, and player
-
 Is gameId the same with current gameId
-
 Is pebbleId associated with given team and player
-
 If valid input:
-
 Update records regarding location and last-contact-time of this FA
-
 If statusReq==1, send a GAME_STATUS to FA
-
 Otherwise; ignore
 
 FA_CLAIM
-
 Validate the message fields; ignore the invalid messages
-
 If kragId is not known; ignore
-
 Confirm the given latitude|longitude is within 10 meters of the known position of the identified krag
-
 If the krag has not been claimed by this team:
-
 Mark it as ‘claimed’ and send a SH_CLAIMED response to the FA
-
 Send two (may be one or zero) randomly chosen clues, in the form of GS_CLUE messages to the GA on same team
-
 Update this team’s copy of the secret so as to reveal characters of the string
-
 Send the updated secret, via a GS_SECRET message to the GA on same team
-
 Else if the krag has already has been claimed by this team, send a SH_CLAIMED_ALREADY response to the FA
 
-FA_LOG
-
+FA_LOG  
 Ignore
 
 GA_STATUS
-
 Validate the message fields; ignore the invalid messaegs
-
 If gameId == 0
-
 If team is not known, register team
-
 If guideId is not known, register guideId and associate it with given player and team names
-
 Else, verify that team matches a known team and associate guideId with given player name
-
 If guide is already in the team; ignore
-
 If no error respond with GAME_STATUS and possibly GS_AGENT
-
 If gameId != 0
-
 Validate the gameId, guideId, team, and player name
-
 Is gameId the same with current gameId
-
 Is guideId associated with given team and player
-
 If valid message:
-
 Update records regarding last-contact-time of this GA
-
 If statusReq==1, send a GAME_STATUS and GS_AGENT message back to GA
 
 GA_HINT
-
 Validate the gameId, guideId, team and player
-
 Is gameId the same with current gameId
-
 Is guideId associated with given team and player
-
 If valid:
-
 If pebbleId is *, send the message to all FA in the team
-
 Else if pebbleId is known player in the team, forward the message to that palyer
-
 Update records regarding last-contact-time of this GA
-
 Otherwise, respond with response code and ignore
 
 FA_LOG
-
 Write the message in the log file (logs/fieldagents.log)
 
-
-
 NULL
-
 Respond with SH_ERROR_INVALID_MESSAGE
 
 not found
-
 Respond with SH_ERROR_INVALID_OPCODE
-
 }
 
-* void send_ga_status(to who){
-
+void send_ga_status(to who){
 Send the GA_STATUS and GS_AGENT to the given person
-
 }
 
-* bool validate_agent (int gameId, char *agentId, char *team, char *playername){
-
+bool validate_agent (int gameId, char *agentId, char *team, char *playername){
 Is gameId the same with current gameId
-
 Is pebbleId/guideId associated with given team and player name
-
 }
 
-* Messages to be sent (Use dispatch table)
+####Messages to be sent (Use dispatch table)
 
 GAME_STATUS (sends to GA)
-
 opCode=GAME_STATUS|gameId=|guideId=|numClaimed=|numKrags=
-
 Write the message in the log file (logs/gameserver.log)
 
 GS_AGENT (sends to GA)
-
 opCode=GA_AGENT|gameId=|pebbleId=|team=|player=|latitude=|longitude=|lastContact=
-
 Write the message in the log file (logs/gameserver.log)
 
-GS_CLUE (sends to GA)
-
+GS_CLUE (sends to GA)  
 opCode=GS_CLUE|gameId=|guideId=|latitude=|longitude=|clue=
-
 Write the message in the log file (logs/gameserver.log)
 
 GS_SECRET (sends to GA)
-
 opCode=GS_SECRET|gmaId=|guideId=|secret=
-
 Write the message in the log file (logs/gameserver.log)
 
 GS_RESPONSE (sends to GA/FA)
-
 opCode=GS_RESPONSE|gameId=|respCode=|test=
-
 Write the message in the log file (logs/gameserver.log)
 
 GAME_OVER (sends to GA/FA)
-
 opCode=GAME_OVER|gameId=|secret=
-
 Write the message in the log file (logs/gameserver.log)
 
 TEAM_RECORD (sends to GA/FA)
-
 opCode=TEAM_RECORD|gameId=|team=|numClaimed=|numPlayers=
-
 Write the message in the log file (logs/gameserver.log)
 
-* Testing plan, including unit tests, integration tests, system tests.
+####Testing plan, including unit tests, integration tests, system tests.
 
-* Unit testing
-
+**Unit testing**
 * When unit testing, do not send message to anyone
-
 * Test each functions
-
 * Check the logfile and see if the output is as expected
-
 * Test various edge cases
-
 * When there are no Krag (empty krag file)
-
 * When the format of the files are incorrect
-
 * Invalid messages
 
-* Integrated testing
-
+**Integrated testing**
 * Handle all messages
-
 * Send proper messages depending on input message
-
 * When the team start without the GA (must work correctly)
-
 * If the krag is found, it must be recorded
-
 * If the GA joins after some krags are revealed, it should be reflected.
+
+
+
 
 
 ## Field Agent
