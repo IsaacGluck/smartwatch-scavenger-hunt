@@ -56,397 +56,215 @@
 
 
 
-**Game Agent **
-
--*Inputs and Outputs*
-
-Command line: ./guideagent guideId=... team=... player=... host=... port=...
-
-./guideagent = name of program
-
-guideId=... = hexadecimal ID num for this player
-
-team=... = name of team to which the agent belongs 
-
-player=... = provides name of the guide agent
-
-host=... = provides the host name of the Game Server 
-
-port=... = provides the port number of the Game Server 
-
-Join Game 
-
-Input from STDIN:
-
-Hint and who it should be sent to
-
-"Update" requesting the server send a game update
-
-"Print" which requests all the data be printed 
-
-Output To STDOUT: 
-
-Current game statistics 
-
-Current location and status of each player on Guide’s team
-
-Current secret string 
-
-List of known clues 
-
-*More Details in Print Function Description 
-
-Receive From Server:
-
-Updates about current locations and status of players on Guide’s team
-
-Clues about the location of krags 
-
-Receive updates about the hacker’s secret 
-
-Receive updates about game status 
-
-Send To Server: 
-
-Hints to go to Field Agents 
-
-Status Request 
-
-Logfile:
-
-Log all activity to logfile in specific format 
-
-*-Structs:*
-
-GameStruct
-
-Variables:
-
-Hex GameID, Hex GuideID, char* TeamName, int TotalKrags, char* Secret, int ClaimedKrags, int LastContacted, int Update, Bag char* Hints, Bag Clue Clues, Bag Agent Agent, char* PlayerName 
-
-Methods:
-
-new_GameStruct(GameID, GuideID, Teamname, #Krags)
-
-getAllHints(GameStruct)
-
-NewHint(GameStruct, Hint)
-
-GetAllClaimedKrags(GameStruct) 
-
-IncrementClaimedKrags(GameStruct)
-
-GetLastContactTime(GameStruct)
-
-ClueIterate(GameStruct, IterateMethod)
-
-AddAClue(GameStruct, Char*, Lat, Long) 
-
-GetSecret(GameStruct) 
-
-UpdateSecret(GameStruct, Secret)
-
-PlayersIterate*GameStruct, IterateMethod)
-
-PlayerUpdate(GameStruct, Name, ID, Lat, Long) 
-
-Player Struct
-
-Variables:
-
-char* name, hex pebbleID, Int Latitude, Int Longitude 
-
-Methods: 
-
-new_player(name, pebID, Lat, Long) 
-
-GetName(player)
-
-GetID(player)
-
-GetLat(player)
-
-GetLong(player)
-
-SetLat(player, latitude)	
-
-SetLong(player, longitude)
-
-Clue Struct 
-
-Variables:
-
-char* clue, int latitude, int longitude 
-
-Methods:
-
-new_clue(clue, lat, long)
-
-getClue(clue)
-
-getLat(clue)
-
-getLong(clue)
-
-SetLat(clue, lat)
-
-SetLong(clue, long) 
-
-Function Struct
-
-Variables: char* command, coid (*func)(Array Of Tokens) 
-
-arrayOfFuncs[] = { {OpCode, FunctionName} {OpCode, FunctionName} } 
-
-*-Functions as Modules *
-
-ValidateArguments(), validates command lines arguments 
-
-ConnectSocket(), creates and connects the Game Agent to the Game Server
-
-CreateGameStruct(), creates game struct, creates log file
-
-SendStatus(), sends the server the current game status in a specified way 
-
-SendHint(), sends a hint to a specific field agent 
-
-DealWithInfo(), takes in recieved line, prints to file, send arguments next function
-
-StatusUpdate(), updates the game with opCode status update information 
-
-AgentUpdate(), updates the agent info with opCode agent information
-
-Clue(), updates the clue bag
-
-Secret(), updates the secret 
-
-Response(), looks at response code from server 
-
-TeamRecordGameOver(), prints end of game information 
-
-WriteToLog(), writes the char* and the time stamp to the log file
-
-PrintAgentUpdate(), prints when an agent is updated
-
-PrintClue(), prints when the clue is updated
-
-PrintSecret(), prints when the secret is updated
-
-MegaPrint(), prints when the user requests all information reprinted 
-
-*-Psuedo Code:*
-
+## Game Agent
+
+### Inputs and Outputs
+
+* -Command line: ./guideagent guideId=... team=... player=... host=... port=...
+* ./guideagent = name of program
+**  guideId=... = hexadecimal ID num for this player
+**  team=... = name of team to which the agent belongs 
+**  player=... = provides name of the guide agent
+** host=... = provides the host name of the Game Server 
+** port=... = provides the port number of the Game Server 
+* Input from STDIN:
+** Hint and who it should be sent to
+** "Update" requesting the server send a game update
+** "Print" which requests all the data be printed 
+* Output To STDOUT: 
+** Current game statistics 
+** Current location and status of each player on Guide’s team
+**Current secret string 
+** List of known clues 
+**More Details in Print Function Description 
+* Receive From Server:
+** Updates about current locations and status of players on Guide’s team
+** Clues about the location of krags 
+** Receive updates about the hacker’s secret 
+** Receive updates about game status 
+* Send To Server: 
+** Hints to go to Field Agents 
+** Status Request 
+* Logfile:
+** Log all activity to logfile in specific format 
+
+### Structs:
+* GameStruct
+** Variables: Hex GameID, Hex GuideID, char* TeamName, int TotalKrags, char* Secret, int ClaimedKrags, int LastContacted, int Update, Bag char* Hints, Bag Clue Clues, Bag Agent Agent, char* PlayerName 
+** Methods:
+*** new_GameStruct(GameID, GuideID, Teamname, #Krags)
+*** getAllHints(GameStruct)
+*** NewHint(GameStruct, Hint)
+***  GetAllClaimedKrags(GameStruct) 
+*** IncrementClaimedKrags(GameStruct)
+*** GetLastContactTime(GameStruct)
+*** ClueIterate(GameStruct, IterateMethod)
+*** AddAClue(GameStruct, Char*, Lat, Long) 
+*** GetSecret(GameStruct) 
+*** UpdateSecret(GameStruct, Secret)
+*** PlayersIterate*GameStruct, IterateMethod)
+*** PlayerUpdate(GameStruct, Name, ID, Lat, Long) 
+* Player Struct
+** Variables: char* name, hex pebbleID, Int Latitude, Int Longitude 
+** Methods: 
+*** new_player(name, pebID, Lat, Long) 
+*** GetName(player)
+*** GetID(player)
+*** GetLat(player)
+*** GetLong(player)
+*** SetLat(player, latitude)	
+*** SetLong(player, longitude)
+*Clue Struct 
+** Variables: char* clue, int latitude, int longitude 
+** Methods:
+*** new_clue(clue, lat, long)
+*** getClue(clue)
+*** getLat(clue)
+*** getLong(clue)
+*** SetLat(clue, lat)
+*** SetLong(clue, long) 
+* Function Struct
+** Variables: char* command, coid (*func)(Array Of Tokens) 
+*** arrayOfFuncs[] = { {OpCode, FunctionName} {OpCode, FunctionName} } 
+
+### Functions as Modules
+* ValidateArguments(), validates command lines arguments * ConnectSocket(), creates and connects the Game Agent to the Game Server
+* CreateGameStruct(), creates game struct, creates log file
+* SendStatus(), sends the server the current game status in a specified way 
+* SendHint(), sends a hint to a specific field agent 
+* DealWithInfo(), takes in recieved line, prints to file, send arguments next function
+* StatusUpdate(), updates the game with opCode status update information 
+* AgentUpdate(), updates the agent info with opCode agent information
+* Clue(), updates the clue bag
+* Secret(), updates the secret 
+* Response(), looks at response code from server 
+* TeamRecordGameOver(), prints end of game information 
+* WriteToLog(), writes the char* and the time stamp to the log file
+* PrintAgentUpdate(), prints when an agent is updated
+* PrintClue(), prints when the clue is updated
+* PrintSecret(), prints when the secret is updated
+* MegaPrint(), prints when the user requests all information reprinted 
+ 
+
+### Psuedo Code:
 Validate Arguments ()
-
-Check for 6 Arguments
-
-Put arguments into variables 
-
-Make sure none are NULL
-
+* Check for 6 Arguments
+* Put arguments into variables 
+* Make sure none are NULL
 Connect Socket()
-
-Use socket given code 
-
+* Use socket given code 
 Create Game Struct() 
-
-GameID = 0
-
-GuideID = Args given 
-
-TeamName = Args Given 
-
-PlayerName = Args Given 
-
-#krags = 0
-
-Call new_GameStruct() w args 
-
-Check Log Dirr & GALog is Readable 
-
+* GameID = 0
+* GuideID = Args given 
+* TeamName = Args Given 
+* PlayerName = Args Given 
+* #krags = 0
+* Call new_GameStruct() w args 
+* Check Log Dirr & GALog is Readable 
 SendStatus()
-
-Get: GameID, GuideID, team, PlayerName
-
-Get: Struct-> update 
-
-If(update == 1)
-
-Update = 0
-
-Format Message via Requirement spec 
-
-Send to server 
-
+* Get: GameID, GuideID, team, PlayerName
+* Get: Struct-> update 
+* If(update == 1): Update = 0
+* Format Message via Requirement spec 
+* Send to server 
 While(true){
-
-if(timer time has been reached)
-
-SendStatus()
-
-if(stdin is ready)
-
-if(stdn == "update") struct-> update = 1 
-
-else if(stdin == "print") Megaprint() 
-
-else SendHint() 
-
-if(message Received) 
-
-writeToLog() 
-
-DealWithInfo() 
-
+* if(timer time has been reached)
+** SendStatus()
+* if(stdin is ready)
+** if(stdn == "update") struct-> update = 1 
+** else if(stdin == "print") Megaprint() 
+** else SendHint() 
+* if(message Received) 
+** writeToLog() 
+** DealWithInfo() 
 } 
 
-
-
 SendHint()
+* Get: GameID, GuideID, team, PlayerName
+* ReadLine to get STDIN
+** Ex line: To:Name Hint:WalkLeft 
+* Lookup name’s pebble Id with bag
+* The rest of the line is the hint 
+* Format Data into Messages 
+* Send to the Server 
 
-Get: GameID, GuideID, team, PlayerName
-
-ReadLine to get STDIN
-
-Ex line: To:Name Hint:WalkLeft 
-
-Lookup name’s pebble Id with bag
-
-The rest of the line is the hint 
-
-Format Data into Messages 
-
-Send to the Server 
-
-Deal With Into() 
-
-Takes the whole received message 
-
-Prints it to the log with Log Print 
-
-Break into Tokens Via Pipes 
-
-Using Function Table, match the command code with the function 
-
-If Op Code doesnt exist, do nthing 
-
-Specific Functions per OpCodes 
+Deal With InFo() 
+* Takes the whole received message 
+* Prints it to the log with Log Print 
+* Break into Tokens Via Pipes 
+* Using Function Table, match the command code with the function 
+* If Op Code doesnt exist, do nthing 
+* Specific Functions per OpCodes 
 
 StatusUpdate()
-
-Parse token to get GameID, GuideID, #Claimed, #Krag 
-
-Check all Info 
-
-If Valid
-
-If #claimed > curr #claimed - curr # claimed = claimed 
-
-If not valid, ignore 
+* Parse token to get GameID, GuideID, #Claimed, #Krag 
+* Check all Info 
+* If Valid
+** If #claimed > curr #claimed - curr # claimed = claimed 
+* If not valid, ignore 
 
 AgentUpdate()
-
-Parse tokens 
-
-Check info and make sure it is all valid 
-
-If Player Exists, use update to update player info 
-
-If player doesnt exist, create a new player 
-
-Printer Agent Update 
+* Parse tokens 
+* Check info and make sure it is all valid 
+* If Player Exists, use update to update player info 
+* If player doesnt exist, create a new player 
+* Printer Agent Update 
 
 Clue()
-
-Parse Tokesn 
-
-Check Info
-
-If Valid
-
-If bag already has clue, ignore 
-
-Else 
-
-new_clue(clue, lat, long)
-
-Add Clue to Bag of Clues 
-
-Print Clue() 
-
-If not valid, ignore 
+* Parse Tokesn 
+* Check Info
+* If Valid
+** If bag already has clue, ignore 
+* Else 
+** new_clue(clue, lat, long)
+** Add Clue to Bag of Clues 
+** Print Clue() 
+* If not valid, ignore 
 
 Secret()
-
-Parse tokens
-
-Validate arguments 
-
-If Valid
-
-Curr secret = secret 
-
-printSecret()
+* Parse tokens
+* Validate arguments 
+* If Valid
+** Curr secret = secret 
+** printSecret()
 
 Response()
-
-Optionally take recovery action
-
-Print issue to STDOUT for debugging 
+* Optionally take recovery action
+* Print issue to STDOUT for debugging 
 
 TeamRecord()
-
-Parse tokes
-
-Check Variables 
-
-Print info to STDOUt
+* Parse tokes
+* Check Variables 
+* Print info to STDOUt
 
 GameOver()
-
-Check Variables 
-
-Prints Secret to STDOUT 
+* Check Variables 
+* Prints Secret to STDOUT 
 
 Print Methods
-
-Print Agent Update() -Print Agent Info to STDOUT
-
-Print Clue() - Print new clue to STDOUt
-
-Print Secret() -Print updated Secret to STDOUT 
-
-MegaPrint() - Print all info in the following Layout with get/set methods 
-
+* Print Agent Update() -Print Agent Info to STDOUT
+* Print Clue() - Print new clue to STDOUt
+* Print Secret() -Print updated Secret to STDOUT 
+* MegaPrint() - Print all info in the following Layout with get/set methods 
 Team Name: __ GudieAgent: __ Krags Found: __
-
 Field Agent Name: __ Latitude: __ Longitude: __ 
-
 Field Agent Name: __ Latitude: __ Longitude: __ 
-
 Field Agent Name: __ Latitude: __ Longitude: __ 
-
 Secret Message Currently: ___
-
 Past Clues: Clue1, Latitude, Longitude 
-
 Clue2, Latitude, Longitude 
-
 Given Hints: Hint:__ To:__ 
-
 Hint:__ To:__
 
-*Testing *
+### Testing
+* Test Program with command line inputs that are wrong 
+* Test Program with a bad Write Log File Directory 
+* Test Program with bad STDIN
+* Test Program with just end for STDIN
+* Test Program with bad Strings in various forms from the server 
 
-*		*-Test Program with command line inputs that are wrong 
 
--Test Program with a bad Write Log File Directory 
 
--Test Program with bad STDIN
-
--Test Program with just end for STDIN
-
--Test Program with bad Strings in various forms from the server 
 
 
 
