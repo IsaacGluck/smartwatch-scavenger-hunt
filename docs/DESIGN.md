@@ -50,13 +50,13 @@
 
 ## Group Member Roles:
 1. Game Server - Kazuma Honjo
-2. Game Agent - Morgan Sorbaro
+2. Guide Agent - Morgan Sorbaro
 3. Field Agent - Isaac Gluck
 
 
 
 
-## Game Agent
+## Guide Agent
 
 ### Inputs and Outputs
 
@@ -128,7 +128,7 @@
      * arrayOfFuncs[] = { {OpCode, FunctionName} {OpCode, FunctionName} } 
 
 ### Functions as Modules
-* ValidateArguments(), validates command lines arguments * ConnectSocket(), creates and connects the Game Agent to the Game Server
+* ValidateArguments(), validates command lines arguments * ConnectSocket(), creates and connects the Guide Agent to the Game Server
 * CreateGameStruct(), creates game struct, creates log file
 * SendStatus(), sends the server the current game status in a specified way 
 * SendHint(), sends a hint to a specific field agent 
