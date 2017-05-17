@@ -20,9 +20,29 @@
 ##Common file Functions
 * hex_to_int (char *hex);
     returns int
+
 * int _to_hex (int);
     returns char *
-* message-parse (used by FA, GA, and GS)
+
+* parse_message(char *message);
+    Check the format of the message. 
+        *alphabet=alphabet[|alphabet=alphabet]*
+    No space
+    If valid input: return char ** ( [0]: opCode [1]: string without opCode )
+    If any error return NULL
+
+* write_message_to_logfile(char *message, char *filePathName, int IP, int port, int mode);
+    Where:
+        Message is the message to be written
+        filePathName is the path to the log file
+        IP is the IP address to be shown; -1 if Mode=2
+        Port is the port number; -1 if Mode=2
+        Mode: 
+            0 if the message is "From" someone
+            1 if the message is "To" someone
+            2 if the message is shown as "Note"
+        Print out the message following the log file format
+
 * Checks message syntax
 * Validates opCode type
 * socket-parse (used by GA, and GS)
@@ -33,39 +53,6 @@
 2. Game Agent - Morgan Sorbaro
 3. Field Agent - Isaac Gluck
 
-Common File Functions
-
-* parse_message(char *message);
-
-Check the format of the message. 
-
-*alphabet=alphabet[|alphabet=alphabet]*
-
-No space
-
-If valid input: return char ** ( [0]: opCode [1]: string without opCode )
-
-If any error return NULL
-
-* write_message_to_logfile(char *message, char *filePathName, int IP, int port, int mode);
-
-Where:
-
-Message is the message to be written
-
-filePathName is the path to the log file
-
-IP is the IP address to be shown; -1 if Mode=2
-
-Port is the port number; -1 if Mode=2
-
-Mode: 0 if the message is "From" someone
-
-1 if the message is "To" someone
-
-2 if the message is shown as "Note"
-
-Print out the message following the log file format
 
 
 
