@@ -308,12 +308,13 @@ Struct game_info
     - Number of agents (#FA + #GA)
     - Number of teams (# of Struct Team)
     - Secret file name
-    - Bag of krags
+    - Set of krags
 
 Struct Team
     - Name of guide (char *)
-    - Name and location of each field agent (list of FA, struct FA **)
+    - Name and location of each field agent (set of FA)
     - Number of krags claimed (int)
+    - Revealed krags (set of char *)
     - Partly revealed secret string (char *)
 
 Struct FA (FA_t)
@@ -333,6 +334,8 @@ Struct krag
     - Longitude (float)
     - kragId (int)
     - Clue (char *)
+
+For managing several teams, I will use set. 
 
 ####Pseudo code
 1. Parse command line argument ()
