@@ -830,8 +830,8 @@ Write the message in the log file (logs/gameserver.log)
 
 * If the GA joins after some krags are revealed, it should be reflected.
 
-## Field Agent
 
+## Field Agent
 ### UI
 - Dropdown to choose a name
 - Join Game? Yes/No (GS port hard coded)
@@ -858,15 +858,16 @@ Write the message in the log file (logs/gameserver.log)
 - Enter a KRAG code when they find one by entering its 4-digit hex code
 - Receive a game status update from the GS (upon request)
 - Receive messages from the GS
-- 
+
+
 #### Outputs
 - Send the Game Server the player’s current location four times per minute
 - The first location-update message is how it introduces itself to the GS
 - Inform the Game Server when this player claims a krag (by providing a 4-digit hex code)
 - Write to the logs with all activities
 
-### Functional Decomposition Into Modules
 
+### Functional Decomposition Into Modules
 - Main
     - setup, attempt to connect to server, choose name screen, join game screen, and game over screen
 - Base Screen
