@@ -62,70 +62,70 @@
 
 * -Command line: ./guideagent guideId=... team=... player=... host=... port=...
 * ./guideagent = name of program
-**  guideId=... = hexadecimal ID num for this player
-**  team=... = name of team to which the agent belongs 
-**  player=... = provides name of the guide agent
-** host=... = provides the host name of the Game Server 
-** port=... = provides the port number of the Game Server 
+    *  guideId=... = hexadecimal ID num for this player
+    *  team=... = name of team to which the agent belongs 
+    *  player=... = provides name of the guide agent
+    * host=... = provides the host name of the Game Server 
+    * port=... = provides the port number of the Game Server 
 * Input from STDIN:
-** Hint and who it should be sent to
-** "Update" requesting the server send a game update
-** "Print" which requests all the data be printed 
+    * Hint and who it should be sent to
+    * "Update" requesting the server send a game update
+    * "Print" which requests all the data be printed 
 * Output To STDOUT: 
-** Current game statistics 
-** Current location and status of each player on Guide’s team
-**Current secret string 
-** List of known clues 
-**More Details in Print Function Description 
+    * Current game statistics 
+    * Current location and status of each player on Guide’s team
+    * Current secret string 
+    * List of known clues 
+    * More Details in Print Function Description 
 * Receive From Server:
-** Updates about current locations and status of players on Guide’s team
-** Clues about the location of krags 
-** Receive updates about the hacker’s secret 
-** Receive updates about game status 
+    * Updates about current locations and status of players on Guide’s team
+    * Clues about the location of krags 
+    * Receive updates about the hacker’s secret 
+    * Receive updates about game status 
 * Send To Server: 
-** Hints to go to Field Agents 
-** Status Request 
+    * Hints to go to Field Agents 
+    * Status Request 
 * Logfile:
-** Log all activity to logfile in specific format 
+    * Log all activity to logfile in specific format 
 
 ### Structs:
 * GameStruct
-** Variables: Hex GameID, Hex GuideID, char* TeamName, int TotalKrags, char* Secret, int ClaimedKrags, int LastContacted, int Update, Bag char* Hints, Bag Clue Clues, Bag Agent Agent, char* PlayerName 
-** Methods:
-*** new_GameStruct(GameID, GuideID, Teamname, #Krags)
-*** getAllHints(GameStruct)
-*** NewHint(GameStruct, Hint)
-***  GetAllClaimedKrags(GameStruct) 
-*** IncrementClaimedKrags(GameStruct)
-*** GetLastContactTime(GameStruct)
-*** ClueIterate(GameStruct, IterateMethod)
-*** AddAClue(GameStruct, Char*, Lat, Long) 
-*** GetSecret(GameStruct) 
-*** UpdateSecret(GameStruct, Secret)
-*** PlayersIterate*GameStruct, IterateMethod)
-*** PlayerUpdate(GameStruct, Name, ID, Lat, Long) 
+    * Variables: Hex GameID, Hex GuideID, char* TeamName, int TotalKrags, char* Secret, int ClaimedKrags, int LastContacted, int Update, Bag char* Hints, Bag Clue Clues, Bag Agent Agent, char* PlayerName 
+    * Methods:
+        * new_GameStruct(GameID, GuideID, Teamname, #Krags)
+        * getAllHints(GameStruct)
+        * NewHint(GameStruct, Hint)
+        *  GetAllClaimedKrags(GameStruct) 
+        * IncrementClaimedKrags(GameStruct)
+        * GetLastContactTime(GameStruct)
+        * ClueIterate(GameStruct, IterateMethod)
+        * AddAClue(GameStruct, Char*, Lat, Long) 
+        * GetSecret(GameStruct) 
+        * UpdateSecret(GameStruct, Secret)
+        * PlayersIterate*GameStruct, IterateMethod)
+        * PlayerUpdate(GameStruct, Name, ID, Lat, Long) 
 * Player Struct
-** Variables: char* name, hex pebbleID, Int Latitude, Int Longitude 
-** Methods: 
-*** new_player(name, pebID, Lat, Long) 
-*** GetName(player)
-*** GetID(player)
-*** GetLat(player)
-*** GetLong(player)
-*** SetLat(player, latitude)	
-*** SetLong(player, longitude)
+    * Variables: char* name, hex pebbleID, Int Latitude, Int Longitude 
+    * Methods: 
+        * new_player(name, pebID, Lat, Long) 
+        * GetName(player)
+        * GetID(player)
+        * GetLat(player)
+        * GetLong(player)
+        * SetLat(player, latitude)	
+        * SetLong(player, longitude)
 *Clue Struct 
-** Variables: char* clue, int latitude, int longitude 
-** Methods:
-*** new_clue(clue, lat, long)
-*** getClue(clue)
-*** getLat(clue)
-*** getLong(clue)
-*** SetLat(clue, lat)
-*** SetLong(clue, long) 
+    * Variables: char* clue, int latitude, int longitude 
+    * Methods:
+        * new_clue(clue, lat, long)
+        * getClue(clue)
+        * getLat(clue)
+        * getLong(clue)
+        * SetLat(clue, lat)
+        * SetLong(clue, long) 
 * Function Struct
-** Variables: char* command, coid (*func)(Array Of Tokens) 
-*** arrayOfFuncs[] = { {OpCode, FunctionName} {OpCode, FunctionName} } 
+    * Variables: char* command, coid (*func)(Array Of Tokens) 
+     * arrayOfFuncs[] = { {OpCode, FunctionName} {OpCode, FunctionName} } 
 
 ### Functions as Modules
 * ValidateArguments(), validates command lines arguments * ConnectSocket(), creates and connects the Game Agent to the Game Server
