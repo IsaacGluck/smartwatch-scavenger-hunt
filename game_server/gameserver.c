@@ -20,6 +20,7 @@
  *  3 - Wrong gameID
  *  4 - Wrong kiff
  *  5 - Wrong sf
+ *  6 - Wrong port
  *
  * Kazuma Honjo, May 2017
  */
@@ -45,6 +46,7 @@
 /**************** local functions ****************/
 /* not visible outside this file */
 static void parse_command_line_arguments(const int argc, char *argv[], game_info_t *gi);
+static void set_up_udp(int port, int *comm_stock);
 
 
 /**************** main ****************/
@@ -61,6 +63,11 @@ main(const int argc, char *argv[]){
     parse_command_line_arguments(argc, argv, gi);
 }
 
+
+/**************** parse_command_line_arguments ****************/
+/* parse the command line arguments
+ * if there are any error, exit with proper exit status
+ */
 static void
 parse_command_line_arguments(const int argc, char *argv[], game_info_t *gi){
     // command line arguments must be 4 (excluding ./gameserver)
@@ -94,7 +101,31 @@ parse_command_line_arguments(const int argc, char *argv[], game_info_t *gi){
     }
     
     // validate port
+    for (int i = 0; i < strlen(argv[4]); i++){
+        if (!isdigit(argv[4][i])){
+            fprintf(stderr, "Port is not a number\n");
+            fprintf(stderr, "./gameserver gameID kiff sf port\n");
+            exit(6);
+        }
+    }
+    int port = atoi(argv[4]);
+    int comm_stock;
+    set_up_udp(port, &comm_stock);
 }
 
 
+/**************** set_up_udp ****************/
+/* set up the dgram socket and bint it to given port number
+ * if there are any error, exit with proper exit status
+ *
+ * reference: udpserver.c from dartmouth college cs50
+ */
+static void
+set_up_udp(int port, int *comm_stock){
+    comm_stock = socket(AF_INET, SOCK_DGRAM, 0);
+    if (comm_stock < 0){
+        perror("opening datagram socket");
+        exit(7)
+    }
+}
 
