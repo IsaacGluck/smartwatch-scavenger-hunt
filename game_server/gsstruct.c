@@ -29,6 +29,7 @@ typedef struct game_info{
     set_t *krags;     // Set of krags (clue will be the key)
     set_t *team;      // Set of Team (team name will be the key)
     int gameID;       // ID of the game
+    int game_status;  // 0 if the game is continuing, 1 if ended
 }game_info_t;
 
 
@@ -101,10 +102,11 @@ game_info_new(){
     gi->krags = set_new();
     gi->team = set_new();
     gi->gameID = 0;
+    gi->game_status = 0;
     return gi;
 }
 
-/**************** game_info_get_start ****************/
+/**************** game_info_get_start_time ****************/
 /* return a start time of game */
 time_t
 game_info_get_start_time(game_info_t *gi){
@@ -112,6 +114,16 @@ game_info_get_start_time(game_info_t *gi){
         return -1;
     }
     return gi->start;
+}
+
+/**************** game_info_get_game_status ****************/
+/* return a status of game */
+int
+game_info_get_game_status(game_info_t *gi){
+    if (gi == NULL){
+        return -1;
+    }
+    return gi->game_status;
 }
 
 /**************** game_info_set_gameID ****************/
@@ -131,7 +143,7 @@ game_info_set_gameID(game_info_t *gi, char *gameID_in_hex){
 }
 
 /**************** game_info_set_kiff ****************/
-/* set the kiff
+/* set the kiff and builds the set of krags
  * return 0 if success, 1 if error
  */
 int

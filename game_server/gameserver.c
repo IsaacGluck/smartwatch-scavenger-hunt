@@ -21,6 +21,8 @@
  *  4 - Wrong kiff
  *  5 - Wrong sf
  *  6 - Wrong port
+ *  7 - Error during setting up UDP/DGRAM
+ *  8 - Error during receiving message through socket
  *
  * Kazuma Honjo, May 2017
  */
@@ -30,12 +32,14 @@
 #include <string.h>
 #include <ctype.h>
 #include <time.h>
+#include <arpa/inet.h>
+#include <unistd.h>
 #include "set.h"
 #include "gsstruct.h"
 
 
 /**************** file-local global variables ****************/
-/* none */
+static const int MESSAGE_LENGTH = 8192;
 
 /**************** local types ****************/
 
@@ -45,8 +49,8 @@
 
 /**************** local functions ****************/
 /* not visible outside this file */
-static void parse_command_line_arguments(const int argc, char *argv[], game_info_t *gi);
-static void set_up_udp(int port, int *comm_stock);
+static void parse_command_line_arguments(const int argc, char *argv[], game_info_t *gi, int *comm_sock, struct sockaddr_in *server);
+static void set_up_udp(int port, int *comm_sock, struct sockaddr_in *server);
 
 
 /**************** main ****************/
@@ -58,18 +62,39 @@ main(const int argc, char *argv[]){
         fprintf(stderr, "failed to initialize gi\n");
         exit(1);
     }
+    int comm_sock;
+    struct sockaddr_in server;
     
+    // parse the command line arguments and set up the game
+    parse_command_line_arguments(argc, argv, gi, &comm_sock, &server);
     
-    parse_command_line_arguments(argc, argv, gi);
+    // receive datagrams and handle the message
+    while(game_info_get_game_status(gi) == 0){
+        char buf[MESSAGE_LENGTH];         // buffer for reading data from socket
+        struct sockaddr_in them;          // sender's address
+        struct sockaddr *themp = (struct sockaddr *) &them;
+        socklen_t themlen = sizeof(them);
+        int nbytes = recvfrom(comm_sock, buf, MESSAGE_LENGTH-1, 0, themp, &themlen);
+        
+        if (nbytes < 0){
+            perror("receiving from socket");
+            exit(8);
+        }
+        else if (nbytes > 0){
+            buf[nbytes] = '\0';            // null terminate string
+            
+            do something with this message!!!!!
+        }
+    }
 }
 
 
 /**************** parse_command_line_arguments ****************/
-/* parse the command line arguments
+/* parse the command line arguments and set up the game
  * if there are any error, exit with proper exit status
  */
 static void
-parse_command_line_arguments(const int argc, char *argv[], game_info_t *gi){
+parse_command_line_arguments(const int argc, char *argv[], game_info_t *gi, int *comm_sock, struct sockaddr_in *server){
     // command line arguments must be 4 (excluding ./gameserver)
     if (argc != 5){
         fprintf(stderr, "./gameserver gameID kiff sf port\n");
@@ -109,8 +134,7 @@ parse_command_line_arguments(const int argc, char *argv[], game_info_t *gi){
         }
     }
     int port = atoi(argv[4]);
-    int comm_stock;
-    set_up_udp(port, &comm_stock);
+    set_up_udp(port, comm_sock, server);
 }
 
 
@@ -121,11 +145,21 @@ parse_command_line_arguments(const int argc, char *argv[], game_info_t *gi){
  * reference: udpserver.c from dartmouth college cs50
  */
 static void
-set_up_udp(int port, int *comm_stock){
-    comm_stock = socket(AF_INET, SOCK_DGRAM, 0);
-    if (comm_stock < 0){
+set_up_udp(int port, int *comm_sock, struct sockaddr_in *server){
+    // create socket on which to listen
+    *comm_sock = socket(AF_INET, SOCK_DGRAM, 0);
+    if (*comm_sock < 0){
         perror("opening datagram socket");
-        exit(7)
+        exit(7);
+    }
+    
+    // name socket using wildcards
+    server->sin_family = AF_INET;
+    server->sin_addr.s_addr = INADDR_ANY;
+    server->sin_port = htons(port);
+    if (bind(*comm_sock, (struct sockaddr *)server, sizeof(*server))){
+        perror("binding socket name");
+        exit(7);
     }
 }
 
