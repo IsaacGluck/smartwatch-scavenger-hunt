@@ -29,4 +29,6 @@ time_t game_info_get_start_time(game_info_t *gi);
 int game_info_set_gameID(game_info_t *gi, char *gameID_in_hex);
 
 int game_info_set_kiff(game_info_t *gi, char *kiff);
+
+int game_info_set_secret_code(game_info_t *gi, char *sf);
 #endif   // __GSSTRUCT_H

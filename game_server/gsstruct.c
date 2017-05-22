@@ -23,7 +23,7 @@ typedef struct game_info{
     int num_krags;    // Number of krags
     int num_agents;   // Number of agents (#FA + #GA)
     int num_teams;    // Number of teams (# of Struct Team)
-    char *sf;         // Secret file path name
+    char *secret_code;// Secret file string
     char *kiff;       // Krag file path name
     set_t *krags;     // Set of krags (clue will be the key)
     set_t *team;      // Set of Team (team name will be the key)
@@ -106,6 +106,9 @@ game_info_new(){
 /* return a start time of game */
 time_t
 game_info_get_start_time(game_info_t *gi){
+    if (gi == NULL){
+        return -1;
+    }
     return gi->start;
 }
 
@@ -115,6 +118,9 @@ game_info_get_start_time(game_info_t *gi){
  */
 int
 game_info_set_gameID(game_info_t *gi, char *gameID_in_hex){
+    if (gi == NULL || gameID_in_hex == NULL){
+        return 1;
+    }
     // convert gameID from hex to int
     // duncitoianen oanwoin wiaenf a
     // afbnoiwa pnawf
@@ -128,10 +134,14 @@ game_info_set_gameID(game_info_t *gi, char *gameID_in_hex){
  */
 int
 game_info_set_kiff(game_info_t *gi, char *kiff){
+    if (gi == NULL || kiff == NULL){
+        return 1;
+    }
     // Open the file. If it does not exist or cannot be read,
     // wrong file path name. Return 1
     FILE *fp = fopen(kiff, "r");
     if (fp == NULL){
+        fprintf(stderr, "kiff cannot be opened or does not exist\n");
         return 1;
     }
     
@@ -142,10 +152,17 @@ game_info_set_kiff(game_info_t *gi, char *kiff){
         // each word must be shorter than the length of line
         char *left = malloc(strlen(line)+1);
         char *right = malloc(strlen(line)+1);
+        if (left == NULL || right == NULL){
+            fprintf(stderr, "Error while allocating memory in game_info_set_kiff\n");
+            return 1;
+        }
         int j = 0;
         int state = 0; // 0 indiactes currently reading the left-hand-side
                        // 1 indicates currently reading the right-hand-side
         krag_t *new_krag = krag_new();
+        if (new_krag == NULL){
+            return 1;
+        }
         
         // loop over the line
         for (int i = 0; i < strlen(line); i++){
@@ -209,6 +226,7 @@ game_info_set_kiff(game_info_t *gi, char *kiff){
         //set_insert(gi->krags, int_to_hex(new_krag->kragID), new_krag);
         free(left);
         free(right);
+        free(line);
     }
     
     fclose(fp);
@@ -219,17 +237,16 @@ game_info_set_kiff(game_info_t *gi, char *kiff){
 /**************** handle_kiff_message ****************/
 /* helper function for game_info_set_kiff
  * handle the message properly
- * return 0 if success, 1 if malloc error, 2 if other error
+ * return 0 if success, 1 if error
  */
 static int
 handle_kiff_message(char *left, char *right, game_info_t *gi, krag_t *new_krag){
     if ((left == NULL) || (right == NULL) || (gi == NULL) || (new_krag == NULL)){
-        return 2;
-    }
-    if (new_krag == NULL){
-        fprintf(stderr, "krag_new failed due to not being able to malloc memory\n");
         return 1;
     }
+    
+    // check the left-hand-side word and set the value of it
+    // to the value of right-hand-side
     if (strcmp(left, "latitude") == 0){
         new_krag->latitude = atof(right);
     }
@@ -243,11 +260,41 @@ handle_kiff_message(char *left, char *right, game_info_t *gi, krag_t *new_krag){
     else if ((strcmp(left, "clue") == 0) && (strlen(right) <= 140)){
         new_krag->clue = left;
     }
+    // if the left-hand-side word does not fall in to the words above,
+    // the krag file format is not correct
     else{
         fprintf(stderr, "Error: krag format error\n");
         krag_delete(new_krag);
-        return 2;
+        return 1;
     }
+    return 0;
+}
+
+/**************** game_info_set_secret_code ****************/
+/* set the secret code
+ * return 0 if success, 1 if error
+ */
+int
+game_info_set_secret_code(game_info_t *gi, char *sf){
+    if (gi == NULL || sf == NULL){
+        return 1;
+    }
+    
+    // Open the file. If it does not exist or cannot be read,
+    // wrong file path name. Return 1
+    FILE *fp = fopen(sf, "r");
+    if (fp == NULL){
+        fprintf(stderr, "sf cannot be opened or does not exist\n");
+        return 1;
+    }
+    char *line = readlinep(fp);
+    if (line == NULL || strlen(line) > 140){
+        fprintf(stderr, "Error: the format of sf is wrong\n");
+        return 1;
+    }
+    strcpy(gi->secret_code,line);
+    free(line);
+    fclose(fp);
     return 0;
 }
 
@@ -264,6 +311,7 @@ static krag_t *
 krag_new(){
     krag_t *krag = malloc(sizeof(krag_t));
     if (krag == NULL){
+        fprintf(stderr, "krag_new failed due to not being able to malloc memory\n");
         return NULL;
     }
     
