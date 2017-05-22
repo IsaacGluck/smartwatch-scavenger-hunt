@@ -19,6 +19,7 @@
  *  2 - Wrong nubmer of command line arguments
  *  3 - Wrong gameID
  *  4 - Wrong kiff
+ *  5 - Wrong sf
  *
  * Kazuma Honjo, May 2017
  */
@@ -86,6 +87,12 @@ parse_command_line_arguments(const int argc, char *argv[], game_info_t *gi){
     
     // validate and set sf
     char *sf = argv[3];
+    if (game_info_set_secret_code(gi, sf) != 0){
+        fprintf(stderr, "Wrong sf\n");
+        fprintf(stderr, "./gameserver gameID kiff sf port\n");
+        exit(5);
+    }
+    
     // validate port
 }
 
