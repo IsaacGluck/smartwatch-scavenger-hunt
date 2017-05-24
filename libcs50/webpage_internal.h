@@ -1,8 +1,6 @@
-<<<<<<< HEAD
 /*
 =======
 /* 
->>>>>>> e3dd83e7ca671d47dee0fd918ca3ab2056254b5b
  * webpage_internal.h - glue between webpage.c and webpage_fetch.c
  *
  * DO NOT INCLUDE THIS FILE - it is only for 'internal' use, that is,

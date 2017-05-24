@@ -11,6 +11,11 @@
  * David Kotz, April 2016, 2017
  */
 
+
+// Conditional inclusion for platform specific builds
+#ifdef NOPEBBLE // we are *not* building for pebble
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "memory.h"
@@ -123,3 +128,5 @@ count_net(void)
 {
   return nmalloc - nfree - nfreenull;
 }
+
+#endif

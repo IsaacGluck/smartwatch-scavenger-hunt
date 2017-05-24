@@ -6,6 +6,11 @@
  * David Kotz - May 2016, April 2017
  */
 
+
+// Conditional inclusion for platform specific builds
+#ifdef NOPEBBLE // we are *not* building for pebble
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -142,4 +147,7 @@ int main(int argc, char *argv[])
     }
   }
 }
+#endif
+
+
 #endif

@@ -55,8 +55,8 @@ static void init() {
     /* 4. Show the Window on the watch, with animated=true. */
     window_stack_push(s_main_window, true);
 
-    /* 5. Make sure the time is displayed from the start. */
-    update_time();
+    /* 5. Choose name window is displayed from the start. */
+    // update_time();
 
     /* 6. Set the handlers for AppMessage inbox/outbox events. Set these    *
      *    handlers BEFORE calling open, otherwise you might miss a message. */
@@ -117,7 +117,7 @@ static void main_window_unload(Window *window) {
 
 // tick_handler
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
-    APP_LOG(APP_LOG_LEVEL_INFO, "Tick.");
+    // APP_LOG(APP_LOG_LEVEL_INFO, "Tick.");
     static int seconds = 5;
     static int reqOption = 0;
 
@@ -146,24 +146,24 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
     }
 
     /* 2. Update time on watchface. */
-    update_time();
+    // update_time();
 }
 
-// update_time
-static void update_time() {
-    /* 1. Get a tm structure. */
-    time_t temp = time(NULL);
-    struct tm *tick_time = localtime(&temp);
+// // update_time
+// static void update_time() {
+//     /* 1. Get a tm structure. */
+//     time_t temp = time(NULL);
+//     struct tm *tick_time = localtime(&temp);
 
-    /* 2. Write the current hours and minutes into a buffer. */
-    static char s_buffer[8];
-    strftime(s_buffer, sizeof(s_buffer),
-    	clock_is_24h_style() ? "%H:%M" : "%I:%M", tick_time);
+//     /* 2. Write the current hours and minutes into a buffer. */
+//     static char s_buffer[8];
+//     strftime(s_buffer, sizeof(s_buffer),
+//     	clock_is_24h_style() ? "%H:%M" : "%I:%M", tick_time);
 
-    /* 3. Display this time on the TextLayer. */
-    text_layer_set_text(main_layer, s_buffer);
+//     /* 3. Display this time on the TextLayer. */
+//     text_layer_set_text(main_layer, s_buffer);
 
-}
+// }
 
 // inbox_received_callback
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {

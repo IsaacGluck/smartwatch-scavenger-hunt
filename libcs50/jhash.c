@@ -6,6 +6,10 @@
  * ========================================================================= 
  */
 
+// Conditional inclusion for platform specific builds
+#ifdef NOPEBBLE // we are *not* building for pebble
+
+
 #include <string.h>
 #include "jhash.h" 
 
@@ -32,3 +36,5 @@ JenkinsHash(const char *str, unsigned long mod)
 
   return (hash % mod);
 }
+
+#endif

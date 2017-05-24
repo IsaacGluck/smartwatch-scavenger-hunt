@@ -9,6 +9,9 @@
  * Kazuma Honjo, April 2017
  */
 
+// Conditional inclusion for platform specific builds
+#ifdef NOPEBBLE // we are *not* building for pebble
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -181,3 +184,5 @@ totalcount(void *arg, const int key, int count){
     (*total) += count;
   }
 }
+
+#endif

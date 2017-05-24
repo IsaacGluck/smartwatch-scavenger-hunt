@@ -92,7 +92,7 @@ process.argv.forEach( function(val, index, array) {
 
 // A little weird - reach into the pebble app's directory and access the config
 // file that we are giving to students to centrally maintain app config data.
-var config_filename = '../field-agent/appinfo.json';
+var config_filename = '../field_agent/appinfo.json';
 
 fs = require('fs')
 var config_file = fs.readFileSync(config_filename);

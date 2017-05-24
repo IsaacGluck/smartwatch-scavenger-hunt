@@ -12,6 +12,11 @@
 /* students shouldn't take advantage of the gnu extensions, 
  * but parsing html without them is a pain.
  */
+
+// Conditional inclusion for platform specific builds
+#ifdef NOPEBBLE // we are *not* building for pebble
+
+
 #define _GNU_SOURCE	      // strncasecmp, strdup
 
 #include <stdlib.h>
@@ -899,3 +904,6 @@ checkp(void *p, char *message)
   }
   return p;
 }
+
+
+#endif // not building for pebble
