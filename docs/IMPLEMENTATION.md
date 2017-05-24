@@ -1,3 +1,24 @@
+## Common 
+In the common file we will have the following methods that are useful to everything 
+* `int ValidateMessage(char* message)`  
+    * *Use:* Make sure the messages are in the right format 
+    * check to make sure no punctuation besides | or =
+    * check to make sure no spaces
+    * If everything is right, return 1 
+    * If something is wrong, return 0 
+* `int hexStringToDecimal(char* hex)`
+    *  *Use*: returns the decimal value of the hex string 
+    *  create a place in memory for the int 
+    *  use sscanf to convert into decimal 
+    *  return decimal
+* `char[] messagesToArray(char*  line)`
+    *  *Use*: split the message into an array with all the inputs after the = sign 
+    *  determine size of arrray by size of = signs 
+    *  Locate the | and the = sign 
+    *  split the string between these places and put the value in the array 
+    *  do this for all portential values
+    *  return array 
+
 ## GAME AGENT 
 
 ### Methods 
