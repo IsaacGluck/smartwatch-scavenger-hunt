@@ -6,22 +6,36 @@
 #include "key_assembly.h"
 
 
+// Global Structs
+typedef struct fieldagent_info {
+	char* pebbleId;
+	char* name;
+	char* team;
+	signed double latitude;
+	signed double longitude;
+	int num_claimed;
+	int num_left;
+	char* known_chars;
+	char** hiints_received;
+} fieldagent_info_t;
+
 // Globals
 static TextLayer *main_layer;
 static Window *s_main_window;
 static char *fa_claim = "opCode=FA_CLAIM|"
-                        "gameId=FEED|"
-                        "pebbleId=8080477D|"
-                        "team=aqua|"
-                        "player=Alice|"
-                        "latitude=43.706552|"
-                        "longitude=-72.287418|"
-                        "kragId=8080";
+												"gameId=FEED|"
+												"pebbleId=8080477D|"
+												"team=aqua|"
+												"player=Alice|"
+												"latitude=43.706552|"
+												"longitude=-72.287418|"
+												"kragId=8080";
+
 
 // static function defintions
 static void init();
 static void deinit();
-static void main_window_load(Window *window);
+static void main_window_load(Window *window); // choose name
 static void main_window_unload(Window *window);
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed);
 static void update_time();
@@ -149,21 +163,21 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
     // update_time();
 }
 
-// // update_time
-// static void update_time() {
-//     /* 1. Get a tm structure. */
-//     time_t temp = time(NULL);
-//     struct tm *tick_time = localtime(&temp);
+// update_time
+static void update_time() {
+    /* 1. Get a tm structure. */
+    time_t temp = time(NULL);
+    struct tm *tick_time = localtime(&temp);
 
-//     /* 2. Write the current hours and minutes into a buffer. */
-//     static char s_buffer[8];
-//     strftime(s_buffer, sizeof(s_buffer),
-//     	clock_is_24h_style() ? "%H:%M" : "%I:%M", tick_time);
+    // /* 2. Write the current hours and minutes into a buffer. */
+    // static char s_buffer[8];
+    // strftime(s_buffer, sizeof(s_buffer),
+    // 	clock_is_24h_style() ? "%H:%M" : "%I:%M", tick_time);
 
-//     /* 3. Display this time on the TextLayer. */
-//     text_layer_set_text(main_layer, s_buffer);
+    // /* 3. Display this time on the TextLayer. */
+    // text_layer_set_text(main_layer, s_buffer);
 
-// }
+}
 
 // inbox_received_callback
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
