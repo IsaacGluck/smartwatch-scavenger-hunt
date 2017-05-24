@@ -43,7 +43,7 @@ static typedef struct token{
 /**************** function dispatch table ****************/
 static const struct {
     const char *command
-    void (*func)(char *rest_of_line);
+    void (*func)(char *rest_of_line, );
 } dispatch[] = {
     { "FA_LOCATION", fn_fa_location },
     { "FA_CLAIM", fn_fa_claim },
