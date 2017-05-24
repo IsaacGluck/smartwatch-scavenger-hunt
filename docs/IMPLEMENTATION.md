@@ -156,7 +156,8 @@
         * Bag char* Hints
         * HashTable Krags Krags
         * Hahtable Agent Agent, 
- ### Storage, Files, and Messages 
+
+### Storage, Files, and Messages 
 * Each received and sent message is written into the Guide Agent Log File. 
 * The Log file will be opened in the WriteToFile method and closed in that as well. 
 * Error messages will be printed to console if response code is received 
