@@ -195,10 +195,7 @@ game_info_set_kiff(game_info_t *gi, char *kiff){
                 // if currently reading right hand side,
                 // the next non-alphabet/number character must be '|'
                 else {
-                    free(left);
-                    free(right);
-                    fclose(fp);
-                    fprintf(stderr, "Error: '=' found consecutively in the kiff\n");
+                    et_kiff_handle_error(left, right, fp, "Error: '=' found consecutively in the kiff\n");
                     return 1;
                 }
             }
@@ -208,20 +205,14 @@ game_info_set_kiff(game_info_t *gi, char *kiff){
                     right[j] = '\0';
                     j = 0;
                     if (handle_kiff_message(left, right, gi, new_krag) != 0){
-                        free(left);
-                        free(right);
-                        fclose(fp);
-                        fprintf(stderr, "Error: krag format error\n");
+                        set_kiff_handle_error(left, right, fp, "Error: krag format error\n");
                         return 1;
                     }
                 }
                 // if currently reading left hand side,
                 // the next non-alphabet/number character must be '='
                 else {
-                    free(left);
-                    free(right);
-                    fclose(fp);
-                    fprintf(stderr, "Error: '|' found consecutively in the kiff\n");
+                    set_kiff_handle_error(left, right, fp, "Error: '|' found consecutively in the kiff\n");
                     return 1;
                 }
             }

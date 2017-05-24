@@ -187,3 +187,247 @@ In the common file we will have the following methods that are useful to everyth
 * Log file is only file and this will be opened and closed within the write to file message so no memory is leaked
 * After the game over op code has been recieved, the game struct and all of its compenents such as the Krags hash table, Agent Hashtable, and hints bag will be freed. 
 * Each string that is malloced to send to the game server will be freed after it is print 
+
+
+
+## Game Server
+### Data structures
+**Struct _game_info_**
+    - Time the game has started (indicates the elapsed time since start of the game)
+    - Number of krags
+    - Number of agents (#FA + #GA)
+    - Number of teams (# of Struct Team)
+    - Secret file name
+    - Set of krags (clue will be the key)
+    - Set of Team (team name will be the key)
+
+**Struct _Team_**
+    - GA
+    - Set of FA
+    - Number of krags claimed (int)
+    - Revealed krags (set of char *)
+    - Partly revealed secret string (char *)
+
+**Struct _FA_**
+    - Name (char *)
+    - pebbleId (int)
+    - Longitude (float)
+    - Latitude (float)
+    - Last-contact-time (time_t)
+
+**Struct _GA_**
+    - Name (char *)
+    - guideId (int)
+    - Last-contact-time (time_t)
+
+**Struct _krag_**
+    - Latitude (float)
+    - Longitude (float)
+    - kragId (int)
+    - Set for keeping track the team that have claimed the krag
+
+
+### Pseudo code
+#### Methods
+**`int main(const int argc, char *argv[])`**
+    1. Parse command line argument ()
+    2. While the game is not over, perform the following
+        1. Listen to message
+        2. If successfully received message:
+            1. Write the message in the log file (logs/gameserver.log) () 
+            2. Parse message ()
+            3. Handle message ()
+                1.	Depending on the return value, respond correctly. Explained below.
+            4. Present summary
+        3. Otherwise exit with non-zero status
+        4. If game over (All krags revieled or by input GAMEOVER):
+            1. Send a game summary (TEAM_RECORD) to all players
+            2. Send a message indicating the end-of-game (GAME_OVER) to all players
+            3. Break
+        5. Otherwise continue loop
+    3. Free all memory
+    4. Exit with 0 status
+
+**`int handle_message(char *opcode, char *rest_of_line, game_infor *gi)`**
+// Use dispatch table and common function
+    If opCode=
+        **FA_LOCATION**
+            1. Validate the message fields; ignore the invalid messages
+            2. If gameId == 0
+                1. If team is not known, register team
+                2. If pebbleId is not known, register pebbleId and associate it with given player and team
+                3. If there is already a player with the same name in the team, ignore and return -6
+                    **Same name is not allowed in one team**
+                4. Return 1
+            3. If gameId != 0
+                1. Validate gameId, pebbleId, team, and player
+                    1. If gameId is incorrect, return -4
+                    2. If pebbleId is incorrect, return -7
+                    3. If team is incorrect, return -5
+                    4. If player is incorrect, return -6
+                2. If valid input:
+                	1. Update records regarding location and last-contact-time of this FA
+                	2. If statusReq==1, Return 1
+                    3. Otherwise return 0
+
+        **FA_CLAIM**
+            1. Validate the message fields; ignore the invalid messages and return -3
+            2. If kragId is not known; ignore and return -7
+            3. Confirm the given latitude|longitude is within 10 meters of the known position of the identified krag
+                1. Return -1 if latitude|longitude is not within 10 meters of the krag
+            4. If the krag has not been claimed by this team:
+                1. Mark it as ‘claimed’ and send a SH_CLAIMED response to the FA
+                2. If this is not the last krag to be claimed, return 1
+                3. If this is the last krag to be claimed, return 2
+            5. Else if the krag has already has been claimed by this team, return 3
+
+        **FA_LOG**  
+            1. Return 0
+
+        **GA_STATUS**
+            1. Validate the message fields; ignore the invalid messaegs and return -3
+            2. If gameId == 0
+                1. If team is not known, register team
+                2. If guideId is not known, register guideId and associate it with given player and team names
+                3. Else, verify that team matches a known team and associate guideId with given player name
+                4. If guide is already in the team; ignore and return -5
+                5. If no error return 1
+            3. If gameId != 0
+                1. Validate the gameId, guideId, team, and player name
+                    1. If gameId is incorrect, return -4
+                    2. If guideId is incorrect, return -7
+                    3. If team is incorrect, return -5
+                    4. If player is incorrect, return -6
+                2. If valid message:
+                    1. Update records regarding last-contact-time of this GA
+                    2. If statusReq==1, return 1
+                    3. Otherwise return 0
+
+        **GA_HINT**
+            1. Validate the gameId, guideId, team and player
+                1. Is gameId the same with current gameId
+                    1. If error return -4
+                2. Is guideId associated with given team and player
+                    1. If error return return -7
+                3. If valid:
+                    1. Update records regarding last-contact-time of this GA
+                    2. If pebbleId is *, return 1
+                    3. Else if pebbleId is known player in the team, return 2
+                    4. Else if pebbleId is not known player in the team, return -7
+
+        **GAME_STATUS**
+            1. Return -2
+
+        **GS_AGENT**
+            1. Return -2
+
+        **GS_CLUE**
+            1. Return -2
+
+        **GS_CLAIMED**
+            1. Return -2
+
+        **GS_SECRET**
+            1. Return -2
+
+        **GS_RESPONSE**
+            1. Return -2
+
+        **GAME_OVER**
+            1. Return -2
+
+        **TEAM_RECORD**
+            1. Return -2
+
+        **not found**
+            1. Return -2
+
+
+#### Functions
+**`Parse command line argument(const int argc, char *argv[], game_infor *gi)`**
+    1. Check the following:
+        1. Number of arguments
+        2. Valid gameID
+        3. Readable and correct format kiff
+        4. Readable and correct format sf
+        5. Valid port
+    2. If any error:
+        1. Print message
+        2. Exit with non-zero status
+    3. Otherwise:
+        1. Build set of krags()
+        2. Create a DGRAM socket
+        3. Bind it to the given port number
+
+**`Build set of krags(char *kiff, game_infor *gi)`**
+    1. For each line in the file:
+        1. Check there are no space
+        2. Create the krag
+        3. Add it to the set of krag stored in game_info 
+
+**`void send message to(char *responseCode, char *name, char *team, game_infor *gi)`**
+    If responseCode = 
+        GAME_STATUS (sends to GA)
+            opCode=GAME_STATUS|gameId=|guideId=|numClaimed=|numKrags=
+            Write the message in the log file (logs/gameserver.log)
+
+        GS_AGENT (sends to GA)
+            opCode=GA_AGENT|gameId=|pebbleId=|team=|player=|latitude=|longitude=|lastContact=
+            Write the message in the log file (logs/gameserver.log)
+
+        GS_CLUE (sends to GA)  
+            opCode=GS_CLUE|gameId=|guideId=|latitude=|longitude=|clue=
+            Write the message in the log file (logs/gameserver.log)
+
+        GS_SECRET (sends to GA)
+            opCode=GS_SECRET|gmaId=|guideId=|secret=
+            Write the message in the log file (logs/gameserver.log)
+
+        GS_RESPONSE (sends to GA/FA)
+            opCode=GS_RESPONSE|gameId=|respCode=|test=
+            Write the message in the log file (logs/gameserver.log)
+
+        GAME_OVER (sends to GA/FA)
+            opCode=GAME_OVER|gameId=|secret=
+            Write the message in the log file (logs/gameserver.log)
+
+        TEAM_RECORD (sends to GA/FA)
+            opCode=TEAM_RECORD|gameId=|team=|numClaimed=|numPlayers=
+            Write the message in the log file (logs/gameserver.log)
+
+
+### Returning value operation
+**Common**
+0: Successfully handled message (can be error and ignore). Nothing to be done
+-1: SH_ERROR_INVALID_MESSAGE
+-2: SH_ERROR_INVALID_OPCODE
+-3: SH_ERROR_INVALID_FIELD
+-4: SH_ERROR_INVALID_GAME_ID
+-5: SH_ERROR_INVALID_TEAMNAME
+-6: SH_ERROR_INVALID_PLAYERNAME
+-7: SH_ERROR_INVALID_ID
+-99: malloc error
+
+**FA_LOCATION**
+1: Respond with GAME_STATUS
+
+**FA_CLAIM**
+1: Respond with SH_CLAIMED, GS_CLUE, and GS_SECRET
+    - Send two (may be one or zero) randomly chosen clues, in the form of GS_CLUE messages to the GA on same team
+    - Update this team’s copy of the secret so as to reveal characters of the string
+    - Send the updated secret, via a GS_SECRET message to the GA on same team
+2: Respond with SH_CLAIMED and finish the game
+3: Respond with SH_CLAIMED_ALREADY
+
+**GA_STATUS**
+1: Respond with GAME_STATUS and GS_AGENT
+
+**GA_HINT**
+1: Send the message to all FA in the team
+2: Forward the message to the specified player
+
+
+### Resource management and Persistent storage
+* After game is finished successfully, either by opCode or stdin, all memory used for running the game will be freed. Therefore, no data will be left.
+* Log file will record all the input message from GA and FA, and output message to GA and FA. Therefore, one can track the game by viewing the log file.
+* Any error message will be printed in stdout.

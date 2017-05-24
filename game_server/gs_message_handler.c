@@ -57,7 +57,7 @@ static const struct {
     { "GS_SECRET", fn_gs_secret },
     { "GS_RESPONSE", fn_gs_response },
     { "GAME_OVER", fn_game_over },
-    { "TEAM_RECORD", fn_team_record },
+    { "", fn_team_record },
     { NULL, NULL }
 };
 
