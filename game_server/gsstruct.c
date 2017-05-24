@@ -14,7 +14,8 @@
 #include "file.h"
 
 /**************** file-local global variables ****************/
-/* none */
+static const int MESSAGE_LENGTH = 8192;
+static const int CLUE_LENGTH = 140;
 
 /**************** Struct ****************/
 // struct for game information
@@ -28,6 +29,7 @@ typedef struct game_info{
     set_t *krags;     // Set of krags (clue will be the key)
     set_t *team;      // Set of Team (team name will be the key)
     int gameID;       // ID of the game
+    int game_status;  // 0 if the game is continuing, 1 if ended
 }game_info_t;
 
 
@@ -70,6 +72,7 @@ typedef struct krag {
 
 /**************** file-local functions ****************/
 static int handle_kiff_message(char *left, char *right, game_info_t *gi, krag_t *new_krag);
+static void set_kiff_handle_error(char *left, char *right, FILE *fp, char *message);
 static krag_t *krag_new();
 static void krag_delete(krag_t *krag);
 static void set_char_delete(void *item);
@@ -99,10 +102,11 @@ game_info_new(){
     gi->krags = set_new();
     gi->team = set_new();
     gi->gameID = 0;
+    gi->game_status = 0;
     return gi;
 }
 
-/**************** game_info_get_start ****************/
+/**************** game_info_get_start_time ****************/
 /* return a start time of game */
 time_t
 game_info_get_start_time(game_info_t *gi){
@@ -110,6 +114,16 @@ game_info_get_start_time(game_info_t *gi){
         return -1;
     }
     return gi->start;
+}
+
+/**************** game_info_get_game_status ****************/
+/* return a status of game */
+int
+game_info_get_game_status(game_info_t *gi){
+    if (gi == NULL){
+        return -1;
+    }
+    return gi->game_status;
 }
 
 /**************** game_info_set_gameID ****************/
@@ -129,7 +143,7 @@ game_info_set_gameID(game_info_t *gi, char *gameID_in_hex){
 }
 
 /**************** game_info_set_kiff ****************/
-/* set the kiff
+/* set the kiff and builds the set of krags
  * return 0 if success, 1 if error
  */
 int
@@ -159,6 +173,7 @@ game_info_set_kiff(game_info_t *gi, char *kiff){
         int j = 0;
         int state = 0; // 0 indiactes currently reading the left-hand-side
                        // 1 indicates currently reading the right-hand-side
+        
         krag_t *new_krag = krag_new();
         if (new_krag == NULL){
             return 1;
@@ -167,10 +182,7 @@ game_info_set_kiff(game_info_t *gi, char *kiff){
         // loop over the line
         for (int i = 0; i < strlen(line); i++){
             if (isspace(line[i])){
-                free(left);
-                free(right);
-                fclose(fp);
-                fprintf(stderr, "Error: space found in the kiff\n");
+                set_kiff_handle_error(left, right, fp, "Error: space found in the kiff\n");
                 return 1;
             }
             
@@ -199,6 +211,7 @@ game_info_set_kiff(game_info_t *gi, char *kiff){
                         free(left);
                         free(right);
                         fclose(fp);
+                        fprintf(stderr, "Error: krag format error\n");
                         return 1;
                     }
                 }
@@ -234,6 +247,17 @@ game_info_set_kiff(game_info_t *gi, char *kiff){
     return 0;
 }
 
+/**************** set_kiff_handle_error ****************/
+/* handle the error recieved for game_info_set_kiff
+ */
+static void
+set_kiff_handle_error(char *left, char *right, FILE *fp, char *message){
+    if (left != NULL) free(left);
+    if (right != NULL) free(right);
+    if (fp != NULL) fclose(fp);
+    if (message != NULL) fprintf(stderr, message);
+}
+
 /**************** handle_kiff_message ****************/
 /* helper function for game_info_set_kiff
  * handle the message properly
@@ -257,13 +281,12 @@ handle_kiff_message(char *left, char *right, game_info_t *gi, krag_t *new_krag){
         ///new_krag->kragID = hex_to_int(right);
         // oaiu 0-uwnaf pawh09 na[=9w u\ca\ 0    uawpycpw4e y[a weifypacw fyp awo4y 8pofy pw8cfapw pcy aweyf aowy pfy pway fo pwf9 yw90 fyy w390fy w9eh fhfuw 0f9awunv9nnf
     }
-    else if ((strcmp(left, "clue") == 0) && (strlen(right) <= 140)){
+    else if ((strcmp(left, "clue") == 0) && (strlen(right) <= (CLUE_LENGTH-1))){
         new_krag->clue = left;
     }
     // if the left-hand-side word does not fall in to the words above,
     // the krag file format is not correct
     else{
-        fprintf(stderr, "Error: krag format error\n");
         krag_delete(new_krag);
         return 1;
     }
@@ -288,7 +311,7 @@ game_info_set_secret_code(game_info_t *gi, char *sf){
         return 1;
     }
     char *line = readlinep(fp);
-    if (line == NULL || strlen(line) > 140){
+    if (line == NULL || strlen(line) > (CLUE_LENGTH-1)){
         fprintf(stderr, "Error: the format of sf is wrong\n");
         return 1;
     }
@@ -319,7 +342,7 @@ krag_new(){
     krag->longitude = 0;
     krag->latitude = 0;
     krag->kragID = 0;
-    krag->clue = malloc(sizeof(char) * 141); // maximum length for clue is 140
+    krag->clue = malloc(sizeof(char) * (CLUE_LENGTH)); // maximum length for clue is 140
     krag->claimed_team = set_new();
     return krag;
 }
