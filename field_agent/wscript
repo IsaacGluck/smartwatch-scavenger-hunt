@@ -45,8 +45,8 @@ def debug_files(ctx, show):
         print ctx.path.ant_glob('src/**/*.c')
         print '----- ../common srcs -----'
         print ctx.path.find_node('../').ant_glob('common/**/*.c')
-        print '----- ../lib srcs (not supported yet - this is just debug) -----'
-        print ctx.path.find_node('../').ant_glob('lib/**/*.c')
+        print '----- ../libcs50 srcs -----'
+        print ctx.path.find_node('../').ant_glob('libcs50/**/*.c')
         print
 
 def build(ctx):
@@ -68,7 +68,8 @@ def build(ctx):
         debug_files(ctx, True)
         ctx.pbl_program(
             source=ctx.path.ant_glob('src/**/*.c') 
-                + ctx.path.find_node('../').ant_glob('common/**/*.c'),
+                + ctx.path.find_node('../').ant_glob('common/**/*.c')
+                + ctx.path.find_node('../').ant_glob('libcs50/**/*.c'),
             target=app_elf)
 
         if build_worker:
