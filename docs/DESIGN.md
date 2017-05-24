@@ -359,7 +359,7 @@ For managing several teams, I will use set.
 4. Exit with 0 status
 
 **Functions**
-Parse command line argument(){
+void Parse command line argument(){
     If any error:
         Print message
         Exit with non-zero status
@@ -369,7 +369,7 @@ Parse command line argument(){
         Build bag of krags
 }
 
-handle_message(){ // Use dispatch table and common function
+int handle_message(){ // Use dispatch table and common function
     If opCode=
         FA_LOCATION
             Validate the message fields; ignore the invalid messages
@@ -383,8 +383,8 @@ handle_message(){ // Use dispatch table and common function
                 Is gameId the same with current gameId
                 Is pebbleId associated with given team and player
                 If valid input:
-                Update records regarding location and last-contact-time of this FA
-                If statusReq==1, send a GAME_STATUS to FA
+                    Update records regarding location and last-contact-time of this FA
+                    If statusReq==1, send a GAME_STATUS to FA
                 Otherwise; ignore
 
         FA_CLAIM
