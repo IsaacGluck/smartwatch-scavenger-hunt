@@ -432,3 +432,107 @@ In the common file we will have the following methods that are useful to everyth
 * After game is finished successfully, either by opCode or stdin, all memory used for running the game will be freed. Therefore, no data will be left.
 * Log file will record all the input message from GA and FA, and output message to GA and FA. Therefore, one can track the game by viewing the log file.
 * Any error message will be printed in stdout.
+
+
+
+## FIELD AGENT
+### Methods
+
+- `int main(void);`
+    - *Pseudocode*
+        - Calls init, app_event_loop(), and deinit 
+
+- `static void init();`
+    - *Pseudocode*
+        - Create main Window element.
+        - Set handlers to manage the elements inside the window.
+        - Register our tick_handler function with TickTimerService.
+        - Show the Window on the watch, with animated=true.
+        - Choose name window is displayed from the start.
+        - Set the handlers for AppMessage inbox/outbox events. Set these handlers BEFORE calling open, otherwise you might miss a message.
+        - open the app message communication protocol. Request as much space as possible, because our messages can be quite large at times.
+        - setup the FA_INFO `fieldagent_info_t` struct
+
+- `static void deinit();`
+	- *Pseudocode*
+        - Destroy the window, unsubscribe from sensors, and free memory.
+
+- `static void main_window_load(Window *window);`
+	- *Pseudocode*
+        - Setup the choose name window and add the menu layer.
+
+- `static void main_window_unload(Window *window);`
+	- *Pseudocode*
+        - Destroy the menu layer.
+
+- `static void tick_handler(struct tm *tick_time, TimeUnits units_changed);`
+	- *Pseudocode*
+        - Send a FA_LOCATION every 15 seconds
+        - Request location every 10 seconds
+        - Check for messages every 5 seconds
+
+- `static void update_time();`
+	- *Pseudocode*
+        - update the time and display it
+
+- `static void inbox_received_callback(DictionaryIterator *iterator, void *context);`
+	- *Pseudocode*
+        - check the dictionary iterator to see if a message was received
+        - call the correct function depending on if there's a message
+
+- `static void outbox_sent_callback(DictionaryIterator *iterator, void *context);`
+	- *Pseudocode*
+        - log the message sent
+
+- `static void inbox_dropped_callback(AppMessageResult reason, void *context);`
+	- *Pseudocode*
+        - log the incoming message dropped
+
+- `static void outbox_failed_callback(DictionaryIterator *iter, AppMessageResult reason, void *context);`
+	- *Pseudocode*
+        - log the failed to send message
+
+- `static void request_pebbleId();`
+	- *Pseudocode*
+        - prepare the outbox
+        - send a request pebble ID message
+        - log errors and success messages
+
+- `static void request_location();`
+	- *Pseudocode*
+        - prepare the outbox
+        - send a request location message
+        - log errors and success messages
+
+- `static void send_message(char *message);`
+	- *Pseudocode*
+        - prepare the outbox
+        - send the message provided
+        - log errors and success messages
+
+- `uint16_t get_num_rows_callback(MenuLayer *menu_layer, uint16_t section_index, void *context);`
+	- *Pseudocode*
+        - return the number of rows in the choose name menu
+
+- `void draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *context);`
+	- *Pseudocode*
+        - draw the rows of the choose name menu - the four names to choose from and the join game text
+
+- `int16_t get_cell_height_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *context);`
+    - *Pseudocode*
+        - return the height of each row in the choose name menu
+
+- `void select_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context);`
+	- *Pseudocode*
+           -  Called when the user joins the game
+           -  Sets the name they chose in the FA_INFO struct
+           -  switches to the main game screen window
+           -  sends a FA_LOCATION message to let the server know the FA joined the game
+
+
+
+
+
+
+
+
