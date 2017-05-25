@@ -256,22 +256,22 @@ In the common file we will have the following methods that are useful to everyth
 If opCode=
 **FA_LOCATION**
 1. Validate the message fields; ignore the invalid messages
-    2. If gameId == 0
-        1. If team is not known, register team
-        2. If pebbleId is not known, register pebbleId and associate it with given player and team
-            3. If there is already a player with the same name in the team, ignore and return -6
-                **Same name is not allowed in one team**
-                4. Return 1
-    3. If gameId != 0
-        1. Validate gameId, pebbleId, team, and player
-            1. If gameId is incorrect, return -4
-            2. If pebbleId is incorrect, return -7
-            3. If team is incorrect, return -5
-            4. If player is incorrect, return -6
-        2. If valid input:
-            1. Update records regarding location and last-contact-time of this FA
-         	2. If statusReq==1, Return 1
-            3. Otherwise return 0
+2. If gameId == 0
+    1. If team is not known, register team
+    2. If pebbleId is not known, register pebbleId and associate it with given player and team
+    3. If there is already a player with the same name in the team, ignore and return -6
+        **Same name is not allowed in one team**
+    4. Return 1
+3. If gameId != 0
+    1. Validate gameId, pebbleId, team, and player
+        1. If gameId is incorrect, return -4
+        2. If pebbleId is incorrect, return -7
+        3. If team is incorrect, return -5
+        4. If player is incorrect, return -6
+    2. If valid input:
+        1. Update records regarding location and last-contact-time of this FA
+        2. If statusReq==1, Return 1
+        3. Otherwise return 0
 
  **FA_CLAIM**
 1. Validate the message fields; ignore the invalid messages and return -3
