@@ -543,6 +543,65 @@ If opCode=
 	- *Pseudocode*
         -  create and validate the FA_LOG message and send it
 
+The following functions implement the krag input window
+- `static char* selection_handle_get_text(int index, void *context);`
+  - *Pseudocode*
+    - get the character from the box
+
+- `static void selection_handle_complete(void *context);`
+  - *Pseudocode*
+    - set the callbacks for the krag input
+
+- `static void selection_handle_inc(int index, uint8_t clicks, void *context);`
+  - *Pseudocode*
+    - increment the int entered with the buttons
+
+- `static void selection_handle_dec(int index, uint8_t clicks, void *context);`
+  - *Pseudocode*
+    - decrement the int entered with the buttons
+
+- `PinWindow* pin_window_create(PinWindowCallbacks callbacks);`
+  - *Pseudocode*
+    - create the krag input window and its layers
+
+- `void pin_window_destroy(PinWindow *pin_window);`
+  - *Pseudocode*
+    - destroy the krag input window
+
+- `void pin_window_push(PinWindow *pin_window, bool animated);`
+  - *Pseudocode*
+    - add the krag input window on the stack
+
+- `void pin_window_pop(PinWindow *pin_window, bool animated);`
+  - *Pseudocode*
+    - remove the krag input window from the stack
+
+- `bool pin_window_get_topmost_window(PinWindow *pin_window);`
+  - *Pseudocode*
+    - make the krag input window the top of the stakc
+
+- `void pin_window_set_highlight_color(PinWindow *pin_window, GColor color);`
+  - *Pseudocode*
+    - set the highlight color of the krag input
+
+
+### Data structures
+```c
+typedef struct fieldagent_info {
+	char *gameID;
+	char* pebbleId;
+	char* name;
+	char* team;
+	double latitude;
+	double longitude;
+	int num_claimed;
+	int num_left;
+	char* known_chars;
+	char** hiints_received;
+} fieldagent_info_t;
+```
+
+- Also an array of hints as strings
 
 
 
