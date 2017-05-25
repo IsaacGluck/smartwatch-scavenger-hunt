@@ -1,6 +1,5 @@
 /*****************************************************************/
-/* This program demonstrates how to configure AppMessage handler */
-/* functions and use them to send and receive messages.          */
+/* This program          */
 /*****************************************************************/
 #include <pebble.h>
 #include "key_assembly.h"
@@ -13,6 +12,7 @@
 
 // Global Structs
 typedef struct fieldagent_info {
+	char *gameID;
 	char* pebbleId;
 	char* name;
 	char* team;
@@ -21,13 +21,20 @@ typedef struct fieldagent_info {
 	int num_claimed;
 	int num_left;
 	char* known_chars;
-	char** hiints_received;
+	char** hints_received;
 } fieldagent_info_t;
 
 // Globals
 static Window *s_main_window;
- MenuLayer *choose_name_menulayer;
- int s_current_selection = 0; // for choosing the name
+static MenuLayer *choose_name_menulayer;
+static int s_current_selection = 1; // for choosing the name, start at 1 for the
+static fieldagent_info_t *FA_INFO;
+static char teamName[7] = "views6";
+static char isaac[6] = "Isaac";
+static char morgan[7] = "Morgan";
+static char laya[5] = "Laya";
+static char kazuma[7] = "Kazuma";
+
 static char *fa_claim = "opCode=FA_CLAIM|"
 												"gameId=FEED|"
 												"pebbleId=8080477D|"
@@ -36,12 +43,6 @@ static char *fa_claim = "opCode=FA_CLAIM|"
 												"latitude=43.706552|"
 												"longitude=-72.287418|"
 												"kragId=8080";
-static fieldagent_info_t *FA_INFO;
-static char teamName[7] = "views6";
-static char isaac[6] = "Isaac";
-static char morgan[7] = "Morgan";
-static char laya[5] = "Laya";
-static char kazuma[7] = "Kazuma";
 
 
 // static function defintions
@@ -355,33 +356,34 @@ static void send_message(char *message) {
 // Setup the radion menu layer to choose a name
 //
 uint16_t get_num_rows_callback(MenuLayer *menu_layer, uint16_t section_index, void *context) {
-  return RADIO_BUTTON_WINDOW_NUM_ROWS + 1;
+  return RADIO_BUTTON_WINDOW_NUM_ROWS + 2; // 2 extra for the join game and title
 }
 
 //
 void draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *context) {
-  if(cell_index->row == RADIO_BUTTON_WINDOW_NUM_ROWS) {
+  if(cell_index->row == RADIO_BUTTON_WINDOW_NUM_ROWS + 1) {
     // This is the submit item
-    menu_cell_basic_draw(ctx, cell_layer, "Join on team views6", NULL, NULL);
+    menu_cell_basic_draw(ctx, cell_layer, "Join team views6", NULL, NULL);
+  } else if (cell_index->row == 0) {
+  	menu_cell_basic_draw(ctx, cell_layer, "Choose a name", NULL, NULL);
   } else {
     // This is a choice item
     static char s_buff[16];
-    // snprintf(s_buff, sizeof(s_buff), "Choice %d", (int)cell_index->row);
+
     switch((int)cell_index->row) {
-    	case 0 :
+    	case 1 :
         snprintf(s_buff, sizeof(s_buff), "Isaac");
         break;
-      case 1 :
+      case 2 :
       	snprintf(s_buff, sizeof(s_buff), "Morgan");
         break;
-      case 2 :
+      case 3 :
       	snprintf(s_buff, sizeof(s_buff), "Kazuma");
         break;
-      case 3 :
+      case 4 :
       	snprintf(s_buff, sizeof(s_buff), "Laya");
         break;
     }
-
 
     menu_cell_basic_draw(ctx, cell_layer, s_buff, NULL, NULL);
 
@@ -415,50 +417,42 @@ int16_t get_cell_height_callback(struct MenuLayer *menu_layer, MenuIndex *cell_i
 
 //
 void select_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context) {
-  if(cell_index->row == RADIO_BUTTON_WINDOW_NUM_ROWS) {
+  if(cell_index->row == RADIO_BUTTON_WINDOW_NUM_ROWS + 1) {
     // Do something with user choice
-    APP_LOG(APP_LOG_LEVEL_INFO, "Submitted choice %d", s_current_selection);
+    if (s_current_selection != 0) {
+    	APP_LOG(APP_LOG_LEVEL_INFO, "Submitted choice %d", s_current_selection);
+    }
 
     switch(s_current_selection) {
-    	case 0 :
+    	case 1 :
         APP_LOG(APP_LOG_LEVEL_INFO, "Chose Isaac");
         FA_INFO->name = isaac;
-        // APP_LOG(APP_LOG_LEVEL_INFO, "Name: %s", FA_INFO->name);
-        break;
-      case 1 :
-      	APP_LOG(APP_LOG_LEVEL_INFO, "Chose Morgan");
-      	FA_INFO->name = morgan;
-      	// APP_LOG(APP_LOG_LEVEL_INFO, "Name: %s", FA_INFO->name);
         break;
       case 2 :
-      	APP_LOG(APP_LOG_LEVEL_INFO, "Chose Kazuma");
-      	FA_INFO->name = kazuma;
-      	// APP_LOG(APP_LOG_LEVEL_INFO, "Name: %s", FA_INFO->name);
+      	APP_LOG(APP_LOG_LEVEL_INFO, "Chose Morgan");
+      	FA_INFO->name = morgan;
         break;
       case 3 :
+      	APP_LOG(APP_LOG_LEVEL_INFO, "Chose Kazuma");
+      	FA_INFO->name = kazuma;
+        break;
+      case 4 :
       	APP_LOG(APP_LOG_LEVEL_INFO, "Chose Laya");
       	FA_INFO->name = laya;
-      	// APP_LOG(APP_LOG_LEVEL_INFO, "Name: %s", FA_INFO->name);
         break;
     }
 
+    // They must choose a name
+    if (s_current_selection != 0) {
+	    window_stack_pop(true);
 
-    window_stack_pop(true);
+	    // add the main screen 
+    }
   } else {
-    // Change selection
-    s_current_selection = cell_index->row;
-    menu_layer_reload_data(menu_layer);
+  	// change selection as long as its not the title
+  	if (cell_index->row != 0) {
+  		s_current_selection = cell_index->row;
+  		menu_layer_reload_data(menu_layer);
+  	}
   }
-}
-
-//
-void radio_button_window_push() {
-  if(!s_main_window) {
-    s_main_window = window_create();
-    window_set_window_handlers(s_main_window, (WindowHandlers) {
-        .load = main_window_load,
-        .unload = main_window_unload,
-    });
-  }
-  window_stack_push(s_main_window, true);
 }
