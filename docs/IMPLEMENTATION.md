@@ -19,10 +19,10 @@ In the common file we will have the following methods that are useful to everyth
     *  do this for all portential values
     *  return array 
 
-## GAME AGENT 
+## Guide AGENT 
 
 ### Methods 
-#### The Game Agent will have the following methods: 
+#### The Guide Agent will have the following methods: 
 * `void validateArguments(const in argc, char *argv[])` 
     * *Use*: Validates command lines arguments 
     * *PsuedoCode*:  
@@ -32,7 +32,7 @@ In the common file we will have the following methods that are useful to everyth
         * Make sure each input is of the right type and not NULL 
         * Exist with a status of non zero if anything is wrong
 * `int ConnectSocket(const int argc, char* argv[], struct sockaddr_in *themp)`
-    * *Use*: Creates and connects the Game Agent to the Game Server
+    * *Use*: Creates and connects the Guide Agent to the Game Server
     * *PsuedoCode*: 
       * look up hostname specified by command line
       * Initialize fields of the server adress 
@@ -95,7 +95,7 @@ In the common file we will have the following methods that are useful to everyth
         * If error print error message and do nothing 
         * Add Krag ID to the hashtable of Krags 
         * Add Clue to the hashtable of Clues 
-        * Print the new clue out for the game agent 
+        * Print the new clue out for the guide agent 
 * `void Secret(Char[] arr, GameStruct g);`
     * *Use*: updates the secret 
     * *PsuedoCode*: 
@@ -113,7 +113,7 @@ In the common file we will have the following methods that are useful to everyth
     * *PsuedoCode:*
         * Check Array[0] (Game ID) and Array[1] (guide ID) with the information from the game struct 
         * look up the player from the hashtable of players using the pebble ID (Array[3])
-        * If the player does not exist or the game agent and guide agent is not correct, print error message and exit the method 
+        * If the player does not exist or the guide agent is not correct, print error message and exit the method 
         * Create a new Krag object by using the kragID (Array[4]) and the lat and long (Array[5] and Array[6]) 
         * Make sure the krag ID does not exist in the hashtable of krags already 
 * `char* TeamRecord(char[] arr, GameStruct g)`
@@ -150,7 +150,7 @@ In the common file we will have the following methods that are useful to everyth
     * *Psuedocode*: 
         * print all the relative information stored in the game struct
         * Print the game id, agent id, team name, number of krags found, total number of krags, current secret 
-        * for each game agent print their pebble id and location 
+        * for each guide agent print their pebble id and location 
         * print a list of all the clues recieved
         * print the list of all the hints sent 
 
