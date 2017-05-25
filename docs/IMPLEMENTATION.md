@@ -529,6 +529,18 @@ In the common file we will have the following methods that are useful to everyth
            -  switches to the main game screen window
            -  sends a FA_LOCATION message to let the server know the FA joined the game
 
+- `void send_FA_LOCATION();`
+	- *Pseudocode*
+        -  create and validate the FA_LOCATION message and send it
+
+- `void send_FA_CALIM();`
+	- *Pseudocode*
+        -  create and validate the FA_CALIM message and send it
+
+- `void send_FA_LOG();`
+	- *Pseudocode*
+        -  create and validate the FA_LOG message and send it
+
 
 
 
