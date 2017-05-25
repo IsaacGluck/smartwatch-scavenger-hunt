@@ -194,154 +194,156 @@ In the common file we will have the following methods that are useful to everyth
 
 ### Data structures
 **Struct _game_info_**
-    - Time the game has started (indicates the elapsed time since start of the game)
-    - Number of krags
-    - Number of agents (#FA + #GA)
-    - Number of teams (# of Struct Team)
-    - Secret file name
-    - Set of krags (clue will be the key)
-    - Set of Team (team name will be the key)
+- Time the game has started (indicates the elapsed time since start of the game)
+- Number of krags
+- Number of agents (#FA + #GA)
+- Number of teams (# of Struct Team)
+- Secret file name
+- Set of krags (clue will be the key)
+- Set of Team (team name will be the key)
 
 **Struct _Team_**
-    - GA
-    - Set of FA
-    - Number of krags claimed (int)
-    - Revealed krags (set of char *)
-    - Partly revealed secret string (char *)
+- GA
+- Set of FA
+- Number of krags claimed (int)
+- Revealed krags (set of char *)
+- Partly revealed secret string (char *)
 
 **Struct _FA_**
-    - Name (char *)
-    - pebbleId (int)
-    - Longitude (float)
-    - Latitude (float)
-    - Last-contact-time (time_t)
+- Name (char *)
+- pebbleId (int)
+- sockaddr (int)
+- Longitude (float)
+- Latitude (float)
+- Last-contact-time (time_t)
 
 **Struct _GA_**
-    - Name (char *)
-    - guideId (int)
-    - Last-contact-time (time_t)
+- Name (char *)
+- guideId (int)
+- sockaddr (int)
+- Last-contact-time (time_t)
 
 **Struct _krag_**
-    - Latitude (float)
-    - Longitude (float)
-    - kragId (int)
-    - Set for keeping track the team that have claimed the krag
+- Latitude (float)
+- Longitude (float)
+- kragId (int)
+- Set for keeping track the team that have claimed the krag
 
 
 ### Pseudo code
 #### Methods
 **`int main(const int argc, char *argv[])`**
-    1. Parse command line argument ()
-    2. While the game is not over, perform the following
-        1. Listen to message
-        2. If successfully received message:
-            1. Write the message in the log file (logs/gameserver.log) () 
-            2. Parse message ()
-            3. Handle message ()
-                1.	Depending on the return value, respond correctly. Explained below.
-            4. Present summary
-        3. Otherwise exit with non-zero status
-        4. If game over (All krags revieled or by input GAMEOVER):
-            1. Send a game summary (TEAM_RECORD) to all players
-            2. Send a message indicating the end-of-game (GAME_OVER) to all players
-            3. Break
-        5. Otherwise continue loop
-    3. Free all memory
-    4. Exit with 0 status
+1. Parse command line argument ()
+2. While the game is not over, perform the following
+    1. Listen to message
+    2. If successfully received message:
+        1. Write the message in the log file (logs/gameserver.log) () 
+        2. Parse message ()
+        3. Handle message ()
+            1.	Depending on the return value, respond correctly. Explained below.
+        4. Present summary
+    3. Otherwise exit with non-zero status
+    4. If game over (All krags revieled or by input GAMEOVER):
+        1. Send a game summary (TEAM_RECORD) to all players
+        2. Send a message indicating the end-of-game (GAME_OVER) to all players
+        3. Break
+    5. Otherwise continue loop
+3. Free all memory
+4. Exit with 0 status
 
 **`int handle_message(char *opcode, char *rest_of_line, game_infor *gi)`**
 // Use dispatch table and common function
-    If opCode=
-        **FA_LOCATION**
-            1. Validate the message fields; ignore the invalid messages
-            2. If gameId == 0
-                1. If team is not known, register team
-                2. If pebbleId is not known, register pebbleId and associate it with given player and team
-                3. If there is already a player with the same name in the team, ignore and return -6
-                    **Same name is not allowed in one team**
-                4. Return 1
-            3. If gameId != 0
-                1. Validate gameId, pebbleId, team, and player
-                    1. If gameId is incorrect, return -4
-                    2. If pebbleId is incorrect, return -7
-                    3. If team is incorrect, return -5
-                    4. If player is incorrect, return -6
-                2. If valid input:
-                	1. Update records regarding location and last-contact-time of this FA
-                	2. If statusReq==1, Return 1
-                    3. Otherwise return 0
+If opCode=
+**FA_LOCATION**
+1. Validate the message fields; ignore the invalid messages
+    2. If gameId == 0
+        1. If team is not known, register team
+        2. If pebbleId is not known, register pebbleId and associate it with given player and team
+            3. If there is already a player with the same name in the team, ignore and return -6
+                **Same name is not allowed in one team**
+                4. Return 1
+    3. If gameId != 0
+        1. Validate gameId, pebbleId, team, and player
+            1. If gameId is incorrect, return -4
+            2. If pebbleId is incorrect, return -7
+            3. If team is incorrect, return -5
+            4. If player is incorrect, return -6
+        2. If valid input:
+            1. Update records regarding location and last-contact-time of this FA
+         	2. If statusReq==1, Return 1
+            3. Otherwise return 0
 
-        **FA_CLAIM**
-            1. Validate the message fields; ignore the invalid messages and return -3
-            2. If kragId is not known; ignore and return -7
-            3. Confirm the given latitude|longitude is within 10 meters of the known position of the identified krag
-                1. Return -1 if latitude|longitude is not within 10 meters of the krag
-            4. If the krag has not been claimed by this team:
-                1. Mark it as ‘claimed’ and send a SH_CLAIMED response to the FA
-                2. If this is not the last krag to be claimed, return 1
-                3. If this is the last krag to be claimed, return 2
-            5. Else if the krag has already has been claimed by this team, return 3
+ **FA_CLAIM**
+1. Validate the message fields; ignore the invalid messages and return -3
+2. If kragId is not known; ignore and return -7
+3. Confirm the given latitude|longitude is within 10 meters of the known position of the identified krag
+    1. Return -1 if latitude|longitude is not within 10 meters of the krag
+4. If the krag has not been claimed by this team:
+    1. Mark it as ‘claimed’ and send a SH_CLAIMED response to the FA
+    2. If this is not the last krag to be claimed, return 1
+     3. If this is the last krag to be claimed, return 2
+5. Else if the krag has already has been claimed by this team, return 3
 
-        **FA_LOG**  
-            1. Return 0
+**FA_LOG**
+1. Return 0
 
-        **GA_STATUS**
-            1. Validate the message fields; ignore the invalid messaegs and return -3
-            2. If gameId == 0
-                1. If team is not known, register team
-                2. If guideId is not known, register guideId and associate it with given player and team names
-                3. Else, verify that team matches a known team and associate guideId with given player name
-                4. If guide is already in the team; ignore and return -5
-                5. If no error return 1
-            3. If gameId != 0
-                1. Validate the gameId, guideId, team, and player name
-                    1. If gameId is incorrect, return -4
-                    2. If guideId is incorrect, return -7
-                    3. If team is incorrect, return -5
-                    4. If player is incorrect, return -6
-                2. If valid message:
-                    1. Update records regarding last-contact-time of this GA
-                    2. If statusReq==1, return 1
-                    3. Otherwise return 0
+**GA_STATUS**
+1. Validate the message fields; ignore the invalid messaegs and return -3
+2. If gameId == 0
+    1. If team is not known, register team
+    2. If guideId is not known, register guideId and associate it with given player and team names
+    3. Else, verify that team matches a known team and associate guideId with given player name
+    4. If guide is already in the team; ignore and return -5
+    5. If no error return 1
+3. If gameId != 0
+    1. Validate the gameId, guideId, team, and player name
+        1. If gameId is incorrect, return -4
+        2. If guideId is incorrect, return -7
+        3. If team is incorrect, return -5
+        4. If player is incorrect, return -6
+    2. If valid message:
+        1. Update records regarding last-contact-time of this GA
+        2. If statusReq==1, return 1
+    3. Otherwise return 0
 
-        **GA_HINT**
-            1. Validate the gameId, guideId, team and player
-                1. Is gameId the same with current gameId
-                    1. If error return -4
-                2. Is guideId associated with given team and player
-                    1. If error return return -7
-                3. If valid:
-                    1. Update records regarding last-contact-time of this GA
-                    2. If pebbleId is *, return 1
-                    3. Else if pebbleId is known player in the team, return 2
-                    4. Else if pebbleId is not known player in the team, return -7
+**GA_HINT**
+1. Validate the gameId, guideId, team and player
+    1. Is gameId the same with current gameId
+        1. If error return -4
+    2. Is guideId associated with given team and player
+        1. If error return return -7
+    3. If valid:
+        1. Update records regarding last-contact-time of this GA
+        2. If pebbleId is *, return 1
+        3. Else if pebbleId is known player in the team, return 2
+        4. Else if pebbleId is not known player in the team, return -7
 
-        **GAME_STATUS**
-            1. Return -2
+**GAME_STATUS**
+1. Return -2
 
-        **GS_AGENT**
-            1. Return -2
+**GS_AGENT**
+1. Return -2
 
-        **GS_CLUE**
-            1. Return -2
+**GS_CLUE**
+1. Return -2
 
-        **GS_CLAIMED**
-            1. Return -2
+**GS_CLAIMED**
+1. Return -2
 
-        **GS_SECRET**
-            1. Return -2
+**GS_SECRET**
+1. Return -2
 
-        **GS_RESPONSE**
-            1. Return -2
+**GS_RESPONSE**
+1. Return -2
 
-        **GAME_OVER**
-            1. Return -2
+**GAME_OVER**
+1. Return -2
 
-        **TEAM_RECORD**
-            1. Return -2
+**TEAM_RECORD**
+1. Return -2
 
-        **not found**
-            1. Return -2
+**not found**
+1. Return -2
 
 
 #### Functions
@@ -432,3 +434,178 @@ In the common file we will have the following methods that are useful to everyth
 * After game is finished successfully, either by opCode or stdin, all memory used for running the game will be freed. Therefore, no data will be left.
 * Log file will record all the input message from GA and FA, and output message to GA and FA. Therefore, one can track the game by viewing the log file.
 * Any error message will be printed in stdout.
+
+
+
+## FIELD AGENT
+### Methods
+
+- `int main(void);`
+    - *Pseudocode*
+        - Calls init, app_event_loop(), and deinit 
+
+- `static void init();`
+    - *Pseudocode*
+        - Create main Window element.
+        - Set handlers to manage the elements inside the window.
+        - Register our tick_handler function with TickTimerService.
+        - Show the Window on the watch, with animated=true.
+        - Choose name window is displayed from the start.
+        - Set the handlers for AppMessage inbox/outbox events. Set these handlers BEFORE calling open, otherwise you might miss a message.
+        - open the app message communication protocol. Request as much space as possible, because our messages can be quite large at times.
+        - setup the FA_INFO `fieldagent_info_t` struct
+
+- `static void deinit();`
+	- *Pseudocode*
+        - Destroy the window, unsubscribe from sensors, and free memory.
+
+- `static void main_window_load(Window *window);`
+	- *Pseudocode*
+        - Setup the choose name window and add the menu layer.
+
+- `static void main_window_unload(Window *window);`
+	- *Pseudocode*
+        - Destroy the menu layer.
+
+- `static void tick_handler(struct tm *tick_time, TimeUnits units_changed);`
+	- *Pseudocode*
+        - Send a FA_LOCATION every 15 seconds
+        - Request location every 10 seconds
+        - Check for messages every 5 seconds
+
+- `static void update_time();`
+	- *Pseudocode*
+        - update the time and display it
+
+- `static void inbox_received_callback(DictionaryIterator *iterator, void *context);`
+	- *Pseudocode*
+        - check the dictionary iterator to see if a message was received
+        - call the correct function depending on if there's a message
+
+- `static void outbox_sent_callback(DictionaryIterator *iterator, void *context);`
+	- *Pseudocode*
+        - log the message sent
+
+- `static void inbox_dropped_callback(AppMessageResult reason, void *context);`
+	- *Pseudocode*
+        - log the incoming message dropped
+
+- `static void outbox_failed_callback(DictionaryIterator *iter, AppMessageResult reason, void *context);`
+	- *Pseudocode*
+        - log the failed to send message
+
+- `static void request_pebbleId();`
+	- *Pseudocode*
+        - prepare the outbox
+        - send a request pebble ID message
+        - log errors and success messages
+
+- `static void request_location();`
+	- *Pseudocode*
+        - prepare the outbox
+        - send a request location message
+        - log errors and success messages
+
+- `static void send_message(char *message);`
+	- *Pseudocode*
+        - prepare the outbox
+        - send the message provided
+        - log errors and success messages
+
+- `uint16_t get_num_rows_callback(MenuLayer *menu_layer, uint16_t section_index, void *context);`
+	- *Pseudocode*
+        - return the number of rows in the choose name menu
+
+- `void draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *context);`
+	- *Pseudocode*
+        - draw the rows of the choose name menu - the four names to choose from and the join game text
+
+- `int16_t get_cell_height_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *context);`
+    - *Pseudocode*
+        - return the height of each row in the choose name menu
+
+- `void select_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context);`
+	- *Pseudocode*
+           -  Called when the user joins the game
+           -  Sets the name they chose in the FA_INFO struct
+           -  switches to the main game screen window
+           -  sends a FA_LOCATION message to let the server know the FA joined the game
+
+- `void send_FA_LOCATION();`
+	- *Pseudocode*
+        -  create and validate the FA_LOCATION message and send it
+
+- `void send_FA_CALIM();`
+	- *Pseudocode*
+        -  create and validate the FA_CALIM message and send it
+
+- `void send_FA_LOG();`
+	- *Pseudocode*
+        -  create and validate the FA_LOG message and send it
+
+The following functions implement the krag input window
+- `static char* selection_handle_get_text(int index, void *context);`
+  - *Pseudocode*
+    - get the character from the box
+
+- `static void selection_handle_complete(void *context);`
+  - *Pseudocode*
+    - set the callbacks for the krag input
+
+- `static void selection_handle_inc(int index, uint8_t clicks, void *context);`
+  - *Pseudocode*
+    - increment the int entered with the buttons
+
+- `static void selection_handle_dec(int index, uint8_t clicks, void *context);`
+  - *Pseudocode*
+    - decrement the int entered with the buttons
+
+- `PinWindow* pin_window_create(PinWindowCallbacks callbacks);`
+  - *Pseudocode*
+    - create the krag input window and its layers
+
+- `void pin_window_destroy(PinWindow *pin_window);`
+  - *Pseudocode*
+    - destroy the krag input window
+
+- `void pin_window_push(PinWindow *pin_window, bool animated);`
+  - *Pseudocode*
+    - add the krag input window on the stack
+
+- `void pin_window_pop(PinWindow *pin_window, bool animated);`
+  - *Pseudocode*
+    - remove the krag input window from the stack
+
+- `bool pin_window_get_topmost_window(PinWindow *pin_window);`
+  - *Pseudocode*
+    - make the krag input window the top of the stakc
+
+- `void pin_window_set_highlight_color(PinWindow *pin_window, GColor color);`
+  - *Pseudocode*
+    - set the highlight color of the krag input
+
+
+### Data structures
+```c
+typedef struct fieldagent_info {
+	char *gameID;
+	char* pebbleId;
+	char* name;
+	char* team;
+	double latitude;
+	double longitude;
+	int num_claimed;
+	int num_left;
+	char* known_chars;
+	char** hiints_received;
+} fieldagent_info_t;
+```
+
+- Also an array of hints as strings
+
+
+
+
+
+
+
