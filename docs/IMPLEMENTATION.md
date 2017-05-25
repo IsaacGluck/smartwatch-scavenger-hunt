@@ -19,7 +19,7 @@ In the common file we will have the following methods that are useful to everyth
     *  do this for all portential values
     *  return array 
 
-## Guide AGENT 
+## GUIDE AGENT 
 
 ### Methods 
 #### The Guide Agent will have the following methods: 
