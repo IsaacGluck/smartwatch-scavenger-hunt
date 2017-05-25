@@ -1,4 +1,4 @@
-## Common 
+## COMMON 
 In the common file we will have the following methods that are useful to everything 
 * `int ValidateMessage(char* message)`  
     * *Use:* Make sure the messages are in the right format 
@@ -190,7 +190,8 @@ In the common file we will have the following methods that are useful to everyth
 
 
 
-## Game Server
+## GAME SERVER
+
 ### Data structures
 **Struct _game_info_**
     - Time the game has started (indicates the elapsed time since start of the game)
