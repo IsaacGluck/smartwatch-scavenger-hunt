@@ -585,6 +585,24 @@ The following functions implement the krag input window
     - set the highlight color of the krag input
 
 
+### Data structures
+```c
+typedef struct fieldagent_info {
+	char *gameID;
+	char* pebbleId;
+	char* name;
+	char* team;
+	double latitude;
+	double longitude;
+	int num_claimed;
+	int num_left;
+	char* known_chars;
+	char** hiints_received;
+} fieldagent_info_t;
+```
+
+Also an array of hints as strings
+
 
 
 
