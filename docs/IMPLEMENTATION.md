@@ -601,7 +601,7 @@ typedef struct fieldagent_info {
 } fieldagent_info_t;
 ```
 
-Also an array of hints as strings
+- Also an array of hints as strings
 
 
 
