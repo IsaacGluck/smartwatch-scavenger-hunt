@@ -212,6 +212,7 @@ In the common file we will have the following methods that are useful to everyth
 **Struct _FA_**
 - Name (char *)
 - pebbleId (int)
+- sockaddr (int)
 - Longitude (float)
 - Latitude (float)
 - Last-contact-time (time_t)
@@ -219,6 +220,7 @@ In the common file we will have the following methods that are useful to everyth
 **Struct _GA_**
 - Name (char *)
 - guideId (int)
+- sockaddr (int)
 - Last-contact-time (time_t)
 
 **Struct _krag_**
