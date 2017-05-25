@@ -45,4 +45,19 @@ int game_info_set_kiff(game_info_t *gi, char *kiff);
  * return 0 if success, 1 if error
  */
 int game_info_set_secret_code(game_info_t *gi, char *sf);
+
+/* Return the struct team_t associated with the given team name;
+ * return NULL if not found.
+ */
+team_t *game_info_find_team(game_info_t *gi, char *team_name);
+
+/* Add a new team to set of teams in game_info
+ * Ignore if the team with same name exists
+ */
+void game_info_register_team(game_info_t *gi, char *team_name);
+
+/* Return the fa named player_name
+ * return NULL if not found
+ */
+fa_t *team_find_fa(team_t *team, char *player_name);
 #endif   // __GSSTRUCT_H
