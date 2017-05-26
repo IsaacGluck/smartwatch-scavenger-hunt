@@ -8,7 +8,15 @@
 #ifndef __GSSTRUCT_H
 #define __GSSTRUCT_H
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <unistd.h>
+#include <string.h>
+#include <ctype.h>
 #include <time.h>
+#include <arpa/inet.h>
+#include <unistd.h>
 
 /**************** global types ****************/
 /* opaque to users of the module */
@@ -56,6 +64,38 @@ team_t *game_info_find_team(game_info_t *gi, char *team_name);
  */
 void game_info_register_team(game_info_t *gi, char *team_name);
 
+/* Validate gameId, pebbleId, team name and player name.
+ * Return 0 if all correct.
+ * Return -4 if gameId is incorrect
+ * Return -5 if team name not found
+ * Return -6 if player not found in the team
+ * Return -7 if pebbleId is incorrect
+ */
+int game_info_validate(game_info_t *gi, char *gameId, char *pebbleId, char *team_name, char *player_name, char *latitude, char *longitude);
+
+/* Examine if there is a krag in the set of krag or not
+ * Return the krag_t * if exists.
+ * Return NULL if not found
+ */
+krag_t *game_info_find_krag(game_info_t *gi, char *kragId);
+
+
+/**************** functions for krag ****************/
+/* check if the krag has claimed by the team or not
+ * Return 0 if claimed, 1 if not
+ * Return -1 if error
+ */
+int krag_has_claimed(krag_t *krag, char *team_name);
+
+/* Mark the krag has claimed for the given krag and team
+ * Return 1 if there are more krags to be claimed after marked
+ * Return 2 if this was the last krag to be claimed
+ * Return 0 if error
+ */
+int krag_mark_claimed(game_info_t *gi, krag_t *krag, char *team_name);
+
+
+/**************** functions for team ****************/
 /* Return the fa named player_name
  * return NULL if not found
  */

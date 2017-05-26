@@ -83,7 +83,7 @@ main(const int argc, char *argv[]){
         else if (nbytes > 0){
             buf[nbytes] = '\0';            // null terminate string
             
-            do something with this message!!!!!
+            // do something with this message!!!!!
         }
     }
 }
@@ -93,8 +93,7 @@ main(const int argc, char *argv[]){
 /* parse the command line arguments and set up the game
  * if there are any error, exit with proper exit status
  */
-static void
-parse_command_line_arguments(const int argc, char *argv[], game_info_t *gi, int *comm_sock, struct sockaddr_in *server){
+static void parse_command_line_arguments(const int argc, char *argv[], game_info_t *gi, int *comm_sock, struct sockaddr_in *server){
     // command line arguments must be 4 (excluding ./gameserver)
     if (argc != 5){
         fprintf(stderr, "./gameserver gameID kiff sf port\n");
@@ -162,4 +161,3 @@ set_up_udp(int port, int *comm_sock, struct sockaddr_in *server){
         exit(7);
     }
 }
-
