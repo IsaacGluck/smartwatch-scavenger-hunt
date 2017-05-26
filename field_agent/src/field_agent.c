@@ -3,6 +3,8 @@
 /*****************************************************************/
 #include <pebble.h>
 #include "key_assembly.h"
+#include "location.h"
+// #include "location.c"
 
 
 // Radio definitions
@@ -27,13 +29,14 @@ typedef struct fieldagent_info {
 // Globals
 static Window *s_main_window;
 static MenuLayer *choose_name_menulayer;
-static int s_current_selection = 1; // for choosing the name, start at 1 for the
 static fieldagent_info_t *FA_INFO;
+static int s_current_selection = 1; // for choosing the name, start at 1 from the menu
 static char teamName[7] = "views6";
 static char isaac[6] = "Isaac";
 static char morgan[7] = "Morgan";
 static char laya[5] = "Laya";
 static char kazuma[7] = "Kazuma";
+static char init_gameID[2] = "0";
 
 static char *fa_claim = "opCode=FA_CLAIM|"
 												"gameId=FEED|"
@@ -46,6 +49,7 @@ static char *fa_claim = "opCode=FA_CLAIM|"
 
 
 // static function defintions
+// base functions
 static void init();
 static void deinit();
 static void main_window_load(Window *window); // choose name
@@ -63,6 +67,9 @@ static void outbox_failed_callback(DictionaryIterator *iter, AppMessageResult re
 static void request_pebbleId();
 static void request_location();
 static void send_message(char *message);
+
+// test functions
+static void print_FA();
 
 // name choose menu layer functions
 uint16_t get_num_rows_callback(MenuLayer *menu_layer, uint16_t section_index, void *context);
@@ -104,7 +111,11 @@ static void init() {
     app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
 
 		FA_INFO = malloc(sizeof(fieldagent_info_t)); // must free this later
-    FA_INFO->team = teamName;
+    FA_INFO->team = teamName; // initialize the team name to the set name
+    FA_INFO->gameID = init_gameID; // initialize the gameID to 0
+    FA_INFO->latitude = 0;
+		FA_INFO->longitude = 0;
+		FA_INFO->num_claimed = 0;
 }
 
 // main
@@ -123,6 +134,11 @@ static void deinit() {
 
     /* 2. Unsubscribe from sensors. */
     tick_timer_service_unsubscribe();
+
+    /* 3. Free memory. */
+    if (FA_INFO != NULL) {
+    	free(FA_INFO);
+    }
 }
 
 // main_window_load
@@ -157,33 +173,33 @@ static void main_window_unload(Window *window) {
 
 // tick_handler
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
-    // APP_LOG(APP_LOG_LEVEL_INFO, "Tick.");
-    static int seconds = 5;
-    static int reqOption = 0;
+  // APP_LOG(APP_LOG_LEVEL_INFO, "Tick.");
+  static int seconds = 5;
+  static int reqOption = 0;
 
-    /* 1. Only send a request/message every 5 seconds. */
-    if(seconds == 0) {
-        switch(reqOption) {
-            case 0 :
-                request_pebbleId();
-                reqOption++;
-                break;
-            case 1 :
-                request_location();
-                reqOption++;
-                break;
-            case 2 :
-                send_message(fa_claim);
-                reqOption = 0;
-                break;
-            default:
-                reqOption = 0;
-                break;
-        }
-        seconds = 5;
-    } else {
-        seconds--;
+  /* 1. Only send a request/message every 5 seconds. */
+  if(seconds == 0) {
+    switch(reqOption) {
+      case 0 :
+        request_pebbleId();
+        reqOption++;
+        break;
+      case 1 :
+        request_location();
+        reqOption++;
+        break;
+      case 2 :
+        // send_message(fa_claim);
+        reqOption = 0;
+        break;
+      default:
+        reqOption = 0;
+        break;
     }
+    seconds = 5;
+  } else {
+    seconds--;
+  }
 
     /* 2. Update time on watchface. */
     // update_time();
@@ -240,6 +256,22 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         // Log the value sent as part of the received message.
         char *location = loc_tuple->value->cstring;
         APP_LOG(APP_LOG_LEVEL_INFO, "Got AppKeyLocation: %s\n", location);
+
+        if (FA_INFO != NULL) { // struct keeping track of the game has been setup
+        	// parse the location string
+	        location_t *location_parsed = parse_location(location);
+          APP_LOG(APP_LOG_LEVEL_INFO, "Parsed AppKeyLocation: %d | %d\n", (int)location_parsed->latitude, (int)location_parsed->longitude);
+	        
+	        if (location_parsed != NULL) {
+	        	// add the location to the FA_INFO
+		        FA_INFO->latitude = location_parsed->latitude;
+		        FA_INFO->longitude = location_parsed->longitude;
+		        free(location_parsed);
+	        }
+
+	        //TEST
+        	print_FA();
+        }
     }
 
     /* 4. Check to see if a PebbleId message received. */
@@ -248,6 +280,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         // Log the value sent as part of the received message.
         char *pebbleId = id_tuple->value->cstring;
         APP_LOG(APP_LOG_LEVEL_INFO, "Got AppKeyPebbleId: %s\n", pebbleId);
+        FA_INFO->pebbleId = pebbleId;
     }
 
     /* 5. Check to see if an error message was received. */
@@ -419,9 +452,9 @@ int16_t get_cell_height_callback(struct MenuLayer *menu_layer, MenuIndex *cell_i
 void select_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context) {
   if(cell_index->row == RADIO_BUTTON_WINDOW_NUM_ROWS + 1) {
     // Do something with user choice
-    if (s_current_selection != 0) {
-    	APP_LOG(APP_LOG_LEVEL_INFO, "Submitted choice %d", s_current_selection);
-    }
+    // if (s_current_selection != 0) {
+    // 	APP_LOG(APP_LOG_LEVEL_INFO, "Submitted choice %d", s_current_selection);
+    // }
 
     switch(s_current_selection) {
     	case 1 :
@@ -445,6 +478,7 @@ void select_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *
     // They must choose a name
     if (s_current_selection != 0) {
 	    window_stack_pop(true);
+	    print_FA();
 
 	    // add the main screen 
     }
@@ -455,4 +489,60 @@ void select_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *
   		menu_layer_reload_data(menu_layer);
   	}
   }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Test functions
+// typedef struct fieldagent_info {
+// 	char *gameID;
+// 	char* pebbleId;
+// 	char* name;
+// 	char* team;
+// 	double latitude;
+// 	double longitude;
+// 	int num_claimed;
+// 	int num_left;
+// 	char* known_chars;
+// 	char** hints_received;
+// } fieldagent_info_t;
+static void print_FA()
+{
+	if (FA_INFO == NULL) {
+		APP_LOG(APP_LOG_LEVEL_INFO, "FA_INFO is NULL.");
+		return;
+	}
+
+
+	APP_LOG(APP_LOG_LEVEL_INFO, 
+		"\nFA_INFO STRUCT:\n gameID: %s\n name: %s\n team: %s\n Lat: %d\n Long: %d\n",
+		 FA_INFO->gameID, FA_INFO->name, FA_INFO-> team, (int)FA_INFO->latitude, (int)FA_INFO->longitude);
+
 }
