@@ -140,6 +140,13 @@ static int fn_fa_location(char *rest_of_line, game_info_t *gi, sockaddr_in them)
         }
     } while(token->rest_of_line != '\0');
     
+    // if there are missing part, invalid message
+    for (int i = 0; i < 7; i++){
+        if (message_fields[i] == '\0'){
+            return -1;
+        }
+    }
+    
     int status;
     // if gameId = 0
     if (strcmp(gameId,"0") == 0){
@@ -182,7 +189,9 @@ static int fn_fa_location(char *rest_of_line, game_info_t *gi, sockaddr_in them)
     else{
         // validate gameId, pebbleId, team, and player
         // if correct, update
-        if ((status = game_info_validate(gi, -tgameId, pebbleId, team_name, player_name, latitude, longitude)) != 0){
+        if ((status = game_info_validate(gi, gameId, pebbleId, team_name, player_name, latitude, longitude)) != 0){
+            delete_message_fields(message_fields);
+            token_delete(token);
             return status;
         }
         
@@ -218,24 +227,31 @@ static int fn_fa_claim(char *rest_of_line, game_info_t *gi, sockaddr_in them){
         token_next(token);
         if (strcmp(token->left,"gameId") == 0){
             message_fields[0] = token->right;
+            char *gameId = message_fields[0];
         }
         else if (strcmp(token->left,"pebbleId") == 0){
             message_fields[1] = token->right;
+            char *pebbleId = message_fields[1];
         }
         else if (strcmp(token->left,"team") == 0){
             message_fields[2] = token->right;
+            char *team_name = message_fields[2];
         }
         else if (strcmp(token->left,"player") == 0){
             message_fields[3] = token->right;
+            char *player_name = message_fields[3];
         }
         else if (strcmp(token->left,"latitude") == 0){
             message_fields[4] = token->right;
+            char *latitude = message_fields[4];
         }
         else if (strcmp(token->left,"longitude") == 0){
             message_fields[5] = token->right;
+            char *longitude = message_fields[5];
         }
         else if (strcmp(token->left,"kragId") == 0){
             message_fields[6] = token->right;
+            char *kragId = message_fields[6];
         }
         // if the left hand side is not found, error
         else {
@@ -244,9 +260,61 @@ static int fn_fa_claim(char *rest_of_line, game_info_t *gi, sockaddr_in them){
         }
     } while(token->rest_of_line != '\0');
     
+    // if there are missing part, invalid message
+    for (int i = 0; i < 7; i++){
+        if (message_fields[i] == '\0'){
+            delete_message_fields(message_fields);
+            token_delete(token);
+            return -1;
+        }
+    }
     
-    delete_message_fields(message_fields);
-    token_delete(token);
+    int status;
+    // validate gameId, pebbleId, team, and player
+    // if correct, update, if error return the error value
+    if ((status = game_info_validate(gi, gameId, pebbleId, team_name, player_name, latitude, longitude)) != 0){
+        delete_message_fields(message_fields);
+        token_delete(token);
+        return status;
+    }
+    
+    krag_t *krag;
+    // if krag is not found, return -7
+    if ( (krag = game_info_find_krag(gi, kragId)) == NULL){
+        delete_message_fields(message_fields);
+        token_delete(token);
+        return -7;
+    }
+    
+    // Confirm the given latitude|longitude is within 10 meters
+    // of the known position of the identified krag
+    if ((status = game_info_krag_distance(gi, kragId, latitude, longitude)) != 0){
+        delete_message_fields(message_fields);
+        token_delete(token);
+        return -1;
+    }
+    
+    // If the krag has not been claimed by this team
+    if (krag_has_claimed(krag, team_name) != 0){
+        // Mark it as ‘claimed’ and send a SH_CLAIMED response to the FA
+        status = krag_mark_claimed(gi, krag, team_name);
+        delete_message_fields(message_fields);
+        token_delete(token);
+        // If this is not the last krag to be claimed, return 1
+        if (status == 1){
+            return 1;
+        }
+        // If this is the last krag to be claimed, return 2
+        else if (status == 2){
+            return 2;
+        }
+        // otherwise ignore
+        else {
+            return 0;
+        }
+    }
+    // Else if the krag has already has been claimed by this team, return 3
+    return 3;
 }
 
 
@@ -272,18 +340,23 @@ static int fn_ga_status(char *rest_of_line, game_info_t *gi, sockaddr_in them){
         token_next(token);
         if (strcmp(token->left,"gameId") == 0){
             message_fields[0] = token->right;
+            char *gameId = message_fields[0];
         }
         else if (strcmp(token->left,"guideId") == 0){
             message_fields[1] = token->right;
+            char *guideId = message_fields[1];
         }
         else if (strcmp(token->left,"team") == 0){
             message_fields[2] = token->right;
+            char *team = message_fields[2];
         }
         else if (strcmp(token->left,"player") == 0){
             message_fields[3] = token->right;
+            char *player = message_fields[3];
         }
         else if (strcmp(token->left,"statusReq") == 0){
-            message_fields[6] = token->right;
+            message_fields[4] = token->right;
+            char *statusReq = message_fields[4];
         }
         // if the left hand side is not found, error
         else {
@@ -291,6 +364,15 @@ static int fn_ga_status(char *rest_of_line, game_info_t *gi, sockaddr_in them){
             return -3;
         }
     } while(token->rest_of_line != '\0');
+    
+    // if there are missing part, invalid message
+    for (int i = 0; i < 5; i++){
+        if (message_fields[i] == '\0'){
+            delete_message_fields(message_fields);
+            token_delete(token);
+            return -1;
+        }
+    }
     
     
     delete_message_fields(message_fields);
@@ -315,21 +397,27 @@ static int fn_ga_hint(char *rest_of_line, game_info_t *gi, sockaddr_in them){
         token_next(token);
         if (strcmp(token->left,"gameId") == 0){
             message_fields[0] = token->right;
+            char *gameId = message_fields[0];
         }
         else if (strcmp(token->left,"guideId") == 0){
             message_fields[1] = token->right;
+            char *guideId = message_fields[1];
         }
         else if (strcmp(token->left,"team") == 0){
             message_fields[2] = token->right;
+            char *team = message_fields[2];
         }
         else if (strcmp(token->left,"player") == 0){
             message_fields[3] = token->right;
+            char *player = message_fields[3];
         }
         else if (strcmp(token->left,"pebbleId") == 0){
             message_fields[4] = token->right;
+            char *pebbleId = message_fields[4];
         }
         else if (strcmp(token->left,"hint") == 0){
             message_fields[5] = token->right;
+            char *hint = message_fields[5];
         }
         // if the left hand side is not found, error
         else {
@@ -337,6 +425,13 @@ static int fn_ga_hint(char *rest_of_line, game_info_t *gi, sockaddr_in them){
             return -3;
         }
     } while(token->rest_of_line != '\0');
+    
+    // if there are missing part, invalid message
+    for (int i = 0; i < 6; i++){
+        if (message_fields[i] == '\0'){
+            return -1;
+        }
+    }
     
     
     delete_message_fields(message_fields);
@@ -454,6 +549,7 @@ static char **allocate_message_fields(int number_of_slots){
     }
     for (int i = 0; i<number_of_slots; i++){
         message_fields[i] = (char *)malloc(MESSAGE_LENGTH * sizeog(char));
+        message_fields[i] = '\0';
         // if malloc error, return NULL after freeing all the memory
         if (message_fields[i] == NULL){
             delete_message_fields(message_fields, i);
