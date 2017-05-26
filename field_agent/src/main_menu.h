@@ -1,0 +1,18 @@
+/*****************************************************************/
+/* This program          */
+/*****************************************************************/
+#ifndef __LOCATION_H
+#define __LOCATION_H
+
+#include <pebble.h>
+
+
+#define RADIO_BUTTON_WINDOW_NUM_ROWS     4
+#define RADIO_BUTTON_WINDOW_CELL_HEIGHT  44
+#define RADIO_BUTTON_WINDOW_RADIO_RADIUS 6
+
+void radio_button_window_push();
+
+
+
+#endif
