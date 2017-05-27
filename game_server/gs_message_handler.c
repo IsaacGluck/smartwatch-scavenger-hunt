@@ -195,7 +195,7 @@ static int fn_fa_location(char *rest_of_line, game_info_t *gi, sockaddr_in them)
             return status;
         }
         
-        if (statusReq = '1'){
+        if (statusReq == '1'){
             delete_message_fields(message_fields);
             token_delete(token);
             return 1;
@@ -314,6 +314,8 @@ static int fn_fa_claim(char *rest_of_line, game_info_t *gi, sockaddr_in them){
         }
     }
     // Else if the krag has already has been claimed by this team, return 3
+    delete_message_fields(message_fields);
+    token_delete(token);
     return 3;
 }
 
@@ -348,11 +350,11 @@ static int fn_ga_status(char *rest_of_line, game_info_t *gi, sockaddr_in them){
         }
         else if (strcmp(token->left,"team") == 0){
             message_fields[2] = token->right;
-            char *team = message_fields[2];
+            char *team_name = message_fields[2];
         }
         else if (strcmp(token->left,"player") == 0){
             message_fields[3] = token->right;
-            char *player = message_fields[3];
+            char *player_name = message_fields[3];
         }
         else if (strcmp(token->left,"statusReq") == 0){
             message_fields[4] = token->right;
@@ -374,9 +376,56 @@ static int fn_ga_status(char *rest_of_line, game_info_t *gi, sockaddr_in them){
         }
     }
     
-    
-    delete_message_fields(message_fields);
-    token_delete(token);
+    int status;
+    // If gameId == 0
+    if (strcmp(gameId,"0") == 0){
+        // If team is not known, register team
+        team_t *team = game_info_find_team( gi, team_name);
+        if (team == NULL){
+            game_info_register_team( gi, team_name);
+            team_t *team = game_info_find_team(gi, team_name);
+            // if team cannot be registered, error
+            if (team == NULL){
+                delete_message_fields(message_fields);
+                token_delete(token);
+                return -5;
+            }
+        }
+        // If guideId is not known, register guideId
+        // and associate it with given player and team names
+        if ((status = team_register_ga(gi, team_name, guideId, player_name, them)) != 0){
+            delete_message_fields(message_fields);
+            token_delete(token);
+            return status;
+        }
+        else{
+            delete_message_fields(message_fields);
+            token_delete(token);
+            return 1;
+        }
+    }
+    // If gameId != 0
+    else{
+        // validate gameId, guideId, team, and player
+        // if correct, update, if error return the error value
+        if ((status = game_info_validate(gi, gameId, pebbleId, team_name, player_name, NULL, NULL)) != 0){
+            delete_message_fields(message_fields);
+            token_delete(token);
+            return status;
+        }
+        
+        // If statusReq==1, return 1
+        if (statusReq == '1'){
+            delete_message_fields(message_fields);
+            token_delete(token);
+            return 1;
+        }
+        // Otherwise return 0
+        delete_message_fields(message_fields);
+        token_delete(token);
+        return 0;
+        
+    }
 }
 
 
@@ -405,11 +454,11 @@ static int fn_ga_hint(char *rest_of_line, game_info_t *gi, sockaddr_in them){
         }
         else if (strcmp(token->left,"team") == 0){
             message_fields[2] = token->right;
-            char *team = message_fields[2];
+            char *team_name = message_fields[2];
         }
         else if (strcmp(token->left,"player") == 0){
             message_fields[3] = token->right;
-            char *player = message_fields[3];
+            char *player_name = message_fields[3];
         }
         else if (strcmp(token->left,"pebbleId") == 0){
             message_fields[4] = token->right;
@@ -433,9 +482,33 @@ static int fn_ga_hint(char *rest_of_line, game_info_t *gi, sockaddr_in them){
         }
     }
     
+    int status;
+    // validate gameId, pebbleId, team, and player
+    // if correct, update, if error return the error value
+    if ((status = game_info_validate(gi, gameId, guideId, team_name, player_name, NULL, NULL)) != 0){
+        delete_message_fields(message_fields);
+        token_delete(token);
+        return status;
+    }
     
-    delete_message_fields(message_fields);
-    token_delete(token);
+    // If pebbleId is *, return 1
+    if (strcmp(pebbleId, "*") == 0){
+        delete_message_fields(message_fields);
+        token_delete(token);
+        return 1;
+    }
+    // Else if pebbleId is known player in the team, return 2
+    else if (game_info_find_pebbleId(gi, pebbleId) != NULL){
+        delete_message_fields(message_fields);
+        token_delete(token);
+        return 2;
+    }
+    // Else if pebbleId is not known player in the team, return -7
+    else {
+        delete_message_fields(message_fields);
+        token_delete(token);
+        return -7;
+    }
 }
 
 
