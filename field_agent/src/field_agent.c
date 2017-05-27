@@ -4,13 +4,13 @@
 #include <pebble.h>
 #include "key_assembly.h"
 #include "location.h"
-// #include "location.c"
+#include "main_menu.h"
 
 
 // Radio definitions
-#define RADIO_BUTTON_WINDOW_NUM_ROWS     4
-#define RADIO_BUTTON_WINDOW_CELL_HEIGHT  44
-#define RADIO_BUTTON_WINDOW_RADIO_RADIUS 6
+#define CHOOSE_NAME_WINDOW_NUM_ROWS     4
+#define CHOOSE_NAME_WINDOW_CELL_HEIGHT  44
+#define CHOOSE_NAME_WINDOW_RADIO_RADIUS 6
 
 // Global Structs
 typedef struct fieldagent_info {
@@ -72,11 +72,11 @@ static void send_message(char *message);
 static void print_FA();
 
 // name choose menu layer functions
-uint16_t get_num_rows_callback(MenuLayer *menu_layer, uint16_t section_index, void *context);
-void draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *context);
-int16_t get_cell_height_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *context);
-void select_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context);
-void radio_button_window_push();
+uint16_t get_num_rows_callback_choose_name(MenuLayer *menu_layer, uint16_t section_index, void *context);
+void draw_row_callback_choose_name(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *context);
+int16_t get_cell_height_callback_choose_name(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *context);
+void select_callback_choose_name(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context);
+// void CHOOSE_NAME_window_push();
 
 
 // init
@@ -153,10 +153,10 @@ static void main_window_load(Window *window) {
     /* 3. Set the callback for clicking the on the menu. */
     menu_layer_set_click_config_onto_window(choose_name_menulayer, window);
 	  menu_layer_set_callbacks(choose_name_menulayer, NULL, (MenuLayerCallbacks) {
-	      .get_num_rows = get_num_rows_callback,
-	      .draw_row = draw_row_callback,
-	      .get_cell_height = get_cell_height_callback,
-	      .select_click = select_callback,
+	      .get_num_rows = get_num_rows_callback_choose_name,
+	      .draw_row = draw_row_callback_choose_name,
+	      .get_cell_height = get_cell_height_callback_choose_name,
+	      .select_click = select_callback_choose_name,
 	  });
 
 	  /* 4. Add MenuLayer as a child layer to the Window root layer. */
@@ -388,13 +388,13 @@ static void send_message(char *message) {
 
 // Setup the radion menu layer to choose a name
 //
-uint16_t get_num_rows_callback(MenuLayer *menu_layer, uint16_t section_index, void *context) {
-  return RADIO_BUTTON_WINDOW_NUM_ROWS + 2; // 2 extra for the join game and title
+uint16_t get_num_rows_callback_choose_name(MenuLayer *menu_layer, uint16_t section_index, void *context) {
+  return CHOOSE_NAME_WINDOW_NUM_ROWS + 2; // 2 extra for the join game and title
 }
 
 //
-void draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *context) {
-  if(cell_index->row == RADIO_BUTTON_WINDOW_NUM_ROWS + 1) {
+void draw_row_callback_choose_name(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *context) {
+  if(cell_index->row == CHOOSE_NAME_WINDOW_NUM_ROWS + 1) {
     // This is the submit item
     menu_cell_basic_draw(ctx, cell_layer, "Join team views6", NULL, NULL);
   } else if (cell_index->row == 0) {
@@ -421,7 +421,7 @@ void draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_i
     menu_cell_basic_draw(ctx, cell_layer, s_buff, NULL, NULL);
 
     GRect bounds = layer_get_bounds(cell_layer);
-    GPoint p = GPoint(bounds.size.w - (3 * RADIO_BUTTON_WINDOW_RADIO_RADIUS), (bounds.size.h / 2));
+    GPoint p = GPoint(bounds.size.w - (3 * CHOOSE_NAME_WINDOW_RADIO_RADIUS), (bounds.size.h / 2));
 
     // Selected?
     if(menu_cell_layer_is_highlighted(cell_layer)) {
@@ -432,16 +432,16 @@ void draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_i
     }
 
     // Draw radio filled/empty
-    graphics_draw_circle(ctx, p, RADIO_BUTTON_WINDOW_RADIO_RADIUS);
+    graphics_draw_circle(ctx, p, CHOOSE_NAME_WINDOW_RADIO_RADIUS);
     if(cell_index->row == s_current_selection) {
       // This is the selection
-      graphics_fill_circle(ctx, p, RADIO_BUTTON_WINDOW_RADIO_RADIUS - 3);
+      graphics_fill_circle(ctx, p, CHOOSE_NAME_WINDOW_RADIO_RADIUS - 3);
     }
   }
 }
 
 // 
-int16_t get_cell_height_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *context) {
+int16_t get_cell_height_callback_choose_name(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *context) {
   return PBL_IF_ROUND_ELSE(
     menu_layer_is_index_selected(menu_layer, cell_index) ? 
       MENU_CELL_ROUND_FOCUSED_SHORT_CELL_HEIGHT : MENU_CELL_ROUND_UNFOCUSED_TALL_CELL_HEIGHT,
@@ -449,12 +449,8 @@ int16_t get_cell_height_callback(struct MenuLayer *menu_layer, MenuIndex *cell_i
 }
 
 //
-void select_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context) {
-  if(cell_index->row == RADIO_BUTTON_WINDOW_NUM_ROWS + 1) {
-    // Do something with user choice
-    // if (s_current_selection != 0) {
-    // 	APP_LOG(APP_LOG_LEVEL_INFO, "Submitted choice %d", s_current_selection);
-    // }
+void select_callback_choose_name(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context) {
+  if(cell_index->row == CHOOSE_NAME_WINDOW_NUM_ROWS + 1) {
 
     switch(s_current_selection) {
     	case 1 :
@@ -478,6 +474,7 @@ void select_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *
     // They must choose a name
     if (s_current_selection != 0) {
 	    window_stack_pop(true);
+      main_menu_window_push();
 	    print_FA();
 
 	    // add the main screen 

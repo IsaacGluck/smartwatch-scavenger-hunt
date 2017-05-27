@@ -9,8 +9,10 @@ location_t* parse_location(char* location_s)
 
 	char *latitude_string = location_s; // pointer to the beginning of the string
 	char *longitude_string = NULL;
+	int location_s_length = (int)strlen(location_s);
+
 	// Tokenize the string
-	for (int i = 0; i < (int)strlen(location_s); i++) {
+	for (int i = 0; i < location_s_length; i++) {
 		if (location_s[i] == '|') {
 			location_s[i] = '\0';
 			longitude_string = &location_s[i+1];
