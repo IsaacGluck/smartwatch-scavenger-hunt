@@ -100,4 +100,9 @@ int krag_mark_claimed(game_info_t *gi, krag_t *krag, char *team_name);
  * return NULL if not found
  */
 fa_t *team_find_fa(team_t *team, char *player_name);
+
+/* Return the ga named player_name
+ * return NULL if not found
+ */
+ga_t *team_find_ga(team_t *team, char *player_name);
 #endif   // __GSSTRUCT_H
