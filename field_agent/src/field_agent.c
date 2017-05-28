@@ -109,12 +109,12 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
         break;
       case 2 :
         // send_message(fa_claim);
+        time(&current);
+        elapsed = ((current - start) / 60);
+        FA_INFO->time_passed = elapsed;
         reqOption = 0;
         break;
       default:
-        time(&current);
-        elapsed = (int)(current - start / 60);
-        FA_INFO->time_passed = elapsed;
         reqOption = 0;
         break;
     }

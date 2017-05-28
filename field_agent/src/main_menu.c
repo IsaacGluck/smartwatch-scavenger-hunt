@@ -26,7 +26,7 @@ static void draw_row_callback_main_menu(GContext *ctx, const Layer *cell_layer, 
       snprintf(s_buff, sizeof(s_buff), "Team: %s", FA_INFO->team);
       break;
     case 2 :
-    	snprintf(s_buff, sizeof(s_buff), "Time Passed: %d mins", FA_INFO->time_passed);
+    	snprintf(s_buff, sizeof(s_buff), "Time: %dmins", FA_INFO->time_passed);
       break;
     case 3 :
     	snprintf(s_buff, sizeof(s_buff), "Latitude: %d", (int)FA_INFO->latitude);
@@ -41,10 +41,10 @@ static void draw_row_callback_main_menu(GContext *ctx, const Layer *cell_layer, 
     	snprintf(s_buff, sizeof(s_buff), "Decoded: %s", FA_INFO->known_chars);
       break;
     case 7 :
-    	snprintf(s_buff, sizeof(s_buff), "Hints received >");
+    	snprintf(s_buff, sizeof(s_buff), "Hints received");
       break;
     case 8 :
-    	snprintf(s_buff, sizeof(s_buff), "Input KRAG >");
+    	snprintf(s_buff, sizeof(s_buff), "Input KRAG");
       break;
     default:
     	break;
