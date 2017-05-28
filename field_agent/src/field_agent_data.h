@@ -14,8 +14,8 @@ typedef struct fieldagent_info {
 	char* name;
 	char* team;
 	int time_passed;
-	double latitude;
-	double longitude;
+	char* latitude;
+	char* longitude;
 	int num_claimed;
 	int num_left;
 	char* known_chars;

@@ -182,12 +182,13 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         if (FA_INFO != NULL) { // struct keeping track of the game has been setup
         	// parse the location string
 	        location_t *location_parsed = parse_location(location);
-          APP_LOG(APP_LOG_LEVEL_INFO, "Parsed AppKeyLocation: %d | %d\n", (int)location_parsed->latitude, (int)location_parsed->longitude);
+          APP_LOG(APP_LOG_LEVEL_INFO, "Parsed AppKeyLocation: %s|%s\n", location_parsed->latitude, location_parsed->longitude);
 	        
 	        if (location_parsed != NULL) {
 	        	// add the location to the FA_INFO
 		        FA_INFO->latitude = location_parsed->latitude;
 		        FA_INFO->longitude = location_parsed->longitude;
+            APP_LOG(APP_LOG_LEVEL_INFO, "Added to FA_INFO: %s|%s\n", FA_INFO->latitude, FA_INFO->longitude);
 		        free(location_parsed);
 	        }
 

@@ -14,7 +14,7 @@ static int s_current_selection_main_menu = 0;
 
 void pin_window_complete_callback(PIN pin, void *context)
 {
-  APP_LOG(APP_LOG_LEVEL_INFO, "Submitted choice %d", pin);
+  APP_LOG(APP_LOG_LEVEL_INFO, "Submitted pin: %s\n", &pin.digits);
   pin_window_pop(pin_window, true);
 }
 
@@ -26,7 +26,7 @@ static uint16_t get_num_rows_callback_main_menu(MenuLayer *menu_layer, uint16_t 
 static void draw_row_callback_main_menu(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *context)
 {
   // This is a choice item
-  static char s_buff[16];
+  static char s_buff[25];
 
   switch((int)cell_index->row) {
   	case 0 :
@@ -36,13 +36,13 @@ static void draw_row_callback_main_menu(GContext *ctx, const Layer *cell_layer, 
       snprintf(s_buff, sizeof(s_buff), "Team: %s", FA_INFO->team);
       break;
     case 2 :
-    	snprintf(s_buff, sizeof(s_buff), "Time: %dmins", FA_INFO->time_passed);
+    	snprintf(s_buff, sizeof(s_buff), "Time: %d mins", FA_INFO->time_passed);
       break;
     case 3 :
-    	snprintf(s_buff, sizeof(s_buff), "Latitude: %d", (int)FA_INFO->latitude);
+    	snprintf(s_buff, sizeof(s_buff), "Latitude: %s", FA_INFO->latitude);
       break;
     case 4 :
-    	snprintf(s_buff, sizeof(s_buff), "Longitude: %d", (int)FA_INFO->longitude);
+    	snprintf(s_buff, sizeof(s_buff), "Longitude: %s", FA_INFO->longitude);
       break;
     case 5 :
     	snprintf(s_buff, sizeof(s_buff), "KRAGS Left: %d", FA_INFO->num_left);
@@ -59,7 +59,7 @@ static void draw_row_callback_main_menu(GContext *ctx, const Layer *cell_layer, 
     default:
     	break;
   }
-  menu_cell_basic_draw(ctx, cell_layer, s_buff, NULL, NULL);
+  menu_cell_basic_draw(ctx, cell_layer, NULL, s_buff, NULL);
 
 
   // Selected?
@@ -84,8 +84,8 @@ static void select_callback_main_menu(struct MenuLayer *menu_layer, MenuIndex *c
 {
   if(cell_index->row == MAIN_MENU_WINDOW_NUM_ROWS - 1) {
     // Do something with user choice
-    APP_LOG(APP_LOG_LEVEL_INFO, "Submitted choice %d", s_current_selection_main_menu);
-    // window_stack_pop(true);
+    APP_LOG(APP_LOG_LEVEL_INFO, "Entering KRAG Input\n");
+
     // put the pin window on top
     pin_window_push(pin_window, true);
   } else {
@@ -118,7 +118,7 @@ static void window_load_main_menu(Window *window)
 static void window_unload_main_menu(Window *window)
 {
   pin_window_destroy(pin_window);
-  
+
   menu_layer_destroy(s_menu_layer_main_menu);
 
   window_destroy(window);

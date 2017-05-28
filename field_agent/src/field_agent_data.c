@@ -13,8 +13,6 @@ void create_info()
 	FA_INFO->team = teamName; // initialize the team name to the set name
 	FA_INFO->gameID = init_gameID; // initialize the gameID to 0
 	FA_INFO->time_passed = 0;
-	FA_INFO->latitude = 0;
-	FA_INFO->longitude = 0;
 	FA_INFO->num_claimed = 0;
 }
 
