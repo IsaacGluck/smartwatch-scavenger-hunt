@@ -1,7 +1,9 @@
 /*****************************************************************/
 /* This program */
+// radio button code drawn from https://github.com/pebble-examples/ui-patterns/blob/master/src/windows/radio_button_window.c
 /*****************************************************************/
 #include "choose_name.h"
+#include "field_agent_data.h"
 #include "main_menu.h"
 
 
@@ -12,7 +14,6 @@ static char isaac[6] = "Isaac";
 static char morgan[7] = "Morgan";
 static char laya[5] = "Laya";
 static char kazuma[7] = "Kazuma";
-static char* chosen_name;
 static int s_current_selection = 1; // for choosing the name, start at 1 from the menu
 
 
@@ -28,7 +29,7 @@ static uint16_t get_num_rows_callback_choose_name(MenuLayer *menu_layer, uint16_
 static void draw_row_callback_choose_name(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *context) {
   if(cell_index->row == CHOOSE_NAME_WINDOW_NUM_ROWS + 1) {
     // This is the submit item
-    menu_cell_basic_draw(ctx, cell_layer, "Join team views6", NULL, NULL);
+    menu_cell_basic_draw(ctx, cell_layer, "Join team views6 >", NULL, NULL);
   } else if (cell_index->row == 0) {
   	menu_cell_basic_draw(ctx, cell_layer, "Choose a name", NULL, NULL);
   } else {
@@ -63,6 +64,7 @@ static void draw_row_callback_choose_name(GContext *ctx, const Layer *cell_layer
       graphics_context_set_fill_color(ctx, GColorBlack);
     }
 
+
     // Draw radio filled/empty
     graphics_draw_circle(ctx, p, CHOOSE_NAME_WINDOW_RADIO_RADIUS);
     if(cell_index->row == s_current_selection) {
@@ -87,33 +89,33 @@ static void select_callback_choose_name(struct MenuLayer *menu_layer, MenuIndex 
     switch(s_current_selection) {
     	case 1 :
         APP_LOG(APP_LOG_LEVEL_INFO, "Chose Isaac");
-        // FA_INFO->name = isaac;
-        chosen_name = isaac;
+        FA_INFO->name = isaac;
+        // chosen_name = isaac;
         break;
       case 2 :
       	APP_LOG(APP_LOG_LEVEL_INFO, "Chose Morgan");
-      	// FA_INFO->name = morgan;
-        chosen_name = morgan;
+      	FA_INFO->name = morgan;
+        // chosen_name = morgan;
         break;
       case 3 :
       	APP_LOG(APP_LOG_LEVEL_INFO, "Chose Kazuma");
-      	// FA_INFO->name = kazuma;
-        chosen_name = kazuma;
+      	FA_INFO->name = kazuma;
+        // chosen_name = kazuma;
         break;
       case 4 :
       	APP_LOG(APP_LOG_LEVEL_INFO, "Chose Laya");
-      	// FA_INFO->name = laya;
-        chosen_name = laya;
+      	FA_INFO->name = laya;
+        // chosen_name = laya;
         break;
     }
 
     // They must choose a name
     if (s_current_selection != 0) {
 	    window_stack_pop(true);
-      main_menu_window_push();
-	    // print_FA();
+	    print_FA();
 
-	    // add the main screen 
+	    // add the main screen
+	    main_menu_window_push();
     }
   } else {
   	// change selection as long as its not the title
@@ -158,7 +160,7 @@ static void window_unload_choose_name(Window *window) {
 
 
 
-char* choose_name_window_push() {
+void choose_name_window_push() {
   if(!s_main_window_choose_name) {
     s_main_window_choose_name = window_create();
     window_set_window_handlers(s_main_window_choose_name, (WindowHandlers) {
@@ -167,5 +169,4 @@ char* choose_name_window_push() {
     });
   }
   window_stack_push(s_main_window_choose_name, true);
-  return chosen_name;
 }

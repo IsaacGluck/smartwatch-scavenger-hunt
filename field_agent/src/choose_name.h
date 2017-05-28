@@ -12,6 +12,6 @@
 #define CHOOSE_NAME_WINDOW_CELL_HEIGHT  44
 #define CHOOSE_NAME_WINDOW_RADIO_RADIUS 6
 
-char* choose_name_window_push();
+void choose_name_window_push();
 
 #endif

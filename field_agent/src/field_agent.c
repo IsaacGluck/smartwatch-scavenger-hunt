@@ -9,6 +9,7 @@
 
 
 // Globals
+static time_t start;
 static char *fa_claim = "opCode=FA_CLAIM|"
 												"gameId=FEED|"
 												"pebbleId=8080477D|"
@@ -37,9 +38,6 @@ static void request_pebbleId();
 static void request_location();
 static void send_message(char *message);
 
-// test functions
-static void print_FA();
-
 // init
 static void init() {
   /* 1. Setup the info struct with the FA data */
@@ -51,7 +49,8 @@ static void init() {
   /* 3. Show the Window on the watch, with animated=true. */
   choose_name_window_push();
 
-  /* 4. Choose name window is displayed from the start. */
+  /* 4. Update time information. */
+  time(&start); // set the start time
   update_time();
 
   /* 5. Set the handlers for AppMessage inbox/outbox events. Set these    *
@@ -94,6 +93,9 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   static int seconds = 5;
   static int reqOption = 0;
 
+  time_t current;
+  int elapsed = 0;
+
   /* 1. Only send a request/message every 5 seconds. */
   if(seconds == 0) {
     switch(reqOption) {
@@ -110,6 +112,9 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
         reqOption = 0;
         break;
       default:
+        time(&current);
+        elapsed = (int)(current - start / 60);
+        FA_INFO->time_passed = elapsed;
         reqOption = 0;
         break;
     }
@@ -301,62 +306,3 @@ static void send_message(char *message) {
     APP_LOG(APP_LOG_LEVEL_INFO, "Sent message.\n");
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// Test functions
-// typedef struct fieldagent_info {
-// 	char *gameID;
-// 	char* pebbleId;
-// 	char* name;
-// 	char* team;
-// 	double latitude;
-// 	double longitude;
-// 	int num_claimed;
-// 	int num_left;
-// 	char* known_chars;
-// 	char** hints_received;
-// } fieldagent_info_t;
-static void print_FA()
-{
-	if (FA_INFO == NULL) {
-		APP_LOG(APP_LOG_LEVEL_INFO, "FA_INFO is NULL.");
-		return;
-	}
-
-
-	APP_LOG(APP_LOG_LEVEL_INFO, 
-		"\nFA_INFO STRUCT:\n gameID: %s\n name: %s\n team: %s\n Lat: %d\n Long: %d\n",
-		 FA_INFO->gameID, FA_INFO->name, FA_INFO-> team, (int)FA_INFO->latitude, (int)FA_INFO->longitude);
-
-}

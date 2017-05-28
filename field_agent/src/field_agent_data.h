@@ -13,6 +13,7 @@ typedef struct fieldagent_info {
 	char* pebbleId;
 	char* name;
 	char* team;
+	int time_passed;
 	double latitude;
 	double longitude;
 	int num_claimed;
@@ -26,6 +27,7 @@ fieldagent_info_t *FA_INFO; // glabal for all windows to get and change data
 
 void create_info();
 void delete_info();
+void print_FA();
 
 
 #endif

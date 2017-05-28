@@ -2,6 +2,7 @@
 /* This program */
 /*****************************************************************/
 #include "main_menu.h"
+#include "field_agent_data.h"
 
 static Window *s_main_window_main_menu;
 static MenuLayer *s_menu_layer_main_menu;
@@ -13,51 +14,51 @@ static uint16_t get_num_rows_callback_main_menu(MenuLayer *menu_layer, uint16_t 
 }
 
 static void draw_row_callback_main_menu(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *context) {
-    // This is a choice item
-    static char s_buff[16];
-    // snprintf(s_buff, sizeof(s_buff), "Choice %d", (int)cell_index->row);
+  // This is a choice item
+  static char s_buff[16];
+  // snprintf(s_buff, sizeof(s_buff), "Choice %d", (int)cell_index->row);
 
-    switch((int)cell_index->row) {
-    	case 0 :
-    		snprintf(s_buff, sizeof(s_buff), "Name:");
-        break;
-    	case 1 :
-        snprintf(s_buff, sizeof(s_buff), "Team:");
-        break;
-      case 2 :
-      	snprintf(s_buff, sizeof(s_buff), "Time Passed:");
-        break;
-      case 3 :
-      	snprintf(s_buff, sizeof(s_buff), "Latitude:");
-        break;
-      case 4 :
-      	snprintf(s_buff, sizeof(s_buff), "Longitude:");
-        break;
-      case 5 :
-      	snprintf(s_buff, sizeof(s_buff), "KRAGS Left:");
-        break;
-      case 6 :
-      	snprintf(s_buff, sizeof(s_buff), "Decoded:");
-        break;
-      case 7 :
-      	snprintf(s_buff, sizeof(s_buff), "Hints received:");
-        break;
-      case 8 :
-      	snprintf(s_buff, sizeof(s_buff), "Input KRAG:");
-        break;
-      default:
-      	break;
-    }
-    menu_cell_basic_draw(ctx, cell_layer, s_buff, NULL, NULL);
+  switch((int)cell_index->row) {
+  	case 0 :
+  		snprintf(s_buff, sizeof(s_buff), "Name: %s", FA_INFO->name);
+      break;
+  	case 1 :
+      snprintf(s_buff, sizeof(s_buff), "Team: %s", FA_INFO->team);
+      break;
+    case 2 :
+    	snprintf(s_buff, sizeof(s_buff), "Time Passed: %d mins", FA_INFO->time_passed);
+      break;
+    case 3 :
+    	snprintf(s_buff, sizeof(s_buff), "Latitude: %d", (int)FA_INFO->latitude);
+      break;
+    case 4 :
+    	snprintf(s_buff, sizeof(s_buff), "Longitude: %d", (int)FA_INFO->longitude);
+      break;
+    case 5 :
+    	snprintf(s_buff, sizeof(s_buff), "KRAGS Left: %d", FA_INFO->num_left);
+      break;
+    case 6 :
+    	snprintf(s_buff, sizeof(s_buff), "Decoded: %s", FA_INFO->known_chars);
+      break;
+    case 7 :
+    	snprintf(s_buff, sizeof(s_buff), "Hints received >");
+      break;
+    case 8 :
+    	snprintf(s_buff, sizeof(s_buff), "Input KRAG >");
+      break;
+    default:
+    	break;
+  }
+  menu_cell_basic_draw(ctx, cell_layer, s_buff, NULL, NULL);
 
 
-    // Selected?
-    if(menu_cell_layer_is_highlighted(cell_layer)) {
-      graphics_context_set_stroke_color(ctx, GColorWhite);
-      graphics_context_set_fill_color(ctx, GColorWhite);
-    } else {
-      graphics_context_set_fill_color(ctx, GColorBlack);
-    }
+  // Selected?
+  if(menu_cell_layer_is_highlighted(cell_layer)) {
+    graphics_context_set_stroke_color(ctx, GColorWhite);
+    graphics_context_set_fill_color(ctx, GColorWhite);
+  } else {
+    graphics_context_set_fill_color(ctx, GColorBlack);
+  }
   
 }
 
