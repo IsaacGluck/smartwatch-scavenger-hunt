@@ -6,17 +6,26 @@
 
 static Window *s_main_window_main_menu;
 static MenuLayer *s_menu_layer_main_menu;
+static PinWindow *pin_window;
 
 static int s_current_selection_main_menu = 0;
 
-static uint16_t get_num_rows_callback_main_menu(MenuLayer *menu_layer, uint16_t section_index, void *context) {
+
+void pin_window_complete_callback(PIN pin, void *context)
+{
+  APP_LOG(APP_LOG_LEVEL_INFO, "Submitted choice %d", pin);
+  pin_window_pop(pin_window, true);
+}
+
+static uint16_t get_num_rows_callback_main_menu(MenuLayer *menu_layer, uint16_t section_index, void *context)
+{
   return MAIN_MENU_WINDOW_NUM_ROWS;
 }
 
-static void draw_row_callback_main_menu(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *context) {
+static void draw_row_callback_main_menu(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *context)
+{
   // This is a choice item
   static char s_buff[16];
-  // snprintf(s_buff, sizeof(s_buff), "Choice %d", (int)cell_index->row);
 
   switch((int)cell_index->row) {
   	case 0 :
@@ -62,18 +71,22 @@ static void draw_row_callback_main_menu(GContext *ctx, const Layer *cell_layer, 
   
 }
 
-static int16_t get_cell_height_callback_main_menu(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *context) {
+static int16_t get_cell_height_callback_main_menu(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *context)
+{
   return PBL_IF_ROUND_ELSE(
     menu_layer_is_index_selected(menu_layer, cell_index) ? 
       MENU_CELL_ROUND_FOCUSED_SHORT_CELL_HEIGHT : MENU_CELL_ROUND_UNFOCUSED_TALL_CELL_HEIGHT,
     44);
 }
 
-static void select_callback_main_menu(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context) {
+static void select_callback_main_menu(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context)
+{
   if(cell_index->row == MAIN_MENU_WINDOW_NUM_ROWS) {
     // Do something with user choice
     APP_LOG(APP_LOG_LEVEL_INFO, "Submitted choice %d", s_current_selection_main_menu);
-    window_stack_pop(true);
+    // window_stack_pop(true);
+    // put the pin window on top
+    pin_window_push(pin_window, true);
   } else {
     // Change selection
     s_current_selection_main_menu = cell_index->row;
@@ -81,7 +94,8 @@ static void select_callback_main_menu(struct MenuLayer *menu_layer, MenuIndex *c
   }
 }
 
-static void window_load_main_menu(Window *window) {
+static void window_load_main_menu(Window *window)
+{
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
 
@@ -94,16 +108,21 @@ static void window_load_main_menu(Window *window) {
       .select_click = select_callback_main_menu,
   });
   layer_add_child(window_layer, menu_layer_get_layer(s_menu_layer_main_menu));
+
+  // Set up the pin window
+  pin_window = pin_window_create(); // must destroy this at some point
 }
 
-static void window_unload_main_menu(Window *window) {
+static void window_unload_main_menu(Window *window)
+{
   menu_layer_destroy(s_menu_layer_main_menu);
 
   window_destroy(window);
   s_main_window_main_menu = NULL;
 }
 
-void main_menu_window_push() {
+void main_menu_window_push()
+{
   if(!s_main_window_main_menu) {
     s_main_window_main_menu = window_create();
     window_set_window_handlers(s_main_window_main_menu, (WindowHandlers) {
