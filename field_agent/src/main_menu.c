@@ -16,7 +16,7 @@ void pin_window_complete_callback(PIN pin, void *context)
 {
   APP_LOG(APP_LOG_LEVEL_INFO, "Submitted choice %d", pin);
   pin_window_pop(pin_window, true);
-  // pin_window_destroy(pin_window);
+  pin_window_destroy(pin_window);
 }
 
 static uint16_t get_num_rows_callback_main_menu(MenuLayer *menu_layer, uint16_t section_index, void *context)
@@ -118,7 +118,6 @@ static void window_load_main_menu(Window *window)
 
 static void window_unload_main_menu(Window *window)
 {
-  pin_window_destroy(pin_window);
   menu_layer_destroy(s_menu_layer_main_menu);
 
   window_destroy(window);
