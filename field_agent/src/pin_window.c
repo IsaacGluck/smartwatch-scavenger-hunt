@@ -1,6 +1,6 @@
 #include <pebble.h>
 #include "pin_window.h"
-#include "../layers/selection_layer.h"
+#include "selection_layer.h"
 
 static char* selection_handle_get_text(int index, void *context) {
   PinWindow *pin_window = (PinWindow*)context;
@@ -70,9 +70,9 @@ PinWindow* pin_window_create(PinWindowCallbacks callbacks) {
         (bounds.size.w - PIN_WINDOW_SIZE.w) / 2);
       pin_window->selection = selection_layer_create(grect_inset(bounds, selection_insets), PIN_WINDOW_NUM_CELLS);
       for (int i = 0; i < PIN_WINDOW_NUM_CELLS; i++) {
-        selection_layer_set_cell_width(pin_window->selection, i, 40);
+        selection_layer_set_cell_width(pin_window->selection, i, 30); // changed from 40
       }
-      selection_layer_set_cell_padding(pin_window->selection, 4);
+      selection_layer_set_cell_padding(pin_window->selection, 3); // changed from 4
       selection_layer_set_active_bg_color(pin_window->selection, GColorRed);
       selection_layer_set_inactive_bg_color(pin_window->selection, GColorDarkGray);
       selection_layer_set_click_config_onto_window(pin_window->selection, pin_window->window);

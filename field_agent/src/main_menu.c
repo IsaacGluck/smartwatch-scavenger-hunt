@@ -3,6 +3,7 @@
 /*****************************************************************/
 #include "main_menu.h"
 #include "field_agent_data.h"
+#include "pin_window.h"
 
 static Window *s_main_window_main_menu;
 static MenuLayer *s_menu_layer_main_menu;
@@ -15,6 +16,7 @@ void pin_window_complete_callback(PIN pin, void *context)
 {
   APP_LOG(APP_LOG_LEVEL_INFO, "Submitted choice %d", pin);
   pin_window_pop(pin_window, true);
+  pin_window_destroy(pin_window);
 }
 
 static uint16_t get_num_rows_callback_main_menu(MenuLayer *menu_layer, uint16_t section_index, void *context)
@@ -81,7 +83,7 @@ static int16_t get_cell_height_callback_main_menu(struct MenuLayer *menu_layer, 
 
 static void select_callback_main_menu(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context)
 {
-  if(cell_index->row == MAIN_MENU_WINDOW_NUM_ROWS) {
+  if(cell_index->row == MAIN_MENU_WINDOW_NUM_ROWS - 1) {
     // Do something with user choice
     APP_LOG(APP_LOG_LEVEL_INFO, "Submitted choice %d", s_current_selection_main_menu);
     // window_stack_pop(true);
@@ -110,7 +112,8 @@ static void window_load_main_menu(Window *window)
   layer_add_child(window_layer, menu_layer_get_layer(s_menu_layer_main_menu));
 
   // Set up the pin window
-  pin_window = pin_window_create(); // must destroy this at some point
+  PinWindowCallbacks pin_window_callback = {.pin_complete = pin_window_complete_callback};
+  pin_window = pin_window_create(pin_window_callback); // must destroy this at some point
 }
 
 static void window_unload_main_menu(Window *window)

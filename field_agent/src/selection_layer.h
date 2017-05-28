@@ -2,7 +2,7 @@
 
 #include <pebble.h>
 
-#define MAX_SELECTION_LAYER_CELLS 3
+#define MAX_SELECTION_LAYER_CELLS 4 // changed from 3
 
 typedef char* (*SelectionLayerGetCellText)(int index, void *context);
 
