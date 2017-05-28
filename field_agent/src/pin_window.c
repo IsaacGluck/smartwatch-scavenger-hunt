@@ -6,8 +6,8 @@ static char* selection_handle_get_text(int index, void *context) {
   PinWindow *pin_window = (PinWindow*)context;
   snprintf(
     pin_window->field_buffs[index], 
-    sizeof(pin_window->field_buffs[0]), "%d",
-    (int)pin_window->pin.digits[index]
+    sizeof(pin_window->field_buffs[0]), "%c",
+    pin_window->pin.digits[index]
   );
   return pin_window->field_buffs[index];
 }
@@ -19,17 +19,121 @@ static void selection_handle_complete(void *context) {
 
 static void selection_handle_inc(int index, uint8_t clicks, void *context) {
   PinWindow *pin_window = (PinWindow*)context;
-  pin_window->pin.digits[index]++;
-  if(pin_window->pin.digits[index] > PIN_WINDOW_MAX_VALUE) {
-    pin_window->pin.digits[index] = 0;
+
+  char cur = pin_window->pin.digits[index];
+  switch(cur) {
+    case '0' :
+      pin_window->pin.digits[index] = '1';
+      break;
+    case '1' :
+      pin_window->pin.digits[index] = '2';
+      break;
+    case '2' :
+      pin_window->pin.digits[index] = '3';
+      break;
+    case '3' :
+      pin_window->pin.digits[index] = '4';
+      break;
+    case '4' :
+      pin_window->pin.digits[index] = '5';
+      break;
+    case '5' :
+      pin_window->pin.digits[index] = '6';
+      break;
+    case '6' :
+      pin_window->pin.digits[index] = '7';
+      break;
+    case '7' :
+      pin_window->pin.digits[index] = '8';
+      break;
+    case '8' :
+      pin_window->pin.digits[index] = '9';
+      break;
+    case '9' :
+      pin_window->pin.digits[index] = 'a';
+      break;
+    case 'a' :
+      pin_window->pin.digits[index] = 'b';
+      break;
+    case 'b' :
+      pin_window->pin.digits[index] = 'c';
+      break;
+    case 'c' :
+      pin_window->pin.digits[index] = 'd';
+      break;
+    case 'd' :
+      pin_window->pin.digits[index] = 'e';
+      break;
+    case 'e' :
+      pin_window->pin.digits[index] = 'f';
+      break;
+    case 'f' :
+      pin_window->pin.digits[index] = '0';
+      break;
+
+    default:
+      pin_window->pin.digits[index] = '0';
+      break;
   }
 }
 
 static void selection_handle_dec(int index, uint8_t clicks, void *context) {
   PinWindow *pin_window = (PinWindow*)context;
-  pin_window->pin.digits[index]--;
-  if(pin_window->pin.digits[index] < 0) {
-    pin_window->pin.digits[index] = PIN_WINDOW_MAX_VALUE;
+  
+  char cur = pin_window->pin.digits[index];
+  switch(cur) {
+    case '0' :
+      pin_window->pin.digits[index] = 'f';
+      break;
+    case '1' :
+      pin_window->pin.digits[index] = '0';
+      break;
+    case '2' :
+      pin_window->pin.digits[index] = '1';
+      break;
+    case '3' :
+      pin_window->pin.digits[index] = '2';
+      break;
+    case '4' :
+      pin_window->pin.digits[index] = '3';
+      break;
+    case '5' :
+      pin_window->pin.digits[index] = '4';
+      break;
+    case '6' :
+      pin_window->pin.digits[index] = '5';
+      break;
+    case '7' :
+      pin_window->pin.digits[index] = '6';
+      break;
+    case '8' :
+      pin_window->pin.digits[index] = '7';
+      break;
+    case '9' :
+      pin_window->pin.digits[index] = '8';
+      break;
+    case 'a' :
+      pin_window->pin.digits[index] = '9';
+      break;
+    case 'b' :
+      pin_window->pin.digits[index] = 'a';
+      break;
+    case 'c' :
+      pin_window->pin.digits[index] = 'b';
+      break;
+    case 'd' :
+      pin_window->pin.digits[index] = 'c';
+      break;
+    case 'e' :
+      pin_window->pin.digits[index] = 'd';
+      break;
+    case 'f' :
+      pin_window->pin.digits[index] = 'e';
+      break;
+
+    default:
+      pin_window->pin.digits[index] = '0';
+      break;
   }
 }
 
@@ -41,7 +145,7 @@ PinWindow* pin_window_create(PinWindowCallbacks callbacks) {
     if (pin_window->window) {
       pin_window->field_selection = 0;
       for(int i = 0; i < PIN_WINDOW_NUM_CELLS; i++) {
-        pin_window->pin.digits[i] = 0;
+        pin_window->pin.digits[i] = '0';
       }
       
       // Get window parameters

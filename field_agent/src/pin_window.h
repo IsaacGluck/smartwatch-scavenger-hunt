@@ -7,7 +7,7 @@
 #define PIN_WINDOW_SIZE GSize(128, 34)
 
 typedef struct {
-  int digits[PIN_WINDOW_NUM_CELLS];
+  char digits[PIN_WINDOW_NUM_CELLS];
 } PIN;
 
 typedef void (*PinWindowComplete)(PIN pin, void *context);
