@@ -3,33 +3,12 @@
 /*****************************************************************/
 #include <pebble.h>
 #include "key_assembly.h"
+#include "field_agent_data.h"
 #include "location.h"
 #include "choose_name.h"
-// #include "main_menu.h"
 
-
-// Global Structs
-typedef struct fieldagent_info {
-	char *gameID;
-	char* pebbleId;
-	char* name;
-	char* team;
-	double latitude;
-	double longitude;
-	int num_claimed;
-	int num_left;
-	char* known_chars;
-	char** hints_received;
-} fieldagent_info_t;
 
 // Globals
-static Window *s_main_window;
-// static MenuLayer *choose_name_menulayer;
-static fieldagent_info_t *FA_INFO;
-static int s_current_selection = 1; // for choosing the name, start at 1 from the menu
-static char teamName[7] = "views6";
-static char init_gameID[2] = "0";
-
 static char *fa_claim = "opCode=FA_CLAIM|"
 												"gameId=FEED|"
 												"pebbleId=8080477D|"
@@ -44,8 +23,6 @@ static char *fa_claim = "opCode=FA_CLAIM|"
 // base functions
 static void init();
 static void deinit();
-// static void main_window_load(Window *window); // choose name
-// static void main_window_unload(Window *window);
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed);
 static void update_time();
 
@@ -63,52 +40,30 @@ static void send_message(char *message);
 // test functions
 static void print_FA();
 
-// name choose menu layer functions
-// uint16_t get_num_rows_callback_choose_name(MenuLayer *menu_layer, uint16_t section_index, void *context);
-// void draw_row_callback_choose_name(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *context);
-// int16_t get_cell_height_callback_choose_name(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *context);
-// void select_callback_choose_name(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context);
-// void CHOOSE_NAME_window_push();
-
-
 // init
 static void init() {
-    // /* 1. Create main Window element. */
-    // s_main_window = window_create();
+  /* 1. Setup the info struct with the FA data */
+  create_info();
 
-    // /* 2. Set handlers to manage the elements inside the window. */
-    // window_set_window_handlers(s_main_window, (WindowHandlers) {
-    //     .load = main_window_load,
-    //     .unload = main_window_unload
-    // });
+  /* 2. Register our tick_handler function with TickTimerService. */
+  tick_timer_service_subscribe(SECOND_UNIT, tick_handler);
 
-    /* 3. Register our tick_handler function with TickTimerService. */
-    tick_timer_service_subscribe(SECOND_UNIT, tick_handler);
+  /* 3. Show the Window on the watch, with animated=true. */
+  choose_name_window_push();
 
-    /* 4. Show the Window on the watch, with animated=true. */
-    // window_stack_push(s_main_window, true);
-    choose_name_window_push();
+  /* 4. Choose name window is displayed from the start. */
+  update_time();
 
-    /* 5. Choose name window is displayed from the start. */
-    update_time();
+  /* 5. Set the handlers for AppMessage inbox/outbox events. Set these    *
+   *    handlers BEFORE calling open, otherwise you might miss a message. */
+  app_message_register_inbox_received(inbox_received_callback);
+  app_message_register_outbox_sent(outbox_sent_callback);
+  app_message_register_inbox_dropped(inbox_dropped_callback);
+  app_message_register_outbox_failed(outbox_failed_callback);
 
-    /* 6. Set the handlers for AppMessage inbox/outbox events. Set these    *
-     *    handlers BEFORE calling open, otherwise you might miss a message. */
-    app_message_register_inbox_received(inbox_received_callback);
-    app_message_register_outbox_sent(outbox_sent_callback);
-    app_message_register_inbox_dropped(inbox_dropped_callback);
-    app_message_register_outbox_failed(outbox_failed_callback);
-
-    /* 7. open the app message communication protocol. Request as much space *
-     *    as possible, because our messages can be quite large at times.     */
-    app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
-
-		FA_INFO = malloc(sizeof(fieldagent_info_t)); // must free this later
-    FA_INFO->team = teamName; // initialize the team name to the set name
-    FA_INFO->gameID = init_gameID; // initialize the gameID to 0
-    FA_INFO->latitude = 0;
-		FA_INFO->longitude = 0;
-		FA_INFO->num_claimed = 0;
+  /* 6. open the app message communication protocol. Request as much space *
+   *    as possible, because our messages can be quite large at times.     */
+  app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
 }
 
 // main
@@ -129,9 +84,8 @@ static void deinit() {
     tick_timer_service_unsubscribe();
 
     /* 3. Free memory. */
-    if (FA_INFO != NULL) {
-    	free(FA_INFO);
-    }
+    delete_info();
+
 }
 
 // tick_handler

@@ -13,38 +13,8 @@ static char morgan[7] = "Morgan";
 static char laya[5] = "Laya";
 static char kazuma[7] = "Kazuma";
 static char* chosen_name;
+static int s_current_selection = 1; // for choosing the name, start at 1 from the menu
 
-
-
-// main_window
-static void window_load_choose_name(Window *window) {
-    /* 1. Get information about the window. */
-    Layer *window_layer = window_get_root_layer(window);
-    GRect bounds = layer_get_bounds(window_layer);
-
-    /* 2. Create the MenuLayer with the bounds from above. */
-    choose_name_menulayer = menu_layer_create(bounds);
-
-    /* 3. Set the callback for clicking the on the menu. */
-    menu_layer_set_click_config_onto_window(choose_name_menulayer, window);
-	  menu_layer_set_callbacks(choose_name_menulayer, NULL, (MenuLayerCallbacks) {
-	      .get_num_rows = get_num_rows_callback_choose_name,
-	      .draw_row = draw_row_callback_choose_name,
-	      .get_cell_height = get_cell_height_callback_choose_name,
-	      .select_click = select_callback_choose_name,
-	  });
-
-	  /* 4. Add MenuLayer as a child layer to the Window root layer. */
-	  layer_add_child(window_layer, menu_layer_get_layer(choose_name_menulayer));
-}
-
-// window_unload_choose_name
-static void window_unload_choose_name(Window *window) {
-    /* 1. Destroy MenuLayer. */
-    menu_layer_destroy(choose_name_menulayer);
-	  window_destroy(window);
-	  s_main_window = NULL;
-}
 
 
 
@@ -141,7 +111,7 @@ static void select_callback_choose_name(struct MenuLayer *menu_layer, MenuIndex 
     if (s_current_selection != 0) {
 	    window_stack_pop(true);
       main_menu_window_push();
-	    print_FA();
+	    // print_FA();
 
 	    // add the main screen 
     }
@@ -153,6 +123,39 @@ static void select_callback_choose_name(struct MenuLayer *menu_layer, MenuIndex 
   	}
   }
 }
+
+
+
+// main_window
+static void window_load_choose_name(Window *window) {
+    /* 1. Get information about the window. */
+    Layer *window_layer = window_get_root_layer(window);
+    GRect bounds = layer_get_bounds(window_layer);
+
+    /* 2. Create the MenuLayer with the bounds from above. */
+    choose_name_menulayer = menu_layer_create(bounds);
+
+    /* 3. Set the callback for clicking the on the menu. */
+    menu_layer_set_click_config_onto_window(choose_name_menulayer, window);
+	  menu_layer_set_callbacks(choose_name_menulayer, NULL, (MenuLayerCallbacks) {
+	      .get_num_rows = get_num_rows_callback_choose_name,
+	      .draw_row = draw_row_callback_choose_name,
+	      .get_cell_height = get_cell_height_callback_choose_name,
+	      .select_click = select_callback_choose_name,
+	  });
+
+	  /* 4. Add MenuLayer as a child layer to the Window root layer. */
+	  layer_add_child(window_layer, menu_layer_get_layer(choose_name_menulayer));
+}
+
+// window_unload_choose_name
+static void window_unload_choose_name(Window *window) {
+    /* 1. Destroy MenuLayer. */
+    menu_layer_destroy(choose_name_menulayer);
+	  window_destroy(window);
+	  s_main_window_choose_name = NULL;
+}
+
 
 
 char* choose_name_window_push() {
