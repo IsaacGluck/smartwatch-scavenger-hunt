@@ -241,7 +241,6 @@ static void handle_socket(int comm_sock, struct sockaddr_in them, game_info_t *g
         exit(8);
     }
     else if (nbytes > 0){
-        printf("message: %s\n", buf);
         buf[nbytes] = '\0';            // null terminate string
         
         char **tokens;
@@ -264,8 +263,6 @@ static void handle_socket(int comm_sock, struct sockaddr_in them, game_info_t *g
         if (dispatch[fn].opCode == NULL){
             printf("\n\nUnknown command\n\n");
         }
-        
-        printf("result of dispatch is: %d\n", result);
         
         respond(opCode, result, comm_sock, them, gi, buf);
         
