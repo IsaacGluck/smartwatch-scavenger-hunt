@@ -4,13 +4,14 @@
 
 C = ../common
 L = ../libcs50
+DEBUG = -DEBUG_TEST
 
 PROG = gameserver
-OBJS = gameserver.o gsstruct.o
-LLIBS = $L/libcs50.a #$C/common.a
+OBJS = gameserver.o gsstruct.o gs_message_handler.o gs_response_handler.o
+LLIBS = $L/libcs50.a $C/common.a
 
 
-CFLAGS = -Wall -pedantic -std=c11 -ggdb -I$C -I$L
+CFLAGS = -Wall -pedantic -std=c11 -ggdb -I$C -I$L -lm $(DEBUG)
 CC = gcc
 MAKE = make
 
@@ -23,8 +24,10 @@ $(PROG): $(OBJS) $(LLIBS)
 
 
 # object files depend on include files
-gameserver.o: $L/set.h
-gsstruct.o: $L/set.h gsstruct.h #$C/
+gsstruct.o: $L/set.h $L/file.h gsstruct.h $C/common.h
+gs_message_handler.o: gsstruct.h
+gs_response_handler.o: gsstruct.h
+gameserver.o: $L/set.h $C/common.h
 
 
 # phony testing
