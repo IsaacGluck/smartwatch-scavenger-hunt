@@ -7,14 +7,47 @@ static char teamName[7] = "views6";
 static char init_gameID[2] = "0";
 
 
+
+// char *gameID;
+// 	char* pebbleID;
+// 	char* name;
+// 	char* team;
+// 	int time_passed;
+// 	char* latitude;
+// 	char* longitude;
+// 	int num_claimed;
+// 	int num_left;
+// 	char* known_chars;
+// 	char** hints_received;
+
+// 	bool game_started;
+
+// 	char* krag_to_submit;
+
 void create_info()
 {
 	FA_INFO = malloc(sizeof(fieldagent_info_t)); // must free this later
 
+	FA_INFO->gameID = malloc(100);
+	FA_INFO->pebbleID = malloc(100);
+	FA_INFO->name = malloc(100);
+	FA_INFO->team = malloc(100);
+	FA_INFO->latitude = malloc(100);
+	FA_INFO->longitude = malloc(100);
+	FA_INFO->known_chars = malloc(100);
+	FA_INFO->krag_to_submit = malloc(100);
+		// FA_INFO->hints_received = malloc(100);
+
+	if (FA_INFO->gameID == NULL || FA_INFO->pebbleID == NULL || FA_INFO->name == NULL || FA_INFO->team == NULL ||
+		FA_INFO->latitude == NULL || FA_INFO->longitude == NULL || FA_INFO->known_chars == NULL ||
+		FA_INFO->hints_received == NULL || FA_INFO->krag_to_submit == NULL) {
+		return;
+	}
 
 
-	
-	FA_INFO->team = teamName; // initialize the team name to the set name
+	strcpy(FA_INFO->team, teamName);
+	// FA_INFO->team = teamName; // initialize the team name to the set name
+	strcpy(FA_INFO->gameID, init_gameID);
 	FA_INFO->gameID = init_gameID; // initialize the gameID to 0
 	FA_INFO->time_passed = 0;
 	FA_INFO->num_claimed = 0;
@@ -27,6 +60,33 @@ void create_info()
 
 void delete_info()
 {
+	if (FA_INFO->gameID != NULL) {
+		free(FA_INFO->gameID);
+	}
+	if (FA_INFO->pebbleID != NULL) {
+		free(FA_INFO->pebbleID);
+	}
+	if (FA_INFO->name != NULL) {
+		free(FA_INFO->name);
+	}
+	if (FA_INFO->team != NULL) {
+		free(FA_INFO->team);
+	}
+	if (FA_INFO->latitude != NULL) {
+		free(FA_INFO->latitude);
+	}
+	if (FA_INFO->longitude != NULL) {
+		free(FA_INFO->longitude);
+	}
+	if (FA_INFO->known_chars != NULL) {
+		free(FA_INFO->known_chars);
+	}
+	if (FA_INFO->krag_to_submit != NULL) {
+		free(FA_INFO->krag_to_submit);
+	}
+	// FA_INFO->hints_received
+
+
 	if (FA_INFO != NULL) {
 		free(FA_INFO);
 	}

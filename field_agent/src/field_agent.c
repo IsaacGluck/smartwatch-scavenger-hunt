@@ -191,8 +191,10 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
 	        
 	        if (location_parsed != NULL) {
 	        	// add the location to the FA_INFO
-		        FA_INFO->latitude = location_parsed->latitude;
-		        FA_INFO->longitude = location_parsed->longitude;
+            strcpy(FA_INFO->latitude, location_parsed->latitude);
+            strcpy(FA_INFO->longitude, location_parsed->longitude);
+		        // FA_INFO->latitude = location_parsed->latitude;
+		        // FA_INFO->longitude = location_parsed->longitude;
 		        free(location_parsed);
 	        }
 
@@ -207,7 +209,8 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         // Log the value sent as part of the received message.
         char *pebbleID = id_tuple->value->cstring;
         APP_LOG(APP_LOG_LEVEL_INFO, "Got AppKeyPebbleId: %s\n", pebbleID);
-        FA_INFO->pebbleID = pebbleID;
+        strcpy(FA_INFO->pebbleID, pebbleID);
+        // FA_INFO->pebbleID = pebbleID;
     }
 
     /* 5. Check to see if an error message was received. */
