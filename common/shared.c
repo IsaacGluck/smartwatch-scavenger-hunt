@@ -1,21 +1,18 @@
 // Conditional inclusion for platform specific builds
-
-
-#ifdef NOPEBBLE // we are *not* building for pebble
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "shared.h"
+#include "time.h"
 #include <ctype.h>
 
 //ga status 
 //respomse
 
-#include "shared.h"
-
-
 
 
 int validate_message(char* message); 
+int print_log(char* message, char* filename, char* IPport, char* tofrom);
 
 static int gameStatus(char* parameters[], int total);
 static int gsAgent(char* parameters[], int total);
@@ -989,7 +986,7 @@ static int faLog(char* parameters[], int total){
 	return 0;
 }
 static int gaStatus(char* parameters[], int total){
-	if(total != 10){
+	if(total != 12){
 		return 5;
 	}
 
@@ -1189,7 +1186,29 @@ static int gaHint(char* parameters[], int total){
 	return 0;
 }
 
+int print_log(char* message, char* filename, char* IPport, char* tofrom){
+	char timestamp[27];
+  	time_t clk = time(NULL);
+ 	sprintf(timestamp, "(%s", ctime(&clk));
+ 	timestamp[25] = ')';
 
-#else // we are building for pebble
-#include <pebble.h>
-#endif
+	char* totalfilename = malloc(strlen("../logs/") + strlen(filename) + 1); 
+	strcpy(totalfilename, "../logs/"); 
+	strcat(totalfilename, filename);
+
+	
+	FILE *file = fopen(totalfilename, "a"); 
+
+	if(file == NULL){
+		return 1;
+	}
+
+	fprintf(file, "%s %s %s: %s\n", timestamp, tofrom, IPport, message); 
+
+	free(totalfilename);
+	fclose(file);
+
+	return 0;
+}
+
+
