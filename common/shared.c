@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "shared.h"
+#include "time.h"
 #include <ctype.h>
 
 //ga status 
@@ -11,6 +12,7 @@
 
 
 int validate_message(char* message); 
+int print_log(char* message, char* filename, char* IPport, char* tofrom);
 
 static int gameStatus(char* parameters[], int total);
 static int gsAgent(char* parameters[], int total);
@@ -1180,6 +1182,32 @@ static int gaHint(char* parameters[], int total){
 	if(strcmp(parameters[11], parameters[13]) == 0 ){
 		return 3;
 	}
+
+	return 0;
+}
+
+int print_log(char* message, char* filename, char* IPport, char* tofrom){
+	char timestamp[27];
+  	time_t clk = time(NULL);
+ 	sprintf(timestamp, "(%s", ctime(&clk));
+ 	timestamp[25] = ')';
+
+	char* totalfilename = malloc(strlen("../logs/") + strlen(filename) + 1); 
+	strcpy(totalfilename, "../logs/"); 
+	strcat(totalfilename, filename);
+
+	printf("total file name: %s", totalfilename);
+	
+	FILE *file = fopen(totalfilename, "a"); 
+
+	if(file == NULL){
+		return 1;
+	}
+
+	fprintf(file, "%s %s %s: %s\n", timestamp, tofrom, IPport, message); 
+
+	free(totalfilename);
+	fclose(file);
 
 	return 0;
 }
