@@ -1,3 +1,5 @@
+
+#ifdef NOPEBBLE // we are *not* building for pebble
 // Conditional inclusion for platform specific builds
 #include <stdio.h>
 #include <stdlib.h>
@@ -1211,4 +1213,4 @@ int print_log(char* message, char* filename, char* IPport, char* tofrom){
 	return 0;
 }
 
-
+#endif
