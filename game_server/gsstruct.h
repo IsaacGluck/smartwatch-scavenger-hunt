@@ -25,7 +25,7 @@ typedef struct team team_t;            // struct for team information
 typedef struct fa fa_t;                // struct for field agent information
 typedef struct ga ga_t;                // struct for game agent information
 typedef struct krag krag_t;            // struct for krag information
-
+typedef struct gifaga gifaga_t;        // struct for holding gi, one fa, and ga in the team
 
 /**************** functions ****************/
 
@@ -33,11 +33,24 @@ typedef struct krag krag_t;            // struct for krag information
 /* get the initial state of game information*/
 game_info_t *game_info_new();
 
+/* delete the game info
+ */
+void game_info_delete(game_info_t *gi);
+
 /* return a start time of game */
 time_t game_info_get_start_time(game_info_t *gi);
 
 /* return a status of game */
 int game_info_get_game_status(game_info_t *gi);
+
+/* return gameId in Hex*/
+char *game_info_get_gameId(game_info_t *gi);
+
+/* return number of krags in this game*/
+int game_info_get_numKrags(game_info_t *gi);
+
+/* change the status of game to 1 */
+void game_info_change_game_status(game_info_t *gi);
 
 /* set the gameID
  * return 0 if success, 1 if error
@@ -59,10 +72,20 @@ int game_info_set_secret_code(game_info_t *gi, char *sf);
  */
 team_t *game_info_find_team(game_info_t *gi, char *team_name);
 
+/* Return the fa with given pebbleId
+ * Return NULL if it does not exist
+ */
+fa_t *game_info_find_fa_pebbleId(game_info_t *gi, char *pebbleId);
+
 /* Add a new team to set of teams in game_info
  * Ignore if the team with same name exists
  */
 void game_info_register_team(game_info_t *gi, char *team_name);
+
+/* Return the team that has guide agent with given guideId
+ * Return NULL if it does not exist
+ */
+team_t *game_info_find_guideId(game_info_t *gi, char *guideId);
 
 /* Validate gameId, pebbleId, team name and player name.
  * Return 0 if all correct.
@@ -79,8 +102,33 @@ int game_info_validate(game_info_t *gi, char *gameId, char *pebbleId, char *team
  */
 krag_t *game_info_find_krag(game_info_t *gi, char *kragId);
 
+/* Examine if there is the krag is within 10 meters from the
+ * given latitude and longitude
+ * Return 0 if the krag is located within 10m.
+ * Return 1 if krag is not found, or is not located within 10m.
+ */
+int game_info_krag_distance(game_info_t *gi, char *kragId, char *latitude, char *longitude);
+
+/* Return the team that has field agent with given pebbleId
+ * Return NULL if it does not exist
+ */
+team_t *game_info_find_pebbleId(game_info_t *gi, char *pebbleId);
+
+
+
 
 /**************** functions for krag ****************/
+
+/* Return the latitude of the krag
+ * return 1000 if it does not exist
+ */
+float krag_get_latitude(krag_t *krag);
+
+/* Return the longitue of the krag
+ * return 1000 if it does not exist
+ */
+float krag_get_longitude(krag_t *krag);
+
 /* check if the krag has claimed by the team or not
  * Return 0 if claimed, 1 if not
  * Return -1 if error
@@ -94,6 +142,12 @@ int krag_has_claimed(krag_t *krag, char *team_name);
  */
 int krag_mark_claimed(game_info_t *gi, krag_t *krag, char *team_name);
 
+/* Print the data stored in krag
+ */
+void krag_print(krag_t *krag);
+
+
+
 
 /**************** functions for team ****************/
 /* Return the fa named player_name
@@ -105,4 +159,116 @@ fa_t *team_find_fa(team_t *team, char *player_name);
  * return NULL if not found
  */
 ga_t *team_find_ga(team_t *team, char *player_name);
+
+/* register fa to the team
+ * return 0 if successfully registered
+ * return -6 if player with same name exists in the team
+ * return -7 if the pebbleId is already registered
+ */
+int team_register_fa(game_info_t *gi, team_t *team, char *pebbleId, char *player_name, struct sockaddr_in them, char *latitude, char *longitude);
+
+/* register ga to the team
+ * return 0 if successfully registered
+ * return -5 if the guide is already registered in the team
+ * return -7 if the guideId is already registered
+ */
+int team_register_ga(game_info_t *gi, team_t *team, char *guideId, char *player_name, struct sockaddr_in them);
+
+/* Print the data stored in team
+ */
+void team_print(team_t *team);
+
+/* Send hint to all field agent in the team
+ */
+void team_send_hint_to_everyone(team_t *team, char *hint, int comm_sock);
+
+/* Send GS_AGENT to guide agent
+ */
+void team_send_gs_agent(game_info_t *gi, team_t *team, int comm_sock, void (*itemfunc)(void *arg, const char *key, void *item));
+
+/* Return the guide agent if exists
+ */
+ga_t *team_get_guide(team_t *team);
+
+/* Return the guideId if exists
+ */
+char *team_get_guideId(team_t *team);
+
+/* Return the number of claimed krags
+ */
+int team_get_numClaimed(team_t *team);
+
+/* Return the secret string for this team
+ */
+char * team_get_secret(team_t *team);
+
+/* return name of the team
+ */
+char *team_get_name(team_t *team);
+
+
+
+
+
+/****************** functions for fa *********************/
+
+/* Print the data stored in team
+ */
+void fa_print(fa_t *fa);
+
+/* send message to field agent
+ */
+void
+fa_send_to(fa_t *fa, int comm_sock, char *message);
+
+/* return pebbleId of the fa
+ */
+char *fa_get_pebbleId(fa_t *fa);
+
+/* return the time elapsed (seconds in int)
+ * since last contact by the fa
+ */
+int fa_get_time(fa_t *fa);
+
+/* return name of the fa
+ */
+char *fa_get_name(fa_t *fa);
+
+/* return latitude of the fa
+ * return 1000 if error
+ */
+float fa_get_latitude(fa_t *fa);
+
+/* return longitude of the fa
+ * return 1000 if error
+ */
+float fa_get_longitude(fa_t *fa);
+
+
+
+
+
+/****************** functions for ga *********************/
+/* return the guideId
+ */
+char *ga_get_id(ga_t *ga);
+
+/* send message to guide agent
+ */
+void ga_send_to(ga_t *ga, int comm_sock, char *message);
+
+
+
+/**************** functions for gifaga *******************/
+/* return gi */
+game_info_t *gifaga_get_gi(gifaga_t *gifaga);
+
+/* return ga */
+ga_t *gifaga_get_ga(gifaga_t *gifaga);
+
+/* return team */
+team_t *gifaga_get_team(gifaga_t *gifaga);
+
+/* return comm_sock */
+int gifaga_get_comm_sock(gifaga_t *gifaga);
 #endif   // __GSSTRUCT_H
