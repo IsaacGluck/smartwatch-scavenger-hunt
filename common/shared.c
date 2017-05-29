@@ -1,9 +1,14 @@
 // Conditional inclusion for platform specific builds
+
+
+#ifdef NOPEBBLE // we are *not* building for pebble
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "shared.h"
 #include <ctype.h>
+
+
+#include "shared.h"
 
 
 
@@ -1077,3 +1082,6 @@ static int gaHint(char* parameters[]){
 }
 
 
+#else // we are building for pebble
+#include <pebble.h>
+#endif
