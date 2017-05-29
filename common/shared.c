@@ -1,4 +1,7 @@
 // Conditional inclusion for platform specific builds
+
+
+#ifdef NOPEBBLE // we are *not* building for pebble
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,6 +11,9 @@
 
 //ga status 
 //respomse
+
+#include "shared.h"
+
 
 
 
@@ -1213,3 +1219,6 @@ int print_log(char* message, char* filename, char* IPport, char* tofrom){
 }
 
 
+#else // we are building for pebble
+#include <pebble.h>
+#endif
