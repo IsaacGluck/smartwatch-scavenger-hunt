@@ -21,7 +21,7 @@
 * hex_to_int (char *hex);
     returns int
 
-* int _to_hex (int);
+* int_to_hex (int);
     returns char *
 
 * parse_message(char *message);

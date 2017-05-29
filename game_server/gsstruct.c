@@ -17,6 +17,8 @@
 #include <math.h>
 #include "set.h"
 #include "file.h"
+#include "common.h"
+#include "gsstruct.h"
 
 #define PI 3.14159265
 
@@ -28,21 +30,21 @@ static const int CLUE_LENGTH = 140;
 /**************** Struct ****************/
 // struct for game information
 typedef struct game_info{
-    time_t start;     // Time the game started
-    int num_krags;    // Number of krags
-    int num_agents;   // Number of agents (#FA + #GA)
-    int num_teams;    // Number of teams (# of Struct Team)
-    char *secret_code;// Secret file string
-    char *kiff;       // Krag file path name
-    set_t *krags;     // Set of krags (clue will be the key)
-    set_t *team;      // Set of Team (team name will be the key)
-    int gameID;       // ID of the game
-    int game_status;  // 0 if the game is continuing, 1 if ended
+    time_t start;            // Time the game started
+    int num_krags;           // Number of krags
+    int num_agents;          // Number of agents (#FA + #GA)
+    int num_teams;           // Number of teams (# of Struct Team)
+    char *secret_code;       // Secret file string
+    set_t *krags;            // Set of krags (clue will be the key)
+    set_t *team;             // Set of Team (team name will be the key)
+    unsigned int gameID;     // ID of the game
+    int game_status;         // 0 if the game is continuing, 1 if ended
 }game_info_t;
 
 
 // struct for team information
 typedef struct team {
+    char *team_name;        // name of the team
     struct ga *ga;          // game agent
     set_t *fa;              // field agents
     int num_claimed_krags;  // number of claimed krags
@@ -52,53 +54,68 @@ typedef struct team {
 
 // struct for field agent information
 typedef struct fa {
-    char *name;          // name
-    int pebbleID;        // pebble id
+    char *name;                 // name
+    char *pebbleID;             // pebble id
     struct sockaddr_in them;    // address of the socket
-    float longitude;     // longitude of the player's position
-    float latitude;      // latitude of the player's position
-    time_t last_contact_time;// the time of last contact
+    float longitude;            // longitude of the player's position
+    float latitude;             // latitude of the player's position
+    time_t last_contact_time;   // the time of last contact
 }fa_t;
 
 
 // struct for game agent information
 typedef struct ga {
     char *name;               // name
-    int guideID;              // guide ID
-    struct sockaddr_in them;         // address of the socket
+    char *guideID;            // guide ID
+    struct sockaddr_in them;  // address of the socket
     time_t last_contact_time; // the time of last contact
 }ga_t;
 
 
 // struct for krag information
 typedef struct krag {
-    float longitude;    // longitude of the krag
-    float latitude;     // latitude of the krag
-    int kragID;         // ID of the krag
-    char *clue;         // clue
-    set_t *claimed_team;// teams that have claimed this krag
+    float longitude;           // longitude of the krag
+    float latitude;            // latitude of the krag
+    unsigned int kragID;       // ID of the krag
+    char *clue;                // clue
+    set_t *claimed_team;       // teams that have claimed this krag
 }krag_t;
 
 // struct for finding Id
 typedef struct find_id {
     team_t *team;
     fa_t *fa;
-    int id;
+    char *id;
+    struct sockaddr_in them;
 }find_id_t;
+
+// struct for sending hint
+typedef struct send_hint {
+    char *hint;
+    int comm_sock;
+}send_hint_t;
+
+// struct for holding gi, one fa, and ga in the team
+typedef struct gifaga{
+    game_info_t *gi;
+    ga_t *ga;
+    fa_t *fa;
+    team_t *team;
+    int comm_sock;
+}gifaga_t;
 
 /**************** file-local functions ****************/
 static int handle_kiff_message(char *left, char *right, game_info_t *gi, krag_t *new_krag);
 static void set_kiff_handle_error(char *left, char *right, FILE *fp, char *message);
-static team_t *game_info_find_pebbleId(game_info_t *gi, char *pebbleId);
 static void find_pebbleId(void *arg, const char *key, void *item);
 static void find_fa_with_pebbleId(void *arg, const char *key, void *item);
-static team_t *game_info_find_guideId(game_info_t *gi, char *guideId);
-static void find_pebbleId(void *arg, const char *key, void *item);
+static void find_guideId(void *arg, const char *key, void *item);
+static void send_hint_to_everyone(void *arg, const char *key, void *item);
 
 static krag_t *krag_new();
-static void krag_delete(krag_t *krag);
+static void krag_delete(void *item);
 static team_t *team_new();
-static void team_delete(team_t *team);
+static void team_delete(void *item);
 static fa_t *fa_new();
 static void fa_delete(fa_t *fa);
 static ga_t *ga_new();
@@ -106,6 +123,9 @@ static void ga_delete(ga_t *ga);
 static void set_char_delete(void *item);
 static void set_fa_delete(void *item);
 
+//#ifdef DEBUG_TEST
+static void krag_set_print(FILE *fp, const char *key, void *item);
+//#endif
 
 
 /*********************************************************/
@@ -129,6 +149,7 @@ team_new(){
     new_team->fa = set_new();
     new_team->num_claimed_krags = 0;
     new_team->secret_string = malloc((CLUE_LENGTH) * sizeof(char));
+    new_team->team_name = malloc((MESSAGE_LENGTH) * sizeof(char));
     return new_team;
 }
 
@@ -136,13 +157,15 @@ team_new(){
 /* free the memory of the given team
  */
 static void
-team_delete(team_t *team){
+team_delete(void *item){
+    team_t *team = item;
     if (team == NULL){
         return;
     }
     set_delete(team->fa, &set_fa_delete);
     ga_delete(team->ga);
     free(team->secret_string);
+    free(team->team_name);
     free(team);
 }
 
@@ -154,78 +177,132 @@ fa_t *
 team_find_fa(team_t *team, char *player_name){
     // get the fa and return (can be NULL)
     fa_t *fa = set_find(team->fa, player_name);
+    printf("finding fa\n\n");
     return fa;
 }
 
-/**************** team_register_ga ****************/
-/* register ga to the team
- * return 0 if successfully registered
- * return -5 if the guide is already registered in the team
- * return -7 if the guideId is already registered
+/**************** team_print ****************/
+/* Print the data stored in team
  */
-int
-team_register_ga(game_info_t *gi, team_t *team, char *guideId, char *player_name, struct sockaddr_in them){
-    // two guide agent in one team is not allowed
-    if (team-> != NULL){
-        return -5;
+void
+team_print(team_t *team){
+    if (team == NULL){
+        printf("No team to print\n");
+        return;
     }
-    
-    // if the player with the given guideId is not found
-    if (game_info_find_guideId(gi,guideId) == NULL){
-        ga_t *ga = ga_new();
-        if (ga == NULL){
-            return -99;
-        }
-        ga->name = player_name;
-        ga->guideID = intToHex(guideId);
-        ga->them = them;
-        ga->last_contact_time = time(NULL);
-        team->ga = ga;
-        return 0;
+    printf("Team Name: %s\n", team->team_name);
+    if (team->ga != NULL){
+        printf("\tGuide: %s\n", team->ga->name);
     }
-    // if the player with the given pebbleId is found, it will not be registered
-    // invalid id
-    else {
-        return -7;
-    }
+    printf("\tNumber of claimed crags: %d\n", team->num_claimed_krags);
+    printf("\tSecret: %s\n", team->secret_string);
 }
 
-
-/**************** team_register_fa ****************/
-/* register fa to the team
- * return 0 if successfully registered
- * return -6 if player with same name exists in the team
- * return -7 if the pebbleId is already registered
+/**************** team_send_hint_to_everyone ****************/
+/* Send hint to all field agent in the team
  */
-int
-team_register_fa(game_info_t *gi, team_t *team, char *pebbleId, char *player_name, struct sockaddr_in them, char *latitude, char *longitude){
-    // same name in any given team is not allowed
-    if (team_find_fa(team, player_name) != NULL){
-        return -6;
+void
+team_send_hint_to_everyone(team_t *team, char *hint, int comm_sock){
+    if (team == NULL || hint == NULL){
+        return;
     }
-    
-    // if the player with the given pebbleId is not found
-    if (game_info_find_pebbleId(gi, pebbleId) == NULL){
-        fa_t *fa = fa_new();
-        if (fa == NULL){
-            return -99;
-        }
-        fa->pebbleID = intToHex(pebbleId);
-        fa->name = player_name;
-        fa->them = them;
-        fa->latitude = atof(latitude);
-        fa->longitude = atof(longitude);
-        fa->last_contact_time = time(NULL);
-        set_insert(team->fa, player_name, fa);
-        return 0;
+    send_hint_t *send_hint = malloc(sizeof(send_hint_t));
+    if (send_hint == NULL){
+        fprintf(stderr, "team_send_hint_to_everyone failed due to not being able to malloc memory\n");
+        return;
     }
-    // if the player with the given pebbleId is found, it will not be registered
-    // invalid id
-    else {
-        return -7;
-    }
+    send_hint->hint = hint;
+    send_hint->comm_sock = comm_sock;
+    set_iterate(team->fa, send_hint, &send_hint_to_everyone);
+    free(send_hint);
 }
 
+/**************** send_hint_to_everyone ****************/
+/* Helper function for team_send_hint_to_everyone
+ */
+static void
+send_hint_to_everyone(void *arg, const char *key, void *item){
+    send_hint_t *send_hint = arg;
+    fa_t *fa = item;
+    
+    if (send_hint == NULL || fa == NULL){
+        return;
+    }
+    
+    fa_send_to(fa, send_hint->comm_sock, send_hint->hint);
+}
+
+/**************** team_send_gs_agent ****************/
+/* Send GS_AGENT to guide agent
+ */
+void
+team_send_gs_agent(game_info_t *gi, team_t *team, int comm_sock, void (*itemfunc)(void *arg, const char *key, void *item)){
+    if (team == NULL || itemfunc == NULL) return;
+    
+    // initialize struct for holding gi, ga
+    gifaga_t *gifaga = malloc(sizeof(gifaga_t));
+    gifaga->gi = gi;
+    gifaga->ga = team->ga;
+    gifaga->team = team;
+    gifaga->comm_sock = comm_sock;
+    
+    // iterate the set and send gs_agent to ga
+    set_iterate(team->fa, team->ga, itemfunc);
+    
+    // free memory
+    free(gifaga);
+}
+
+/**************** team_get_guide ****************/
+/* Return the guide agent if exists
+ */
+ga_t *
+team_get_guide(team_t *team){
+    if (team == NULL) return NULL;
+    return team->ga;
+}
+
+/**************** team_get_guideID ****************/
+/* Return the guideId if exists
+ */
+char *team_get_guideId(team_t *team){
+    if (team == NULL) return NULL;
+    if (team->ga == NULL) return NULL;
+    char *guideId = malloc(MESSAGE_LENGTH);
+    strcpy(guideId, team->ga->guideID);
+    return guideId;
+}
+
+/**************** team_get_numClaimed ****************/
+/* Return the number of claimed krags
+ */
+int
+team_get_numClaimed(team_t *team){
+    if (team == NULL) return 0;
+    return team->num_claimed_krags;
+}
+
+/**************** team_get_secret ****************/
+/* Return the secret string for this team
+ */
+char *
+team_get_secret(team_t *team){
+    if (team == NULL) return NULL;
+    char *secret = malloc(CLUE_LENGTH);
+    strcpy(secret, team->secret_string);
+    return secret;
+}
+
+/**************** team_get_name ****************/
+/* return name of the team
+ */
+char *
+team_get_name(team_t *team){
+    if (team == NULL) return NULL;
+    char *team_name = malloc(MESSAGE_LENGTH);
+    strcpy(team_name, team->team_name);
+    return team_name;
+}
 
 /*********************************************************/
 /**************** functions for game_info ****************/
@@ -252,7 +329,24 @@ game_info_new(){
     gi->team = set_new();
     gi->gameID = 0;
     gi->game_status = 0;
+    gi->secret_code = malloc(CLUE_LENGTH);
     return gi;
+}
+
+/**************** game_info_delete ****************/
+/* delete the game info
+ */
+void
+game_info_delete(game_info_t *gi){
+    if (gi == NULL){
+        return;
+    }
+    
+    // free all memory
+    free(gi->secret_code);
+    set_delete(gi->krags, &krag_delete);
+    set_delete(gi->team, &team_delete);
+    free(gi);
 }
 
 /**************** game_info_get_start_time ****************/
@@ -275,6 +369,34 @@ game_info_get_game_status(game_info_t *gi){
     return gi->game_status;
 }
 
+/**************** game_info_get_game_gameId ****************/
+/* return gameId in Hex*/
+char *
+game_info_get_gameId(game_info_t *gi){
+    if (gi == NULL){
+        return NULL;
+    }
+    return decToStringHex(gi->gameID);
+}
+
+/**************** game_info_get_numKrags ****************/
+/* return number of krags in this game*/
+int
+game_info_get_numKrags(game_info_t *gi){
+    if (gi == NULL) return 0;
+    return gi->num_krags;
+}
+
+/**************** game_info_change_game_status ****************/
+/* change the status of game to 1 */
+void
+game_info_change_game_status(game_info_t *gi){
+    if (gi == NULL){
+        return;
+    }
+    gi->game_status = 1;
+}
+
 /**************** game_info_set_gameID ****************/
 /* set the gameID 
  * return 0 if success, 1 if error
@@ -284,7 +406,7 @@ game_info_set_gameID(game_info_t *gi, char *gameID_in_hex){
     if (gi == NULL || gameID_in_hex == NULL){
         return 1;
     }
-    gi->gameID = intToHex(gameID_in_hex);
+    gi->gameID = stringHexToDec(gameID_in_hex);
     return 0;
 }
 
@@ -305,6 +427,7 @@ game_info_set_kiff(game_info_t *gi, char *kiff){
         return 1;
     }
     
+    int num_krags = 0;
     char *line;
     // read all lines in the file
     while ((line = readlinep(fp)) != NULL){
@@ -327,11 +450,6 @@ game_info_set_kiff(game_info_t *gi, char *kiff){
         
         // loop over the line
         for (int i = 0; i < strlen(line); i++){
-            if (isspace(line[i])){
-                set_kiff_handle_error(left, right, fp, "Error: space found in the kiff\n");
-                return 1;
-            }
-            
             if (line[i] == '='){
                 if (state == 0){
                     state = 1;
@@ -345,7 +463,7 @@ game_info_set_kiff(game_info_t *gi, char *kiff){
                     return 1;
                 }
             }
-            if (line[i] == '|'){
+            else if (line[i] == '|'){
                 if (state == 1){
                     state = 0;
                     right[j] = '\0';
@@ -362,6 +480,21 @@ game_info_set_kiff(game_info_t *gi, char *kiff){
                     return 1;
                 }
             }
+            // when i reaches the end of the line
+            else if (i == strlen(line)-1){
+                // it should be reading the right hand side
+                if (state == 1){
+                    right[j] = '\0';
+                    if (handle_kiff_message(left, right, gi, new_krag) != 0){
+                        set_kiff_handle_error(left, right, fp, "Error: krag format error\n");
+                        return 1;
+                    }
+                }
+                else {
+                    set_kiff_handle_error(left, right, fp, "Error: krag format error\n");
+                    return 1;
+                }
+            }
             else {
                 // if currently reading the left-hand-side
                 if (state == 0){
@@ -373,14 +506,26 @@ game_info_set_kiff(game_info_t *gi, char *kiff){
                 j++;
             }
         }
-        set_insert(gi->krags, intToHex(new_krag->kragID), new_krag);
+
+    
+        //#ifdef DEBUG_TEST
+        krag_print(new_krag);
+        //#endif
+        
+        
+        
+        
+        
+        char *val = decToStringHex(new_krag->kragID);
+        set_insert(gi->krags, val, new_krag);
+        num_krags += 1;
+        free(val);
         free(left);
-        free(right);
         free(line);
     }
     
     fclose(fp);
-    gi->kiff = kiff;
+    gi->num_krags = num_krags;
     return 0;
 }
 
@@ -405,7 +550,7 @@ handle_kiff_message(char *left, char *right, game_info_t *gi, krag_t *new_krag){
     if ((left == NULL) || (right == NULL) || (gi == NULL) || (new_krag == NULL)){
         return 1;
     }
-    
+
     // check the left-hand-side word and set the value of it
     // to the value of right-hand-side
     if (strcmp(left, "latitude") == 0){
@@ -415,10 +560,10 @@ handle_kiff_message(char *left, char *right, game_info_t *gi, krag_t *new_krag){
         new_krag->longitude = atof(right);
     }
     else if (strcmp(left, "kragId") == 0){
-        new_krag->kragID = hex_to_int(right);
+        new_krag->kragID = stringHexToDec(right);
     }
     else if ((strcmp(left, "clue") == 0) && (strlen(right) <= (CLUE_LENGTH-1))){
-        new_krag->clue = left;
+        new_krag->clue = right;
     }
     // if the left-hand-side word does not fall in to the words above,
     // the krag file format is not correct
@@ -451,7 +596,8 @@ game_info_set_secret_code(game_info_t *gi, char *sf){
         fprintf(stderr, "Error: the format of sf is wrong\n");
         return 1;
     }
-    strcpy(gi->secret_code,line);
+    printf("%s\n\n", line);
+    strcpy(gi->secret_code, line);
     free(line);
     fclose(fp);
     return 0;
@@ -477,18 +623,52 @@ game_info_register_team(game_info_t *gi, char *team_name){
     // if the team is not found in the game, add the team
     if (game_info_find_team(gi, team_name) == NULL){
         team_t *new_team = team_new();
+        strcpy(new_team->team_name, team_name);
         set_insert(gi->team, team_name, new_team);
+        
+        // represent the secret code by '_'
+        char *buf = malloc(CLUE_LENGTH);
+        for (int i = 0; i < strlen(gi->secret_code); i++){
+            buf[i] = '_';
+        }
+        buf[strlen(gi->secret_code)] = '\0';
+        strcpy(new_team->secret_string, buf);
+        free(buf);
     }
+}
+
+/**************** game_info_find_fa_pebbleId ****************/
+/* Return the fa with given pebbleId
+ * Return NULL if it does not exist
+ */
+fa_t *
+game_info_find_fa_pebbleId(game_info_t *gi, char *pebbleId){
+    find_id_t *find_id = malloc(sizeof(find_id_t));
+    find_id->id = malloc(MESSAGE_LENGTH);
+    strcpy(find_id->id, pebbleId);
+    find_id->fa = NULL;
+    find_id->team = NULL;
+    
+    // interate over all the teams and find the fa
+    // associated with the given pebbleId
+    set_iterate(gi->team, find_id, &find_pebbleId);
+    fa_t *fa = find_id->fa;
+    free(find_id->id);
+    free(find_id);
+    
+    // return the fa (can be NULL)
+    return fa;
 }
 
 /**************** game_info_find_pebbleId ****************/
 /* Return the team that has field agent with given pebbleId
  * Return NULL if it does not exist
  */
-static team_t *
+team_t *
 game_info_find_pebbleId(game_info_t *gi, char *pebbleId){
     find_id_t *find_id = malloc(sizeof(find_id_t));
-    find_id->id = intToHex(pebbleId);
+    find_id->id = malloc(MESSAGE_LENGTH);
+    strcpy(find_id->id, pebbleId);
     find_id->fa = NULL;
     find_id->team = NULL;
     
@@ -496,6 +676,7 @@ game_info_find_pebbleId(game_info_t *gi, char *pebbleId){
     // associated with the given pebbleId
     set_iterate(gi->team, find_id, &find_pebbleId);
     team_t *team = find_id->team;
+    free(find_id->id);
     free(find_id);
     
     // return the team (can be NULL)
@@ -540,7 +721,7 @@ find_fa_with_pebbleId(void *arg, const char *key, void *item){
         return;
     }
     
-    if ( fa->pebbleID == find_id->id ){
+    if ( strcmp(fa->pebbleID,find_id->id) == 0 ){
         find_id->fa = fa;
     }
 }
@@ -549,10 +730,10 @@ find_fa_with_pebbleId(void *arg, const char *key, void *item){
 /* Return the team that has guide agent with given guideId
  * Return NULL if it does not exist
  */
-static team_t *
+team_t *
 game_info_find_guideId(game_info_t *gi, char *guideId){
     find_id_t *find_id = malloc(sizeof(find_id_t));
-    find_id->id = intToHex(guideId);
+    find_id->id = guideId;
     find_id->fa = NULL;
     find_id->team = NULL;
     
@@ -567,10 +748,10 @@ game_info_find_guideId(game_info_t *gi, char *guideId){
 }
 
 /**************** find_guideId ****************/
-/* Helper function for game_info_find_pebbleId
+/* Helper function for game_info_find_guideId
  */
 static void
-find_pebbleId(void *arg, const char *key, void *item){
+find_guideId(void *arg, const char *key, void *item){
     // initialize parameters
     find_id_t *find_id = arg;
     team_t *team = item;
@@ -584,10 +765,80 @@ find_pebbleId(void *arg, const char *key, void *item){
     // if it is still not found
     if (find_id->team == NULL){
         if (team->ga != NULL){
-            if (ga->guideID == find_id->id){
+            if (strcmp(team->ga->guideID,find_id->id) == 0){
                 find_id->team = team;
             }
         }
+    }
+}
+
+/**************** team_register_ga ****************/
+/* register ga to the team
+ * return 0 if successfully registered
+ * return -5 if the guide is already registered in the team
+ * return -7 if the guideId is already registered
+ */
+int
+team_register_ga(game_info_t *gi, team_t *team, char *guideId, char *player_name, struct sockaddr_in them){
+    // two guide agent in one team is not allowed
+    team_print(team);
+    if (team->ga != NULL){
+        return -8;
+    }
+    
+    // if the player with the given guideId is not found
+    if (game_info_find_guideId(gi,guideId) == NULL){
+        ga_t *ga = ga_new();
+        if (ga == NULL){
+            return -99;
+        }
+        strcpy(ga->name, player_name);
+        strcpy(ga->guideID, guideId);
+        ga->them = them;
+        ga->last_contact_time = time(NULL);
+        team->ga = ga;
+        return 0;
+    }
+    // if the player with the given pebbleId is found, it will not be registered
+    // invalid id
+    else {
+        return -7;
+    }
+}
+
+
+/**************** team_register_fa ****************/
+/* register fa to the team
+ * return 0 if successfully registered
+ * return -6 if player with same name exists in the team
+ * return -7 if the pebbleId is already registered
+ */
+int
+team_register_fa(game_info_t *gi, team_t *team, char *pebbleId, char *player_name, struct sockaddr_in them, char *latitude, char *longitude){
+    // same name in any given team is not allowed
+    if (team_find_fa(team, player_name) != NULL){
+        return -6;
+    }
+    
+    // if the player with the given pebbleId is not found
+    if (game_info_find_pebbleId(gi, pebbleId) == NULL){
+        fa_t *fa = fa_new();
+        if (fa == NULL){
+            return -99;
+        }
+        strcpy(fa->pebbleID, pebbleId);
+        strcpy(fa->name, player_name);
+        fa->them = them;
+        fa->latitude = atof(latitude);
+        fa->longitude = atof(longitude);
+        fa->last_contact_time = time(NULL);
+        set_insert(team->fa, fa->name, fa);
+        return 0;
+    }
+    // if the player with the given pebbleId is found, it will not be registered
+    // invalid id
+    else {
+        return -7;
     }
 }
 
@@ -610,7 +861,7 @@ game_info_validate(game_info_t *gi, char *gameId, char *pebbleId, char *team_nam
     }
     
     // if the gameId does not match, return -4
-    if (gi->gameID != intToHex(gameId)) return -4;
+    if (gi->gameID != stringHexToDec(gameId)) return -4;
     
     // if team does not exist, return -5
     team_t *team = game_info_find_team(gi, team_name);
@@ -619,21 +870,23 @@ game_info_validate(game_info_t *gi, char *gameId, char *pebbleId, char *team_nam
     ga_t *ga = NULL;
     fa_t *fa = NULL;
     // get ga is the name is the same
-    if (strcmp(team->ga->name, player_name) == 0){
-        ga = team->ga;
+    if (team->ga != NULL){
+        if (strcmp(team->ga->name, player_name) == 0){
+            ga = team->ga;
+        }
     }
     // if ga's name is not the same with the given name,
     // find the fa with the same name
-    else{
+    if (ga == NULL){
         fa = team_find_fa(team, player_name);
     }
     // if player is not found, return -6
     if ((fa == NULL) && (ga == NULL)) return -6;
     
     // if the fa is found
-    if (fa != NULL){
+    else if (fa != NULL){
         // if the pebbleId does not match, return -7
-        if (fa->pebbleID != intToHex(pebbleId)) return -7;
+        if (strcmp(fa->pebbleID,pebbleId) != 0) return -7;
         
         // if any input is NULL, wrong message; return -1
         if (latitude == NULL || longitude == NULL) return -1;
@@ -646,9 +899,9 @@ game_info_validate(game_info_t *gi, char *gameId, char *pebbleId, char *team_nam
     }
     
     // if the ga is found
-    if (ga != NULL){
+    else{
         // if the guideId does not match, return -7
-        if (fa->guideID != intToHex(pebbleId)) return -7;
+        if (strcmp(ga->guideID,pebbleId) != 0) return -7;
         
         // update
         ga->last_contact_time = time(NULL);
@@ -663,7 +916,10 @@ game_info_validate(game_info_t *gi, char *gameId, char *pebbleId, char *team_nam
  */
 krag_t *
 game_info_find_krag(game_info_t *gi, char *kragId){
+    unsigned int kragID = stringHexToDec(kragId);
+    kragId = decToStringHex(kragID);
     krag_t *krag = set_find(gi->krags, kragId);
+    free(kragId);
     return krag;
 }
 
@@ -718,7 +974,6 @@ krag_new(){
     krag->longitude = 0;
     krag->latitude = 0;
     krag->kragID = 0;
-    krag->clue = malloc((CLUE_LENGTH) * sizeof(char)); // maximum length for clue is 140
     krag->claimed_team = set_new();
     return krag;
 }
@@ -727,13 +982,34 @@ krag_new(){
 /* free the memory of the given krag
  */
 static void
-krag_delete(krag_t *krag){
+krag_delete(void *item){
+    krag_t *krag = item;
     if (krag == NULL){
         return;
     }
     set_delete(krag->claimed_team, &set_char_delete);
     free(krag->clue);
     free(krag);
+}
+
+/**************** krag_get_longitude ****************/
+/* Return the longitue of the krag
+ * return 1000 if it does not exist
+ */
+float
+krag_get_longitude(krag_t *krag){
+    if (krag == NULL) return 1000;
+    return krag->longitude;
+}
+
+/**************** krag_get_latitude ****************/
+/* Return the latitude of the krag
+ * return 1000 if it does not exist
+ */
+float
+krag_get_latitude(krag_t *krag){
+    if (krag == NULL) return 1000;
+    return krag->latitude;
 }
 
 /**************** krag_has_claimed ****************/
@@ -743,7 +1019,7 @@ krag_delete(krag_t *krag){
  */
 int
 krag_has_claimed(krag_t *krag, char *team_name){
-    if (krag == NULL || team_name){
+    if (krag == NULL || team_name == NULL){
         return -1;
     }
     
@@ -763,10 +1039,15 @@ krag_has_claimed(krag_t *krag, char *team_name){
  */
 int
 krag_mark_claimed(game_info_t *gi, krag_t *krag, char *team_name){
+    char *team_name_to_be_inserted = malloc(MESSAGE_LENGTH);
+    strcpy(team_name_to_be_inserted,team_name);
     if (krag_has_claimed(krag, team_name) == 1){
-        set_insert(krag->claimed_team, team_name, team_name);
+        set_insert(krag->claimed_team, team_name, team_name_to_be_inserted);
         team_t *team = game_info_find_team(gi, team_name);
-        team->num_claimed_krags = team->num_claimed_krags+1;
+        team->num_claimed_krags += 1;
+        
+        team_print(team);
+        printf("%d %d",team->num_claimed_krags ,gi->num_krags);
         
         // If there are more krags to be claimed
         if (team->num_claimed_krags < gi->num_krags){
@@ -778,7 +1059,6 @@ krag_mark_claimed(game_info_t *gi, krag_t *krag, char *team_name){
     
     return 0;
 }
-
 
 /*********************************************************/
 /****************** functions for fa *********************/
@@ -798,6 +1078,7 @@ fa_new(){
     
     // initialize parameters
     new_fa->name = malloc(MESSAGE_LENGTH * sizeof(char));
+    new_fa->pebbleID = malloc(MESSAGE_LENGTH * sizeof(char));
     return new_fa;
 }
 
@@ -810,7 +1091,86 @@ fa_delete(fa_t *fa){
         return;
     }
     free(fa->name);
+    free(fa->pebbleID);
     free(fa);
+}
+
+/**************** fa_print ****************/
+/* Print the data stored in team
+ */
+void
+fa_print(fa_t *fa){
+    if (fa == NULL){
+        printf("No fa to print\n");
+        return;
+    }
+    printf("fa name: %s\n", fa->name);
+    printf("\tlongitude: %lf\n\tlatitude: %lf", fa->longitude, fa->latitude);
+}
+
+/**************** fa_send_to ****************/
+/* send message to field agent
+ */
+void
+fa_send_to(fa_t *fa, int comm_sock, char *message){
+    if (sendto(comm_sock, message, strlen(message), 0, (struct sockaddr *) &(fa->them), sizeof(fa->them)) < 0) {
+        perror("sending in datagram socket");
+        exit(6);
+    }
+}
+
+/**************** fa_get_pebbleId ****************/
+/* return pebbleId of the fa
+ */
+char *
+fa_get_pebbleId(fa_t *fa){
+    if (fa == NULL) return NULL;
+    char *pebbleId = malloc(MESSAGE_LENGTH);
+    strcpy(pebbleId, fa->pebbleID);
+    return pebbleId;
+}
+
+/**************** fa_get_name ****************/
+/* return name of the fa
+ */
+char *
+fa_get_name(fa_t *fa){
+    if (fa == NULL) return NULL;
+    char *name = malloc(MESSAGE_LENGTH);
+    strcpy(name, fa->name);
+    return name;
+}
+
+/**************** fa_get_latitude ****************/
+/* return latitude of the fa
+ * return 1000 if error
+ */
+float
+fa_get_latitude(fa_t *fa){
+    if (fa == NULL) return 1000;
+    return fa->latitude;
+}
+
+/**************** fa_get_longitude ****************/
+/* return longitude of the fa
+ * return 1000 if error
+ */
+float
+fa_get_longitude(fa_t *fa){
+    if (fa == NULL) return 1000;
+    return fa->longitude;
+}
+
+/**************** fa_get_time ****************/
+/* return the time elapsed (seconds in int)
+ * since last contact by the fa
+ */
+int
+fa_get_time(fa_t *fa){
+    if (fa == NULL) return -1;
+    time_t last = fa->last_contact_time;
+    time_t now = time(NULL);
+    return (int)difftime(now , last);
 }
 
 
@@ -832,7 +1192,8 @@ ga_new(){
     
     // initialize parameters
     new_ga->name = malloc(MESSAGE_LENGTH * sizeof(char));
-    return new_fa;
+    new_ga->guideID = malloc(MESSAGE_LENGTH * sizeof(char));
+    return new_ga;
 }
 
 /**************** ga_delete ****************/
@@ -844,8 +1205,61 @@ ga_delete(ga_t *ga){
         return;
     }
     free(ga->name);
+    free(ga->guideID);
     free(ga);
 }
+
+/**************** ga_get_id ****************/
+/* return the guideId
+ */
+char *
+ga_get_id(ga_t *ga){
+    if (ga == NULL) return NULL;
+    return ga->guideID;
+}
+
+/**************** ga_send_to ****************/
+/* send message to guide agent
+ */
+void
+ga_send_to(ga_t *ga, int comm_sock, char *message){
+    if (sendto(comm_sock, message, strlen(message), 0, (struct sockaddr *) &(ga->them), sizeof(ga->them)) < 0) {
+        perror("sending in datagram socket");
+        exit(6);
+    }
+}
+
+/*********************************************************/
+/**************** functions for gifaga *******************/
+/*********************************************************/
+/* return gi */
+game_info_t *
+gifaga_get_gi(gifaga_t *gifaga){
+    if (gifaga == NULL) return NULL;
+    return gifaga->gi;
+}
+
+/* return ga */
+ga_t *
+gifaga_get_ga(gifaga_t *gifaga){
+    if (gifaga == NULL) return NULL;
+    return gifaga->ga;
+}
+
+/* return team */
+team_t *
+gifaga_get_team(gifaga_t *gifaga){
+    if (gifaga == NULL) return NULL;
+    return gifaga->team;
+}
+
+/* return comm_sock */
+int
+gifaga_get_comm_sock(gifaga_t *gifaga){
+    if (gifaga == NULL) return -1;
+    return gifaga->comm_sock;
+}
+
 
 /*********************************************************/
 /********** helper functions for set_delete **************/
@@ -868,9 +1282,30 @@ set_char_delete(void *item){
 static void
 set_fa_delete(void *item){
     fa_t *fa = item;
-    if (fa != NULL){
-        free(fa->name);
-        free(fa);
-    }
+    fa_delete(fa);
 }
+
+
+/*********************************************************/
+/*********** helper functions for debugging **************/
+/*********************************************************/
+
+/**************** krag_print ****************/
+/* Print the data stored in krag
+ */
+void
+krag_print(krag_t *krag){
+    if (krag == NULL) return;
+    char *val = decToStringHex(krag->kragID);
+    printf("kragID: %s\n\tlongitude: %f\n\tlatitude: %f\n\tclue: %s\n\n", val, krag->longitude, krag->latitude, krag->clue);
+    free(val);
+}
+
+static void
+krag_set_print(FILE *fp, const char *key, void *item){
+    krag_t *krag = item;
+    printf("key: %s\n", key);
+    krag_print(krag);
+}
+
 
