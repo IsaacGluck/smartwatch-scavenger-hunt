@@ -16,9 +16,10 @@ void pin_window_complete_callback(PIN pin, void *context)
 {
   pin.digits[4] = '\0';
   APP_LOG(APP_LOG_LEVEL_INFO, "Submitted pin: %s\n", &pin.digits);
-  pin_window_pop(pin_window, true);
-  FA_INFO->krag_to_submit = pin.digits;
+  strcpy(FA_INFO->krag_to_submit, pin.digits);
+  // FA_INFO->krag_to_submit = pin.digits;
   FA_INFO->submit_krag = true;
+  pin_window_pop(pin_window, true);
 }
 
 static uint16_t get_num_rows_callback_main_menu(MenuLayer *menu_layer, uint16_t section_index, void *context)
