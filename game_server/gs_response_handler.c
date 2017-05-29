@@ -59,6 +59,7 @@ static void respond_with_gs_agent(int comm_sock, struct sockaddr_in them, game_i
 static void respond_with_gs_claimed(int comm_sock, struct sockaddr_in them, game_info_t *gi, char *message_from);
 static void send_gs_agent(void *arg, const char *key, void *item);
 static void send_hint_to_everyone_in_team(int comm_sock, struct sockaddr_in them, game_info_t *gi, char *message_from);
+static void send_gs_clue(int comm_sock, game_info_t *gi, char *message_from, krag_t *krag);
 static void respond_with_ga_hint(int comm_sock, struct sockaddr_in them, char *message_from, game_info_t *gi);
 static team_t *get_team(char *message_from, game_info_t *gi);
 static char *get_token(char *message, char *left_hand_side);
@@ -240,8 +241,64 @@ respond_with_game_status(int comm_sock, struct sockaddr_in them, game_info_t *gi
  * opCode=GS_CLUE|gameId=|guideId=|kragId=|clue=
  */
 static void respond_with_gs_clue(int comm_sock, struct sockaddr_in them, game_info_t *gi, char *message_from){
-    return;
+    team_t *team = get_team(message_from, gi);
     // reveal two and send both clues
+    // First time is if number of reveled krags is less than number of total krags
+    if (team_get_numRevealed(team) < game_info_get_numKrags(gi)){
+        krag_t *krag = game_info_reveal_krag(gi, team);
+        send_gs_clue(comm_sock, gi, message_from, krag);
+    }
+    
+    // Second time is if number of revealed krags is less than number of total krags
+    if (team_get_numRevealed(team) < game_info_get_numKrags(gi)){
+        krag_t *krag = game_info_reveal_krag(gi, get_team(message_from, gi));
+        send_gs_clue(comm_sock, gi, message_from, krag);
+    }
+}
+
+/**************** respond_with_gs_clue ****************/
+/* Send with gs clue to the guide agent
+ * opCode=GS_CLUE|gameId=|guideId=|kragId=|clue=
+ */
+static void
+send_gs_clue(int comm_sock, game_info_t *gi, char *message_from, krag_t *krag){
+    char *message = malloc(MESSAGE_LENGTH);
+    strcpy(message,"opCode=GS_CLUE|gameId=");
+    int i = strlen(message);
+    char *gameId = game_info_get_gameId(gi);
+    strcpy(&(message[i]), gameId);
+    i = strlen(message);
+    
+    strcpy(&(message[i]), "|guideId=");
+    i = strlen(message);
+    team_t *team = get_team(message_from, gi);
+    char *guideId = team_get_guideId(team);
+    if (guideId == NULL){
+        strcpy(&(message[i]), "none");
+    }
+    else{
+        strcpy(&(message[i]), guideId);
+    }
+    i = strlen(message);
+    
+    strcpy(&(message[i]), "|kragId=");
+    i = strlen(message);
+    char *kragId = krag_get_kragId(krag);
+    strcpy(&(message[i]), kragId);
+    i = strlen(message);
+    strcpy(&(message[i]), "|clue=");
+    i = strlen(message);
+    char *clue = krag_get_clue(krag);
+    strcpy(&(message[i]), clue);
+    
+    ga_send_to(team_get_guide(team), comm_sock, message);
+    
+    printf("Out message: %s\n", message);
+    free(gameId);
+    if (guideId!= NULL) free(guideId);
+    free(kragId);
+    free(clue);
+    free(message);
 }
 
 /**************** respond_with_gs_claimed ****************/

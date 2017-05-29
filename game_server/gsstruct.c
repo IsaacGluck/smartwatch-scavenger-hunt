@@ -48,6 +48,7 @@ typedef struct team {
     struct ga *ga;          // game agent
     set_t *fa;              // field agents
     int num_claimed_krags;  // number of claimed krags
+    int num_revealed;       // number of revealed krags
     char *secret_string;    // partly revealed secret string
 }team_t;
 
@@ -79,6 +80,7 @@ typedef struct krag {
     unsigned int kragID;       // ID of the krag
     char *clue;                // clue
     set_t *claimed_team;       // teams that have claimed this krag
+    set_t *revealed_team;      // teams that have been revealed this krag
 }krag_t;
 
 // struct for finding Id
@@ -95,7 +97,8 @@ typedef struct send_hint {
     int comm_sock;
 }send_hint_t;
 
-// struct for holding gi, one fa, and ga in the team
+// struct for holding gi, one fa,
+// ga, team and comm_sock in the team
 typedef struct gifaga{
     game_info_t *gi;
     ga_t *ga;
@@ -104,6 +107,15 @@ typedef struct gifaga{
     int comm_sock;
 }gifaga_t;
 
+// struct for finding krag to be revealed
+typedef struct find_krag{
+    struct krag *krag;
+    int current;
+    int target;
+    char *team_name;
+}find_krag_t;
+
+
 /**************** file-local functions ****************/
 static int handle_kiff_message(char *left, char *right, game_info_t *gi, krag_t *new_krag);
 static void set_kiff_handle_error(char *left, char *right, FILE *fp, char *message);
@@ -111,6 +123,7 @@ static void find_pebbleId(void *arg, const char *key, void *item);
 static void find_fa_with_pebbleId(void *arg, const char *key, void *item);
 static void find_guideId(void *arg, const char *key, void *item);
 static void send_hint_to_everyone(void *arg, const char *key, void *item);
+static void reveal_krag_helper(void *arg, const char *key, void *item);
 
 static krag_t *krag_new();
 static void krag_delete(void *item);
@@ -148,6 +161,7 @@ team_new(){
     new_team->ga = NULL;
     new_team->fa = set_new();
     new_team->num_claimed_krags = 0;
+    new_team->num_revealed = 0;
     new_team->secret_string = malloc((CLUE_LENGTH) * sizeof(char));
     new_team->team_name = malloc((MESSAGE_LENGTH) * sizeof(char));
     return new_team;
@@ -280,6 +294,15 @@ int
 team_get_numClaimed(team_t *team){
     if (team == NULL) return 0;
     return team->num_claimed_krags;
+}
+
+/**************** team_get_numRevealed ****************/
+/* Return the number of claimed krags
+ */
+int
+team_get_numRevealed(team_t *team){
+    if (team == NULL) return 0;
+    return team->num_revealed;
 }
 
 /**************** team_get_secret ****************/
@@ -953,6 +976,63 @@ game_info_krag_distance(game_info_t *gi, char *kragId, char *latitude, char *lon
     return 1;
 }
 
+/**************** game_info_reveal_krag ****************/
+/* Reveal krag and return the krag that was revealed
+ * Return NULL if error
+ */
+krag_t *
+game_info_reveal_krag(game_info_t *gi, team_t *team){
+    if (gi == NULL || team == NULL) return NULL;
+    
+    // if all krags are revealed,
+    // end the game and return NULL
+    if (gi->num_krags >= team->num_claimed_krags) {
+        game_info_change_game_status(gi);
+        return NULL;
+    }
+    
+
+    find_krag_t *find_krag = malloc(sizeof(find_krag_t));
+    find_krag->team_name = team->team_name;
+    find_krag->krag = NULL;
+    // loop the set of krag until it finds a krag that is not
+    // revealed to the team
+    do{
+        find_krag->target = rand()%(game_info_get_numKrags(gi));
+        find_krag->current = 0;
+        set_iterate(gi->krags, find_krag, &reveal_krag_helper);
+    }while (find_krag->krag == NULL);
+    
+    krag_t *krag;
+    krag = find_krag->krag;
+    team->num_revealed += 1;
+    free(find_krag);
+    return krag;
+}
+
+/**************** reveal_krag_helper ****************/
+/* Helper function for game_info_reveal_krag
+ */
+static void
+reveal_krag_helper(void *arg, const char *key, void *item){
+    krag_t *krag = item;
+    find_krag_t *find_krag = arg;
+    if (krag == NULL || find_krag == NULL) return;
+    
+    if ((find_krag->current == find_krag->target) && (find_krag->krag == NULL)){
+        if (krag_has_revealed(krag, find_krag->team_name) == 1){
+            find_krag->krag = krag;
+            char *team_name_to_be_inserted = malloc(MESSAGE_LENGTH);
+            strcpy(team_name_to_be_inserted, find_krag->team_name);
+            set_insert(krag->revealed_team, find_krag->team_name, team_name_to_be_inserted);
+        }
+    }
+    else {
+        find_krag->current++;
+    }
+}
+
+
 
 /*********************************************************/
 /**************** functions for krag *********************/
@@ -975,6 +1055,7 @@ krag_new(){
     krag->latitude = 0;
     krag->kragID = 0;
     krag->claimed_team = set_new();
+    krag->revealed_team = set_new();
     return krag;
 }
 
@@ -988,6 +1069,7 @@ krag_delete(void *item){
         return;
     }
     set_delete(krag->claimed_team, &set_char_delete);
+    set_delete(krag->revealed_team, &set_char_delete);
     free(krag->clue);
     free(krag);
 }
@@ -1012,6 +1094,30 @@ krag_get_latitude(krag_t *krag){
     return krag->latitude;
 }
 
+/**************** krag_get_kragId ****************/
+/* Return the kragId of the krag
+ * return NULL if it does not exist
+ */
+char *
+krag_get_kragId(krag_t *krag){
+    if (krag == NULL) return NULL;
+    char *kragId = decToStringHex(krag->kragID);
+    return kragId;
+}
+
+/**************** krag_get_clue ****************/
+/* Return the clue of the krag
+ * return NULL if it does not exist
+ */
+char *
+krag_get_clue(krag_t *krag){
+    if (krag == NULL) return NULL;
+    char *clue = malloc(CLUE_LENGTH);
+    strcpy(clue, krag->clue);
+    return clue;
+}
+
+
 /**************** krag_has_claimed ****************/
 /* check if the krag has claimed by the team or not
  * Return 0 if claimed, 1 if not
@@ -1030,6 +1136,26 @@ krag_has_claimed(krag_t *krag, char *team_name){
     }
     return 0;
 }
+
+/**************** krag_has_revealed ****************/
+/* check if the krag has revealed by the team or not
+ * Return 0 if revealed, 1 if not
+ * Return -1 if error
+ */
+int
+krag_has_revealed(krag_t *krag, char *team_name){
+    if (krag == NULL || team_name == NULL){
+        return -1;
+    }
+    
+    // if team not found in the set of claimed_teams,
+    // return NULL
+    if (set_find(krag->revealed_team, team_name) == NULL){
+        return 1;
+    }
+    return 0;
+}
+
 
 /**************** krag_mark_claimed ****************/
 /* Mark the krag has claimed for the given krag and team
@@ -1223,6 +1349,7 @@ ga_get_id(ga_t *ga){
  */
 void
 ga_send_to(ga_t *ga, int comm_sock, char *message){
+    if (ga == NULL || message == NULL) return;
     if (sendto(comm_sock, message, strlen(message), 0, (struct sockaddr *) &(ga->them), sizeof(ga->them)) < 0) {
         perror("sending in datagram socket");
         exit(6);
