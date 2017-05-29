@@ -8,8 +8,8 @@
 
 
 typedef struct location_struct {
-	double latitude;
-	double longitude;
+	char* latitude;
+	char* longitude;
 } location_t;
 
 location_t *parse_location(char* location_s);

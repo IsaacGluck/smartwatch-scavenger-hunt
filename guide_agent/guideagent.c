@@ -5,6 +5,7 @@
 #include <ctype.h>
 #include "bag.h"
 #include "hashtable.h"
+#include "../common/shared.h"
 
 //opCode=GAME_STATUS|gameId=FEED|guideId=1d2f3e4a|numClaimed=6|numKrags=8
 //opCode=GS_SECRET|gameId=FEED|guideId=1d2f3e4a|secret=com__dafd_ _cie____50
@@ -114,7 +115,7 @@ int main(const int argc, char *argv[]){
 	char* l = readlinep(stdin); 
 	while(l!=NULL){
 
-	printf("message: %s\n", l);
+	/*printf("message: %s\n", l);
 	if(strcmp(l, "hint")==0){
 		printf("going to hunt mesage rn\n");
 		printf("HINT: %s\n", GA_HINTReturn(game));
@@ -125,7 +126,9 @@ int main(const int argc, char *argv[]){
 		dealWithInfo(game, l);
 	}
 
-	printf("GOT HERE! %s", game->gameID);
+	printf("GOT HERE! %s", game->gameID);*/
+	printf("I Have message: %s\n", l);
+	printf("Nuber : %d\n", validate_message(l));
 
 	free(l); 
 	l = readlinep(stdin); //get next line 
