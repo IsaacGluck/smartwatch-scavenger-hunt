@@ -1,22 +1,26 @@
-# Makefile for common library
-#
-# Kazuma Honjo, May 2017
+
 
 L = ../libcs50
 
 
 # object files and the target library
-OBJS = common.o
+OBJS = shared.o
 LIB = common.a
 
-CFLAGS = -Wall -I$L -std=gnu11 -pedantic -ggdb $(TESTING)
-
+CFLAGS = -Wall -pedantic -std=c11 -ggdb $(FLAGS)
+CC = gcc
+MAKE = make
 
 # build the library by archiving object files
 $(LIB): $(OBJS)
 	ar cr $(LIB) $(OBJS)
 
-# clean
+shared.o: shared.h
+.PHONY: clean sourcelist
+
+sourcelist: Makefile *.md *.c *.h
+	@echo $^
+
 clean:
 	rm -f *~ *.o *.dSYM
 	rm *.a
