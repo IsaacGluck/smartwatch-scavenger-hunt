@@ -6,6 +6,7 @@
 #include "field_agent_data.h"
 #include "location.h"
 #include "choose_name.h"
+#include "message_handler.h"
 
 
 // Globals
@@ -51,7 +52,6 @@ static void init() {
 
   /* 4. Update time information. */
   time(&start); // set the start time
-  update_time();
 
   /* 5. Set the handlers for AppMessage inbox/outbox events. Set these    *
    *    handlers BEFORE calling open, otherwise you might miss a message. */
@@ -93,25 +93,36 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   static int seconds = 5;
   static int reqOption = 0;
 
-  time_t current;
-  int elapsed = 0;
+  if (FA_INFO->submit_krag) {
+    char* FA_CLAIM = create_fa_claim(FA_INFO->krag_to_submit);
+    send_message(FA_CLAIM);
+    free(FA_CLAIM);
+    FA_INFO->submit_krag = false; 
+  }
+
 
   /* 1. Only send a request/message every 5 seconds. */
   if(seconds == 0) {
     switch(reqOption) {
       case 0 :
-        request_pebbleId();
+        if (FA_INFO->pebbleID == NULL) {
+          request_pebbleId();
+        }
+        request_location();
         reqOption++;
         break;
       case 1 :
         request_location();
+        if(FA_INFO->game_started){
+          char* FA_LOCATION = create_fa_location("0");
+          send_message(FA_LOCATION);
+          free(FA_LOCATION);
+        }
         reqOption++;
         break;
       case 2 :
-        // send_message(fa_claim);
-        time(&current);
-        elapsed = ((current - start) / 60);
-        FA_INFO->time_passed = elapsed;
+        request_location();
+        main_menu_reload_pass_up();
         reqOption = 0;
         break;
       default:
@@ -124,22 +135,17 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   }
 
     /* 2. Update time on watchface. */
-    // update_time();
+ 
 }
 
 // update_time
 static void update_time() {
-    /* 1. Get a tm structure. */
-    // time_t temp = time(NULL);
-    // struct tm *tick_time = localtime(&temp);
+  time_t current; // current second
+  int elapsed = 0; // initialize elapsed time
 
-    // /* 2. Write the current hours and minutes into a buffer. */
-    // static char s_buffer[8];
-    // strftime(s_buffer, sizeof(s_buffer),
-    // 	clock_is_24h_style() ? "%H:%M" : "%I:%M", tick_time);
-
-    // /* 3. Display this time on the TextLayer. */
-    // text_layer_set_text(main_layer, s_buffer);
+  time(&current);
+  elapsed = ((current - start) / 60);
+  FA_INFO->time_passed = elapsed;
 
 }
 
@@ -182,18 +188,16 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         if (FA_INFO != NULL) { // struct keeping track of the game has been setup
         	// parse the location string
 	        location_t *location_parsed = parse_location(location);
-          APP_LOG(APP_LOG_LEVEL_INFO, "Parsed AppKeyLocation: %s|%s\n", location_parsed->latitude, location_parsed->longitude);
 	        
 	        if (location_parsed != NULL) {
 	        	// add the location to the FA_INFO
 		        FA_INFO->latitude = location_parsed->latitude;
 		        FA_INFO->longitude = location_parsed->longitude;
-            APP_LOG(APP_LOG_LEVEL_INFO, "Added to FA_INFO: %s|%s\n", FA_INFO->latitude, FA_INFO->longitude);
 		        free(location_parsed);
 	        }
 
 	        //TEST
-        	print_FA();
+        	// print_FA();
         }
     }
 
@@ -201,9 +205,9 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     Tuple *id_tuple = dict_find(iterator, AppKeyPebbleId);
     if(id_tuple) {
         // Log the value sent as part of the received message.
-        char *pebbleId = id_tuple->value->cstring;
-        APP_LOG(APP_LOG_LEVEL_INFO, "Got AppKeyPebbleId: %s\n", pebbleId);
-        FA_INFO->pebbleId = pebbleId;
+        char *pebbleID = id_tuple->value->cstring;
+        APP_LOG(APP_LOG_LEVEL_INFO, "Got AppKeyPebbleId: %s\n", pebbleID);
+        FA_INFO->pebbleID = pebbleID;
     }
 
     /* 5. Check to see if an error message was received. */
@@ -232,78 +236,80 @@ static void outbox_failed_callback(DictionaryIterator *iter, AppMessageResult re
 
 // request_pebbleId
 static void request_pebbleId() {
-    /* 1. Declare dictionary iterator */
-    DictionaryIterator *out_iter;
+  /* 1. Declare dictionary iterator */
+  DictionaryIterator *out_iter;
 
-    /* 2. Prepare the outbox */
-    AppMessageResult result = app_message_outbox_begin(&out_iter);
+  /* 2. Prepare the outbox */
+  AppMessageResult result = app_message_outbox_begin(&out_iter);
 
-    /* 3. If outbox was prepared, send request. Otherwise, log error. */
-    if (result == APP_MSG_OK) {
-        int value = 1;
+  /* 3. If outbox was prepared, send request. Otherwise, log error. */
+  if (result == APP_MSG_OK) {
+    int value = 1;
 
-        /* construct and send message, outgoing value ignored */
-        dict_write_int(out_iter, AppKeyPebbleId, &value, sizeof(value), true);
+    /* construct and send message, outgoing value ignored */
+    dict_write_int(out_iter, AppKeyPebbleId, &value, sizeof(value), true);
 
-        result = app_message_outbox_send();
+    result = app_message_outbox_send();
 
-        if (result != APP_MSG_OK) {
-            APP_LOG(APP_LOG_LEVEL_ERROR, "Error sending pebbleId request from outbox.\n");
-        }
-    } else {
-        APP_LOG(APP_LOG_LEVEL_ERROR, "Error preparing outbox for pebbleId request.\n");
+    if (result != APP_MSG_OK) {
+      APP_LOG(APP_LOG_LEVEL_ERROR, "Error sending pebbleId request from outbox.\n");
     }
-    APP_LOG(APP_LOG_LEVEL_INFO, "Requested pebbleId.\n");
+  } else {
+    APP_LOG(APP_LOG_LEVEL_ERROR, "Error preparing outbox for pebbleId request.\n");
+  }
+  APP_LOG(APP_LOG_LEVEL_INFO, "Requested pebbleId.\n");
 }
 
 // request_location
 static void request_location() {
-    /* 1. Declare dictionary iterator */
-    DictionaryIterator *out_iter;
+  /* 1. Declare dictionary iterator */
+  DictionaryIterator *out_iter;
 
-    /* 2. Prepare the outbox */
-    AppMessageResult result = app_message_outbox_begin(&out_iter);
+  /* 2. Prepare the outbox */
+  AppMessageResult result = app_message_outbox_begin(&out_iter);
 
-    /* 3. If outbox was prepared, send request. Otherwise, log error. */
-    if (result == APP_MSG_OK) {
-        int value = 1;
+  /* 3. If outbox was prepared, send request. Otherwise, log error. */
+  if (result == APP_MSG_OK) {
+    int value = 1;
 
-        /* construct and send message, outgoing value ignored */
-        dict_write_int(out_iter, AppKeyLocation, &value, sizeof(value), true);
+    /* construct and send message, outgoing value ignored */
+    dict_write_int(out_iter, AppKeyLocation, &value, sizeof(value), true);
 
-        result = app_message_outbox_send();
+    result = app_message_outbox_send();
 
-        if (result != APP_MSG_OK) {
-            APP_LOG(APP_LOG_LEVEL_ERROR, "Error sending locationrequest from outbox.\n");
-        }
-    } else {
-        APP_LOG(APP_LOG_LEVEL_ERROR, "Error preparing outbox for location request.\n");
+    if (result != APP_MSG_OK) {
+      APP_LOG(APP_LOG_LEVEL_ERROR, "Error sending locationrequest from outbox.\n");
     }
-    APP_LOG(APP_LOG_LEVEL_INFO, "Requested location.\n");
+  } else {
+    APP_LOG(APP_LOG_LEVEL_ERROR, "Error preparing outbox for location request.\n");
+  }
+  APP_LOG(APP_LOG_LEVEL_INFO, "Requested location.\n");
 }
 
 // send_message
 static void send_message(char *message) {
-    /* 1. Declare dictionary iterator */
-    DictionaryIterator *out_iter;
+  APP_LOG(APP_LOG_LEVEL_INFO, "\n\n SENDING: %s \n\n", message);
 
-    /* 2. Prepare the outbox */
-    AppMessageResult result = app_message_outbox_begin(&out_iter);
+  /* 1. Declare dictionary iterator */
+  DictionaryIterator *out_iter;
 
-    /* 3. If outbox was prepared, send message. Otherwise, log error. */
-    if (result == APP_MSG_OK) {
-      
-        /* Construct and send the message */
-        dict_write_cstring(out_iter, AppKeySendMsg, message);
-      
-        result = app_message_outbox_send();
-      
-        if(result != APP_MSG_OK) {
-            APP_LOG(APP_LOG_LEVEL_ERROR, "Error sending message from outbox.\n");
-        }
-    } else {
-        APP_LOG(APP_LOG_LEVEL_ERROR, "Error preparing outbox for send_message.\n");
+  /* 2. Prepare the outbox */
+  AppMessageResult result = app_message_outbox_begin(&out_iter);
+
+  /* 3. If outbox was prepared, send message. Otherwise, log error. */
+  if (result == APP_MSG_OK) {
+  
+    /* Construct and send the message */
+    dict_write_cstring(out_iter, AppKeySendMsg, message);
+  
+    result = app_message_outbox_send();
+  
+    if(result != APP_MSG_OK) {
+      APP_LOG(APP_LOG_LEVEL_ERROR, "Error sending message from outbox.\n");
     }
-    APP_LOG(APP_LOG_LEVEL_INFO, "Sent message.\n");
+  } else {
+    APP_LOG(APP_LOG_LEVEL_ERROR, "Error preparing outbox for send_message.\n");
+  }
+  APP_LOG(APP_LOG_LEVEL_INFO, "Sent message.\n");
 }
 

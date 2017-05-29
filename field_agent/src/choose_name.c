@@ -112,9 +112,10 @@ static void select_callback_choose_name(struct MenuLayer *menu_layer, MenuIndex 
     // They must choose a name
     if (s_current_selection != 0) {
 	    window_stack_pop(true);
-	    print_FA();
+	    // print_FA();
 
 	    // add the main screen
+	    FA_INFO->game_started = true;
 	    main_menu_window_push();
     }
   } else {
@@ -169,4 +170,8 @@ void choose_name_window_push() {
     });
   }
   window_stack_push(s_main_window_choose_name, true);
+}
+
+void main_menu_reload_pass_up() {
+	main_menu_reload();
 }

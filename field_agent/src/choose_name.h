@@ -14,4 +14,6 @@
 
 void choose_name_window_push();
 
+void main_menu_reload_pass_up();
+
 #endif

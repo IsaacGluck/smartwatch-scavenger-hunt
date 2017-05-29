@@ -7,10 +7,10 @@
 #include <pebble.h>
 
 
+char* create_fa_location(char* statusReq);
 
 
-
-
+char* create_fa_claim(char* kragId);
 
 
 

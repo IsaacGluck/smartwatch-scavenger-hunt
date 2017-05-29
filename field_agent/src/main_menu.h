@@ -12,6 +12,8 @@
 
 void main_menu_window_push();
 
+void main_menu_reload();
+
 
 
 #endif

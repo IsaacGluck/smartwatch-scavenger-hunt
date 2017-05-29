@@ -10,10 +10,18 @@ static char init_gameID[2] = "0";
 void create_info()
 {
 	FA_INFO = malloc(sizeof(fieldagent_info_t)); // must free this later
+
+
+
+	
 	FA_INFO->team = teamName; // initialize the team name to the set name
 	FA_INFO->gameID = init_gameID; // initialize the gameID to 0
 	FA_INFO->time_passed = 0;
 	FA_INFO->num_claimed = 0;
+
+	FA_INFO->game_started = false;
+
+	FA_INFO->submit_krag = false;
 }
 
 

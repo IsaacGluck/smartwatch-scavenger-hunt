@@ -5,8 +5,8 @@
 #include "field_agent_data.h"
 #include "pin_window.h"
 
-static Window *s_main_window_main_menu;
-static MenuLayer *s_menu_layer_main_menu;
+static Window *s_main_window_main_menu = NULL;
+static MenuLayer *s_menu_layer_main_menu = NULL;
 static PinWindow *pin_window;
 
 static int s_current_selection_main_menu = 0;
@@ -14,8 +14,11 @@ static int s_current_selection_main_menu = 0;
 
 void pin_window_complete_callback(PIN pin, void *context)
 {
+  pin.digits[4] = '\0';
   APP_LOG(APP_LOG_LEVEL_INFO, "Submitted pin: %s\n", &pin.digits);
   pin_window_pop(pin_window, true);
+  FA_INFO->krag_to_submit = pin.digits;
+  FA_INFO->submit_krag = true;
 }
 
 static uint16_t get_num_rows_callback_main_menu(MenuLayer *menu_layer, uint16_t section_index, void *context)
@@ -135,4 +138,11 @@ void main_menu_window_push()
     });
   }
   window_stack_push(s_main_window_main_menu, true);
+}
+
+void main_menu_reload()
+{
+  if (s_main_window_main_menu) {
+    menu_layer_reload_data(s_menu_layer_main_menu);
+  }
 }
