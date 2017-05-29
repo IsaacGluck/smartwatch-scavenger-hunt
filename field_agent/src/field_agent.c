@@ -193,13 +193,8 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
 	        	// add the location to the FA_INFO
             strcpy(FA_INFO->latitude, location_parsed->latitude);
             strcpy(FA_INFO->longitude, location_parsed->longitude);
-		        // FA_INFO->latitude = location_parsed->latitude;
-		        // FA_INFO->longitude = location_parsed->longitude;
 		        free(location_parsed);
 	        }
-
-	        //TEST
-        	// print_FA();
         }
     }
 
@@ -210,7 +205,6 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         char *pebbleID = id_tuple->value->cstring;
         APP_LOG(APP_LOG_LEVEL_INFO, "Got AppKeyPebbleId: %s\n", pebbleID);
         strcpy(FA_INFO->pebbleID, pebbleID);
-        // FA_INFO->pebbleID = pebbleID;
     }
 
     /* 5. Check to see if an error message was received. */

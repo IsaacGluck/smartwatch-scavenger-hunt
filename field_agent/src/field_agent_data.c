@@ -5,6 +5,10 @@
 
 static char teamName[7] = "views6";
 static char init_gameID[2] = "0";
+static int max_num_hints = 10;
+static int max_hint_size = 141;
+static char start_string[5] = "None";
+
 
 
 
@@ -36,7 +40,7 @@ void create_info()
 	FA_INFO->longitude = malloc(100);
 	FA_INFO->known_chars = malloc(100);
 	FA_INFO->krag_to_submit = malloc(100);
-		// FA_INFO->hints_received = malloc(100);
+	FA_INFO->hints_received = malloc(max_num_hints * sizeof(char*));
 
 	if (FA_INFO->gameID == NULL || FA_INFO->pebbleID == NULL || FA_INFO->name == NULL || FA_INFO->team == NULL ||
 		FA_INFO->latitude == NULL || FA_INFO->longitude == NULL || FA_INFO->known_chars == NULL ||
@@ -44,11 +48,18 @@ void create_info()
 		return;
 	}
 
+	for (int i = 0; i < max_num_hints; i++){
+		FA_INFO->hints_received[i] = malloc(max_hint_size + 1);
+		if (FA_INFO->hints_received[i] != NULL) {
+			strcpy(FA_INFO->hints_received[i], start_string);
+		}
+	}
+
 
 	strcpy(FA_INFO->team, teamName);
 	// FA_INFO->team = teamName; // initialize the team name to the set name
 	strcpy(FA_INFO->gameID, init_gameID);
-	FA_INFO->gameID = init_gameID; // initialize the gameID to 0
+	// FA_INFO->gameID = init_gameID; // initialize the gameID to 0
 	FA_INFO->time_passed = 0;
 	FA_INFO->num_claimed = 0;
 
@@ -84,7 +95,14 @@ void delete_info()
 	if (FA_INFO->krag_to_submit != NULL) {
 		free(FA_INFO->krag_to_submit);
 	}
-	// FA_INFO->hints_received
+
+	if (FA_INFO->hints_received != NULL) {
+		for (int i = 0; i < max_num_hints; i++){
+			if (FA_INFO->hints_received[i] != NULL) {
+				free(FA_INFO->hints_received[i]);
+			}
+		}
+	}
 
 
 	if (FA_INFO != NULL) {
