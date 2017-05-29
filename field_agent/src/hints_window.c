@@ -3,6 +3,7 @@
 /*****************************************************************/
 #include "hints_window.h"
 #include "field_agent_data.h"
+#include "message_dialog.h"
 
 static Window *s_main_window_hints_window = NULL;
 static MenuLayer *s_menu_layer_hints_window = NULL;
@@ -46,6 +47,8 @@ static int16_t get_cell_height_callback_hints_window(struct MenuLayer *menu_laye
 static void select_callback_hints_window(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context)
 {
   APP_LOG(APP_LOG_LEVEL_INFO, "Selected hint %d\n", (int)cell_index->row);
+
+  dialog_message_window_push(FA_INFO->hints_received[(int)cell_index->row]);
 
   // if(cell_index->row == HINTS_WINDOW_WINDOW_NUM_ROWS - 1) {
   //   // Do something with user choice

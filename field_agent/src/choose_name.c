@@ -90,26 +90,18 @@ static void select_callback_choose_name(struct MenuLayer *menu_layer, MenuIndex 
     	case 1 :
         APP_LOG(APP_LOG_LEVEL_INFO, "Chose Isaac");
         strcpy(FA_INFO->name, isaac);
-        // FA_INFO->name = isaac;
-        // chosen_name = isaac;
         break;
       case 2 :
       	APP_LOG(APP_LOG_LEVEL_INFO, "Chose Morgan");
       	strcpy(FA_INFO->name, morgan);
-      	// FA_INFO->name = morgan;
-        // chosen_name = morgan;
         break;
       case 3 :
       	APP_LOG(APP_LOG_LEVEL_INFO, "Chose Kazuma");
       	strcpy(FA_INFO->name, kazuma);
-      	// FA_INFO->name = kazuma;
-        // chosen_name = kazuma;
         break;
       case 4 :
       	APP_LOG(APP_LOG_LEVEL_INFO, "Chose Laya");
       	strcpy(FA_INFO->name, laya);
-      	// FA_INFO->name = laya;
-        // chosen_name = laya;
         break;
     }
 
