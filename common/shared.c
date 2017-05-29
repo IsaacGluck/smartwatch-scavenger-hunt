@@ -183,33 +183,703 @@ static int gameStatus(char* parameters[]){
 	return 0;
 }
 static int gsAgent(char* parameters[]){
+	char* opcode=  parameters[0];
+	if(strcmp(opcode, "opCode")==1){
+		return 4; 
+	}
+	char* gameid = parameters[2];
+	if(strcmp(gameid, "gameId")==1){
+		return 4; 
+	}
+
+	char* pebbleID = parameters[4];
+	if(strcmp(pebbleID, "pebbleId")==1){
+		return 4; 
+	}
+
+	char* team = parameters[6];
+	if(strcmp(team, "team")==1){
+		return 4; 
+	}
+	char* player = parameters[8]; 
+	if(strcmp(player, "player")==1){
+		return 4; 
+	}
+
+	char* lat = parameters[10];
+	if(strcmp(lat, "latitude") ==1){
+		return 4;
+	}
+
+	char* lon = parameters[12]; 
+	if(strcmp(lon, "longitude")==1){
+		return 4;
+	}
+	char* lastcontact = parameters[14]; 
+	if(strcmp(lastcontact, "lastContact")==1){
+		return 4;
+	}
+
+	printf("Checking game id\n");
+	if(strlen(parameters[3])>0 && strlen(parameters[3])<9){
+		for(int i = 0; i< strlen(parameters[3]); i++){
+			if(!isxdigit(parameters[3][i])){
+				return 3; 
+			}
+		}
+	}
+	else{
+		return 3; 
+	}
+
+	//checking hex for parameter 5 pebble id
+	if(strlen(parameters[5])>0 && strlen(parameters[5])<9){
+		for(int i = 0; i< strlen(parameters[5]); i++){
+			if(!isxdigit(parameters[5][i])){
+				return 3; 
+			}
+		}
+	}
+	else{
+		return 3; 
+	}
+
+	//team
+	if(strlen(parameters[7]) < 0 || strlen(parameters[7]) > 11){
+		return 3; 
+	}
+
+	//player
+	if(strlen(parameters[9]) < 0 || strlen(parameters[9]) > 11){
+		return 3; 
+	}
+
+	//lat 
+	int latitude = atof(parameters[11]); 
+	if(latitude< -90 || latitude > 90){
+		return 3; 
+	}
+
+	int longitude = atof(parameters[13]); 
+	if(longitude< -180 || longitude > 180){
+		return 3; 
+	}
+
+	int lc = atof(parameters[15]); 
+	if(lc <0 ){
+		return 3;
+	}
+
+	//comparing for the same answers
+	if(strcmp(parameters[3], parameters[5]) == 0 || strcmp(parameters[3], parameters[7]) == 0 || strcmp(parameters[3], parameters[9]) == 0 || strcmp(parameters[3], parameters[11]) == 0 || strcmp(parameters[3], parameters[13]) == 0 || strcmp(parameters[3], parameters[15]) == 0){
+		return 3; 
+	}
+	if(strcmp(parameters[5], parameters[7]) == 0 || strcmp(parameters[5], parameters[9]) == 0 || strcmp(parameters[5], parameters[11]) == 0 || strcmp(parameters[5], parameters[13]) == 0 || strcmp(parameters[5], parameters[15]) == 0){
+		return 3; 
+	}
+	if(strcmp(parameters[7], parameters[9]) == 0 || strcmp(parameters[7], parameters[11]) == 0 || strcmp(parameters[7], parameters[13]) == 0 || strcmp(parameters[7], parameters[15]) == 0){
+		return 3; 
+	}
+	if( strcmp(parameters[9], parameters[11]) == 0 || strcmp(parameters[9], parameters[13]) == 0 || strcmp(parameters[9], parameters[15]) == 0){
+		return 3; 
+	}
+	if(strcmp(parameters[11], parameters[13]) == 0 || strcmp(parameters[11], parameters[15]) == 0){
+		return 3;
+	}
+	if(strcmp(parameters[13], parameters[15]) == 0){
+		return 3;
+	}
+
+
+
 	return 0;
 }
 static int gsClue(char* parameters[]){
+	char* opcode=  parameters[0];
+	if(strcmp(opcode, "opCode")==1){
+		return 4; 
+	}
+	char* gameid = parameters[2];
+	if(strcmp(gameid, "gameId")==1){
+		return 4; 
+	}
+	char* guideid = parameters[4]; 
+	if(strcmp(guideid, "guideId")==1){
+		return 4; 
+	}
+	char* kragid = parameters[6];
+	if(strcmp(kragid, "kragId")==1){
+		return 4; 
+	}
+	char* clue = parameters[8]; 
+	if(strcmp(clue, "clue")==1){
+		return 4; 
+	}
+
+	if(strlen(parameters[3])>0 && strlen(parameters[3])<9){
+		for(int i = 0; i< strlen(parameters[3]); i++){
+			if(!isxdigit(parameters[3][i])){
+				return 3; 
+			}
+		}
+	}
+	else{
+		return 3; 
+	}
+	
+	if(strlen(parameters[5])>0 && strlen(parameters[5])<9){
+		for(int i = 0; i< strlen(parameters[5]); i++){
+			if(!isxdigit(parameters[5][i])){
+				return 3; 
+			}
+		}
+	}
+	else{
+		return 3; 
+	}
+	if(strlen(parameters[7])>0 && strlen(parameters[7])<5){
+		for(int i = 0; i< strlen(parameters[7]); i++){
+			if(!isxdigit(parameters[7][i])){
+				return 3; 
+			}
+		}
+	}
+	else{
+		return 3; 
+	}
+
+	if(strlen(parameters[9])<1){
+		return 3;
+	}
+
+	if(strcmp(parameters[3], parameters[5]) == 0 || strcmp(parameters[3], parameters[7]) == 0 || strcmp(parameters[3], parameters[9]) == 0){
+		return 3; 
+	}
+	if(strcmp(parameters[5], parameters[7]) == 0 || strcmp(parameters[5], parameters[9]) == 0){
+		return 3; 
+	}
+	if(strcmp(parameters[7], parameters[9]) == 0){
+		return 3; 
+	}
+
+
 	return 0;
 }
 static int gsClaimed(char* parameters[]){
+
+	char* opcode=  parameters[0];
+	if(strcmp(opcode, "opCode")==1){
+		return 4; 
+	}
+	char* gameid = parameters[2];
+	if(strcmp(gameid, "gameId")==1){
+		return 4; 
+	}
+	char* guideid = parameters[4]; 
+	if(strcmp(guideid, "guideId")==1){
+		return 4; 
+	}
+	char* pebbleId = parameters[6];
+	if(strcmp(pebbleId, "pebbleId")==1){
+		return 4; 
+	}
+	char* kragId = parameters[8]; 
+	if(strcmp(kragId, "kragId")==1){
+		return 4; 
+	}
+	char* lat = parameters[10];
+	if(strcmp(lat, "latitude") ==1){
+		return 4;
+	}
+
+	char* lon = parameters[12]; 
+	if(strcmp(lon, "longitude")==1){
+		return 4;
+	}
+
+	//game ID
+	if(strlen(parameters[3])>0 && strlen(parameters[3])<9){
+		for(int i = 0; i< strlen(parameters[3]); i++){
+			if(!isxdigit(parameters[3][i])){
+				return 3; 
+			}
+		}
+	}
+	else{
+		return 3; 
+	}
+	
+	//guide ID 
+	if(strlen(parameters[5])>0 && strlen(parameters[5])<9){
+		for(int i = 0; i< strlen(parameters[5]); i++){
+			if(!isxdigit(parameters[5][i])){
+				return 3; 
+			}
+		}
+	}
+	else{
+		return 3; 
+	}
+	//pebble ID
+	if(strlen(parameters[7])>0 && strlen(parameters[7])<9){
+		for(int i = 0; i< strlen(parameters[7]); i++){
+			if(!isxdigit(parameters[7][i])){
+				return 3; 
+			}
+		}
+	}
+	else{
+		return 3; 
+	}
+	//krag ID
+	if(strlen(parameters[9])>0 && strlen(parameters[9])<5){
+		for(int i = 0; i< strlen(parameters[9]); i++){
+			if(!isxdigit(parameters[9][i])){
+				return 3; 
+			}
+		}
+	}
+	else{
+		return 3; 
+	}
+
+	//check lat
+	int latitude = atof(parameters[11]); 
+	if(latitude< -90 || latitude > 90){
+		return 3; 
+	}
+	//check long
+	int longitude = atof(parameters[13]); 
+	if(longitude< -180 || longitude > 180){
+		return 3; 
+	}
+
+	if(strcmp(parameters[3], parameters[5]) == 0 || strcmp(parameters[3], parameters[7]) == 0 || strcmp(parameters[3], parameters[9]) == 0 || strcmp(parameters[3], parameters[11]) == 0 || strcmp(parameters[3], parameters[13]) == 0 ){
+		return 3; 
+	}
+	if(strcmp(parameters[5], parameters[7]) == 0 || strcmp(parameters[5], parameters[9]) == 0 || strcmp(parameters[5], parameters[11]) == 0 || strcmp(parameters[5], parameters[13]) == 0 ){
+		return 3; 
+	}
+	if(strcmp(parameters[7], parameters[9]) == 0 || strcmp(parameters[7], parameters[11]) == 0 || strcmp(parameters[7], parameters[13]) == 0){
+		return 3; 
+	}
+	if( strcmp(parameters[9], parameters[11]) == 0 || strcmp(parameters[9], parameters[13]) == 0){
+		return 3; 
+	}
+	if(strcmp(parameters[11], parameters[13]) == 0 ){
+		return 3;
+	}
+
+
+
 	return 0;
 }
 static int gsSecret(char* parameters[]){
+	char* opcode=  parameters[0];
+	if(strcmp(opcode, "opCode")==1){
+		return 4; 
+	}
+	char* gameid = parameters[2];
+	if(strcmp(gameid, "gameId")==1){
+		return 4; 
+	}
+	char* guideid = parameters[4]; 
+	if(strcmp(guideid, "guideId")==1){
+		return 4; 
+	}
+	char* secret = parameters[6]; 
+	if(strcmp(secret, "secret")==1){
+		return 4; 
+	}
+	//game ID
+	if(strlen(parameters[3])>0 && strlen(parameters[3])<9){
+		for(int i = 0; i< strlen(parameters[3]); i++){
+			if(!isxdigit(parameters[3][i])){
+				return 3; 
+			}
+		}
+	}
+	else{
+		return 3; 
+	}
+
+	//checking hex for parameter guide id
+	if(strlen(parameters[5])>0 && strlen(parameters[5])<9){
+		for(int i = 0; i< strlen(parameters[5]); i++){
+			if(!isxdigit(parameters[5][i])){
+				return 3; 
+			}
+		}
+	}
+	else{
+		return 3; 
+	}
+
+	if(strlen(parameters[7])> 140){
+		return 3;
+	}
+
+	//check duplicates
+	if(strcmp(parameters[3], parameters[5]) == 0 || strcmp(parameters[3], parameters[7]) == 0 ){
+		return 3; 
+	}
+	if(strcmp(parameters[5], parameters[7]) == 0 ){
+		return 3; 
+	}
+
+
+
 	return 0;
 }
 static int gsResponse(char* parameters[]){
 	return 0;
 }
 static int gameOver(char* parameters[]){
+	char* opcode=  parameters[0];
+	if(strcmp(opcode, "opCode")==1){
+		return 4; 
+	}
+	char* gameid = parameters[2];
+	if(strcmp(gameid, "gameId")==1){
+		return 4; 
+	}
+	char* secret = parameters[4]; 
+	if(strcmp(secret, "secret")==1){
+		return 4; 
+	}
+
+	//game ID
+	if(strlen(parameters[3])>0 && strlen(parameters[3])<9){
+		for(int i = 0; i< strlen(parameters[3]); i++){
+			if(!isxdigit(parameters[3][i])){
+				return 3; 
+			}
+		}
+	}
+	else{
+		return 3; 
+	}
+
+	if(strlen(parameters[5])> 140){
+		return 3;
+	}
 	return 0;
+
 }
+
 static int teamRecord(char* parameters[]){
+	char* opcode=  parameters[0];
+	if(strcmp(opcode, "opCode")==1){
+		return 4; 
+	}
+	char* gameid = parameters[2];
+	if(strcmp(gameid, "gameId")==1){
+		return 4; 
+	}
+	char* team = parameters[4]; 
+	if(strcmp(team, "team")==1){
+		return 4; 
+	}
+	char* numClaimed = parameters[6];
+	if(strcmp(numClaimed, "numClaimed")==1){
+		return 4; 
+	}
+	char* numPlayers = parameters[8]; 
+	if(strcmp(numPlayers, "numPlayers")==1){
+		return 4; 
+	}
+
+	//game ID
+	if(strlen(parameters[3])>0 && strlen(parameters[3])<9){
+		for(int i = 0; i< strlen(parameters[3]); i++){
+			if(!isxdigit(parameters[3][i])){
+				return 3; 
+			}
+		}
+	}
+	else{
+		return 3; 
+	}
+
+
+	//team
+	if(strlen(parameters[5]) < 0 || strlen(parameters[5]) > 11){
+		return 3; 
+	}
+
+	//num claimed and num players 
+	if(atoi(parameters[7]) < 0 || atoi(parameters[9]) <= 0){
+		return 3; 
+	}
+
 	return 0;
 }
 static int faLocation(char* parameters[]){
+	char* opcode=  parameters[0];
+	if(strcmp(opcode, "opCode")==1){
+		return 4; 
+	}
+	char* gameid = parameters[2];
+	if(strcmp(gameid, "gameId")==1){
+		return 4; 
+	}
+
+	char* pebbleID = parameters[4];
+	if(strcmp(pebbleID, "pebbleId")==1){
+		return 4; 
+	}
+
+	char* team = parameters[6];
+	if(strcmp(team, "team")==1){
+		return 4; 
+	}
+	char* player = parameters[8]; 
+	if(strcmp(player, "player")==1){
+		return 4; 
+	}
+
+	char* lat = parameters[10];
+	if(strcmp(lat, "latitude") ==1){
+		return 4;
+	}
+
+	char* lon = parameters[12]; 
+	if(strcmp(lon, "longitude")==1){
+		return 4;
+	}
+	char* statusReq = parameters[14]; 
+	if(strcmp(statusReq, "statusReq")==1){
+		return 4;
+	}
+
+	if(strlen(parameters[3])>0 && strlen(parameters[3])<9){
+		for(int i = 0; i< strlen(parameters[3]); i++){
+			if(!isxdigit(parameters[3][i])){
+				return 3; 
+			}
+		}
+	}
+	else{
+		return 3; 
+	}
+
+	//checking hex for parameter 5 pebble id
+	if(strlen(parameters[5])>0 && strlen(parameters[5])<9){
+		for(int i = 0; i< strlen(parameters[5]); i++){
+			if(!isxdigit(parameters[5][i])){
+				return 3; 
+			}
+		}
+	}
+	else{
+		return 3; 
+	}
+
+	//team
+	if(strlen(parameters[7]) < 0 || strlen(parameters[7]) > 11){
+		return 3; 
+	}
+
+	//player
+	if(strlen(parameters[9]) < 0 || strlen(parameters[9]) > 11){
+		return 3; 
+	}
+
+	//lat 
+	int latitude = atof(parameters[11]); 
+	if(latitude< -90 || latitude > 90){
+		return 3; 
+	}
+
+	int longitude = atof(parameters[13]); 
+	if(longitude< -180 || longitude > 180){
+		return 3; 
+	}
+	//status req
+	int sr = atoi(parameters[15]); 
+	if(!(sr ==1 || sr == 0 )){
+		return 3;
+	}
+
+	//comparing for the same answers
+	if(strcmp(parameters[3], parameters[5]) == 0 || strcmp(parameters[3], parameters[7]) == 0 || strcmp(parameters[3], parameters[9]) == 0 || strcmp(parameters[3], parameters[11]) == 0 || strcmp(parameters[3], parameters[13]) == 0 || strcmp(parameters[3], parameters[15]) == 0){
+		return 3; 
+	}
+	if(strcmp(parameters[5], parameters[7]) == 0 || strcmp(parameters[5], parameters[9]) == 0 || strcmp(parameters[5], parameters[11]) == 0 || strcmp(parameters[5], parameters[13]) == 0 || strcmp(parameters[5], parameters[15]) == 0){
+		return 3; 
+	}
+	if(strcmp(parameters[7], parameters[9]) == 0 || strcmp(parameters[7], parameters[11]) == 0 || strcmp(parameters[7], parameters[13]) == 0 || strcmp(parameters[7], parameters[15]) == 0){
+		return 3; 
+	}
+	if( strcmp(parameters[9], parameters[11]) == 0 || strcmp(parameters[9], parameters[13]) == 0 || strcmp(parameters[9], parameters[15]) == 0){
+		return 3; 
+	}
+	if(strcmp(parameters[11], parameters[13]) == 0 || strcmp(parameters[11], parameters[15]) == 0){
+		return 3;
+	}
+	if(strcmp(parameters[13], parameters[15]) == 0){
+		return 3;
+	}
+
+
 	return 0;
 }
+
 static int faClaim(char* parameters[]){
+	char* opcode=  parameters[0];
+	if(strcmp(opcode, "opCode")==1){
+		return 4; 
+	}
+	char* gameid = parameters[2];
+	if(strcmp(gameid, "gameId")==1){
+		return 4; 
+	}
+
+	char* pebbleID = parameters[4];
+	if(strcmp(pebbleID, "pebbleId")==1){
+		return 4; 
+	}
+
+	char* team = parameters[6];
+	if(strcmp(team, "team")==1){
+		return 4; 
+	}
+	char* player = parameters[8]; 
+	if(strcmp(player, "player")==1){
+		return 4; 
+	}
+
+	char* lat = parameters[10];
+	if(strcmp(lat, "latitude") ==1){
+		return 4;
+	}
+
+	char* lon = parameters[12]; 
+	if(strcmp(lon, "longitude")==1){
+		return 4;
+	}
+	char* kragId = parameters[14]; 
+	if(strcmp(kragId, "kragId")==1){
+		return 4;
+	}
+
+	//game ID 
+	if(strlen(parameters[3])>0 && strlen(parameters[3])<9){
+		for(int i = 0; i< strlen(parameters[3]); i++){
+			if(!isxdigit(parameters[3][i])){
+				return 3; 
+			}
+		}
+	}
+	else{
+		return 3; 
+	}
+
+	//checking hex for parameter 5 pebble id
+	if(strlen(parameters[5])>0 && strlen(parameters[5])<9){
+		for(int i = 0; i< strlen(parameters[5]); i++){
+			if(!isxdigit(parameters[5][i])){
+				return 3; 
+			}
+		}
+	}
+	else{
+		return 3; 
+	}
+
+	//team
+	if(strlen(parameters[7]) < 0 || strlen(parameters[7]) > 11){
+		return 3; 
+	}
+
+	//player
+	if(strlen(parameters[9]) < 0 || strlen(parameters[9]) > 11){
+		return 3; 
+	}
+
+	//lat 
+	float latitude = atof(parameters[11]); 
+	if(latitude< -90 || latitude > 90){
+		return 3; 
+	}
+
+	float longitude = atof(parameters[13]); 
+	if(longitude< -180 || longitude > 180){
+		return 3; 
+	}
+
+	//kraig ID
+	if(strlen(parameters[15])>0 && strlen(parameters[15])<5){
+		for(int i = 0; i< strlen(parameters[15]); i++){
+			if(!isxdigit(parameters[15][i])){
+				return 3; 
+			}
+		}
+	}
+	else{
+		return 3; 
+	}
+
+	//comparing for the same answers
+	if(strcmp(parameters[3], parameters[5]) == 0 || strcmp(parameters[3], parameters[7]) == 0 || strcmp(parameters[3], parameters[9]) == 0 || strcmp(parameters[3], parameters[11]) == 0 || strcmp(parameters[3], parameters[13]) == 0 || strcmp(parameters[3], parameters[15]) == 0){
+		return 3; 
+	}
+	if(strcmp(parameters[5], parameters[7]) == 0 || strcmp(parameters[5], parameters[9]) == 0 || strcmp(parameters[5], parameters[11]) == 0 || strcmp(parameters[5], parameters[13]) == 0 || strcmp(parameters[5], parameters[15]) == 0){
+		return 3; 
+	}
+	if(strcmp(parameters[7], parameters[9]) == 0 || strcmp(parameters[7], parameters[11]) == 0 || strcmp(parameters[7], parameters[13]) == 0 || strcmp(parameters[7], parameters[15]) == 0){
+		return 3; 
+	}
+	if( strcmp(parameters[9], parameters[11]) == 0 || strcmp(parameters[9], parameters[13]) == 0 || strcmp(parameters[9], parameters[15]) == 0){
+		return 3; 
+	}
+	if(strcmp(parameters[11], parameters[13]) == 0 || strcmp(parameters[11], parameters[15]) == 0){
+		return 3;
+	}
+	if(strcmp(parameters[13], parameters[15]) == 0){
+		return 3;
+	}	
+
+
 	return 0;
 }
 static int faLog(char* parameters[]){
+	char* opcode=  parameters[0];
+	if(strcmp(opcode, "opCode")==1){
+		return 4; 
+	}
+	char* pebbleId = parameters[2];
+	if(strcmp(pebbleId, "pebbleId")==1){
+		return 4; 
+	}
+	char* text = parameters[4]; 
+	if(strcmp(text, "text")==1){
+		return 4; 
+	}
+
+	//hexID
+	if(strlen(parameters[3])>0 && strlen(parameters[3])<9){
+		for(int i = 0; i< strlen(parameters[3]); i++){
+
+			if(!isxdigit(parameters[3][i])){
+				return 3; 
+			}
+		}
+	}
+	else{
+		return 3; 
+	}
+
+	if(strlen(parameters[5])>140){
+
+		return 3;
+	}
+
+	if(strcmp(parameters[3], parameters[5])==0){
+
+		return 3;
+	}
+
 	return 0;
 }
 static int gaStatus(char* parameters[]){
@@ -275,9 +945,134 @@ static int gaStatus(char* parameters[]){
 	if( !(atoi(parameters[11]) == 0 || atoi(parameters[11]) == 1) ){
 		return 3;
 	}
+
+	if(strcmp(parameters[3], parameters[5]) == 0 || strcmp(parameters[3], parameters[7]) == 0 || strcmp(parameters[3], parameters[9]) == 0 || strcmp(parameters[3], parameters[11]) == 0){
+		return 3; 
+	}
+	if(strcmp(parameters[5], parameters[7]) == 0 || strcmp(parameters[5], parameters[9]) == 0 || strcmp(parameters[5], parameters[11]) == 0){
+		return 3; 
+	}
+	if(strcmp(parameters[7], parameters[9]) == 0 || strcmp(parameters[7], parameters[11]) == 0) {
+		return 3; 
+	}
+	if(strcmp(parameters[9], parameters[11]) == 0){
+		return 3;
+	}
+
 	return 0;
+
+
 }
 static int gaHint(char* parameters[]){
+
+	char* opcode=  parameters[0];
+	if(strcmp(opcode, "opCode")==1){
+		return 4; 
+	}
+	char* gameid = parameters[2];
+	if(strcmp(gameid, "gameId")==1){
+		return 4; 
+	}
+	char* guideid = parameters[4]; 
+	if(strcmp(guideid, "guideId")==1){
+		return 4; 
+	}
+	char* team = parameters[6];
+	if(strcmp(team, "team")==1){
+		return 4; 
+	}
+	char* player = parameters[8]; 
+	if(strcmp(player, "player")==1){
+		return 4; 
+	}
+	char* pebbleID = parameters[10]; 
+	if(strcmp(pebbleID, "pebbleId")==1){
+		return 4; 
+	}
+	char* hint = parameters[12]; 
+	if(strcmp(hint, "hint")==1){
+		return 4; 
+	}
+
+	//gmae id 
+	if(strlen(parameters[3])>0 && strlen(parameters[3])<9){
+		for(int i = 0; i< strlen(parameters[3]); i++){
+			if(!isxdigit(parameters[3][i])){
+				return 3; 
+			}
+		}
+	}
+	else{
+
+		return 3; 
+	}
+	
+	//guide id 
+	if(strlen(parameters[5])>0 && strlen(parameters[5])<9){
+		for(int i = 0; i< strlen(parameters[5]); i++){
+			if(!isxdigit(parameters[5][i])){
+
+				return 3; 
+			}
+		}
+	}
+	else{
+
+		return 3; 
+	}
+
+	//team
+	if(strlen(parameters[7]) < 0 || strlen(parameters[7]) > 11){
+		return 3; 
+	}
+
+	//player 
+	if(strlen(parameters[9]) < 0 || strlen(parameters[9]) > 11){
+		return 3; 
+	}
+
+	//pebbleId
+	if(strlen(parameters[11])==1){
+		if(strcmp(parameters[11], "*") == 0){
+			return 3; 
+		}
+	}
+	else{
+		if(strlen(parameters[11])>0 && strlen(parameters[11])<9){
+			for(int i = 0; i< strlen(parameters[11]); i++){
+				if(!isxdigit(parameters[11][i])){
+					return 3; 
+				}
+			}
+		}
+		else{
+
+			return 3; 
+		}
+	}
+
+	if(strlen(parameters[13])>140){
+		printf("return 1\n");
+		return 3; 
+	}
+
+	//comparing for the same answers
+	if(strcmp(parameters[3], parameters[5]) == 0 || strcmp(parameters[3], parameters[7]) == 0 || strcmp(parameters[3], parameters[9]) == 0 || strcmp(parameters[3], parameters[11]) == 0 || strcmp(parameters[3], parameters[13]) == 0 ){
+		return 3; 
+	}
+	if(strcmp(parameters[5], parameters[7]) == 0 || strcmp(parameters[5], parameters[9]) == 0 || strcmp(parameters[5], parameters[11]) == 0 || strcmp(parameters[5], parameters[13]) == 0 ){
+		return 3; 
+	}
+	if(strcmp(parameters[7], parameters[9]) == 0 || strcmp(parameters[7], parameters[11]) == 0 || strcmp(parameters[7], parameters[13]) == 0 ){
+		return 3; 
+	}
+	if( strcmp(parameters[9], parameters[11]) == 0 || strcmp(parameters[9], parameters[13]) == 0 ){
+		return 3; 
+	}
+	if(strcmp(parameters[11], parameters[13]) == 0 ){
+		return 3;
+	}
+
 	return 0;
 }
 
