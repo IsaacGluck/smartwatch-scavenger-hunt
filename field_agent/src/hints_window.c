@@ -49,18 +49,6 @@ static void select_callback_hints_window(struct MenuLayer *menu_layer, MenuIndex
   APP_LOG(APP_LOG_LEVEL_INFO, "Selected hint %d\n", (int)cell_index->row);
 
   dialog_message_window_push(FA_INFO->hints_received[(int)cell_index->row]);
-
-  // if(cell_index->row == HINTS_WINDOW_WINDOW_NUM_ROWS - 1) {
-  //   // Do something with user choice
-  //   APP_LOG(APP_LOG_LEVEL_INFO, "Entering KRAG Input\n");
-
-  //   // put the pin window on top
-  //   pin_window_push(pin_window, true);
-  // } else {
-  //   // Change selection
-  //   s_current_selection_hints_window = cell_index->row;
-  //   menu_layer_reload_data(menu_layer);
-  // }
 }
 
 static void window_load_hints_window(Window *window)
