@@ -109,6 +109,11 @@ krag_t *game_info_find_krag(game_info_t *gi, char *kragId);
  */
 int game_info_krag_distance(game_info_t *gi, char *kragId, char *latitude, char *longitude);
 
+/* Reveal krag and return the krag that was revealed
+ * Return NULL if error
+ */
+krag_t * game_info_reveal_krag(game_info_t *gi, team_t *team);
+
 /* Return the team that has field agent with given pebbleId
  * Return NULL if it does not exist
  */
@@ -129,11 +134,27 @@ float krag_get_latitude(krag_t *krag);
  */
 float krag_get_longitude(krag_t *krag);
 
+/* Return the kragId of the krag
+ * return NULL if it does not exist
+ */
+char *krag_get_kragId(krag_t *krag);
+
+/* Return the clue of the krag
+ * return NULL if it does not exist
+ */
+char *krag_get_clue(krag_t *krag);
+
 /* check if the krag has claimed by the team or not
  * Return 0 if claimed, 1 if not
  * Return -1 if error
  */
 int krag_has_claimed(krag_t *krag, char *team_name);
+
+/* check if the krag has revealed by the team or not
+ * Return 0 if revealed, 1 if not
+ * Return -1 if error
+ */
+int krag_has_revealed(krag_t *krag, char *team_name);
 
 /* Mark the krag has claimed for the given krag and team
  * Return 1 if there are more krags to be claimed after marked
@@ -197,6 +218,10 @@ char *team_get_guideId(team_t *team);
 /* Return the number of claimed krags
  */
 int team_get_numClaimed(team_t *team);
+
+/* Return the number of claimed krags
+ */
+int team_get_numRevealed(team_t *team);
 
 /* Return the secret string for this team
  */
