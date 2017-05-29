@@ -102,6 +102,7 @@ void delete_info()
 				free(FA_INFO->hints_received[i]);
 			}
 		}
+		free(FA_INFO->hints_received);
 	}
 
 

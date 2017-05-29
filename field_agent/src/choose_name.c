@@ -108,7 +108,6 @@ static void select_callback_choose_name(struct MenuLayer *menu_layer, MenuIndex 
     // They must choose a name
     if (s_current_selection != 0) {
 	    window_stack_pop(true);
-	    // print_FA();
 
 	    // add the main screen
 	    FA_INFO->game_started = true;

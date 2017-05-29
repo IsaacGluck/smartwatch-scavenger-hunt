@@ -76,8 +76,8 @@ int main(void) {
 
 // deinit
 static void deinit() {
-    /* 1. Destroy the window. */
-    // window_destroy(s_main_window);
+    /* 1. Remove all windows from the stack */
+    window_stack_pop_all(false); 
 
     /* 2. Unsubscribe from sensors. */
     tick_timer_service_unsubscribe();

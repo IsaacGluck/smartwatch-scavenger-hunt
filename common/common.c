@@ -3,12 +3,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-
+#else // we are building for pebble
+#include <pebble.h>
+#endif
 
 
 /**************** file-local global variables ****************/
 static const int MESSAGE_LENGTH = 8192;
 
+
+#ifdef NOPEBBLE // we are *not* building for pebble
 unsigned int stringHexToDec(char* hex){
     unsigned int decimalNumber;
     sscanf(hex,"%x", &decimalNumber);
@@ -24,7 +28,6 @@ char *decToStringHex(unsigned int dec){
     
     return hex;
 }
-
 
 
 // not robust
@@ -87,7 +90,4 @@ void deleteopCode(char **token){
     free(token);
 }
 
-
-#else // we are building for pebble
-#include <pebble.h>
 #endif
