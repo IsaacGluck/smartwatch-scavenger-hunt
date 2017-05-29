@@ -1,9 +1,10 @@
-
-//include statements
+#ifdef NOPEBBLE // we are *not* building for pebble
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+
+
 
 /**************** file-local global variables ****************/
 static const int MESSAGE_LENGTH = 8192;
@@ -85,3 +86,8 @@ void deleteopCode(char **token){
     free(token[1]);
     free(token);
 }
+
+
+#else // we are building for pebble
+#include <pebble.h>
+#endif

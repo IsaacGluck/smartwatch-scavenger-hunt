@@ -1,23 +1,16 @@
 /*****************************************************************/
 /* This program          */
 /*****************************************************************/
-#ifndef _MESSAGE_HANDLER_H
-#define _MESSAGE_HANDLER_H
+#ifndef __HINTS_WINDOW_H
+#define __HINTS_WINDOW_H
 
 #include <pebble.h>
 
 
-char* create_fa_location(char* statusReq);
+#define HINTS_WINDOW_WINDOW_NUM_ROWS     10
+#define HINTS_WINDOW_WINDOW_CELL_HEIGHT  44
 
-
-char* create_fa_claim(char* kragId);
-
-
-
-
-
-
-
+void hints_window_window_push();
 
 
 #endif

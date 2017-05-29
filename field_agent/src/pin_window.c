@@ -147,6 +147,7 @@ PinWindow* pin_window_create(PinWindowCallbacks callbacks) {
       for(int i = 0; i < PIN_WINDOW_NUM_CELLS; i++) {
         pin_window->pin.digits[i] = '0';
       }
+      // pin_window->pin.digits[PIN_WINDOW_NUM_CELLS] = '\0';
       
       // Get window parameters
       Layer *window_layer = window_get_root_layer(pin_window->window);

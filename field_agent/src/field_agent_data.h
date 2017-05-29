@@ -10,7 +10,7 @@
 // Global Structs
 typedef struct fieldagent_info {
 	char *gameID;
-	char* pebbleId;
+	char* pebbleID;
 	char* name;
 	char* team;
 	int time_passed;
@@ -20,6 +20,11 @@ typedef struct fieldagent_info {
 	int num_left;
 	char* known_chars;
 	char** hints_received;
+
+	bool game_started;
+
+	char* krag_to_submit;
+	bool submit_krag;
 } fieldagent_info_t;
 
 fieldagent_info_t *FA_INFO; // glabal for all windows to get and change data

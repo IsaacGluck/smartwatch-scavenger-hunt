@@ -89,22 +89,26 @@ static void select_callback_choose_name(struct MenuLayer *menu_layer, MenuIndex 
     switch(s_current_selection) {
     	case 1 :
         APP_LOG(APP_LOG_LEVEL_INFO, "Chose Isaac");
-        FA_INFO->name = isaac;
+        strcpy(FA_INFO->name, isaac);
+        // FA_INFO->name = isaac;
         // chosen_name = isaac;
         break;
       case 2 :
       	APP_LOG(APP_LOG_LEVEL_INFO, "Chose Morgan");
-      	FA_INFO->name = morgan;
+      	strcpy(FA_INFO->name, morgan);
+      	// FA_INFO->name = morgan;
         // chosen_name = morgan;
         break;
       case 3 :
       	APP_LOG(APP_LOG_LEVEL_INFO, "Chose Kazuma");
-      	FA_INFO->name = kazuma;
+      	strcpy(FA_INFO->name, kazuma);
+      	// FA_INFO->name = kazuma;
         // chosen_name = kazuma;
         break;
       case 4 :
       	APP_LOG(APP_LOG_LEVEL_INFO, "Chose Laya");
-      	FA_INFO->name = laya;
+      	strcpy(FA_INFO->name, laya);
+      	// FA_INFO->name = laya;
         // chosen_name = laya;
         break;
     }
@@ -112,9 +116,10 @@ static void select_callback_choose_name(struct MenuLayer *menu_layer, MenuIndex 
     // They must choose a name
     if (s_current_selection != 0) {
 	    window_stack_pop(true);
-	    print_FA();
+	    // print_FA();
 
 	    // add the main screen
+	    FA_INFO->game_started = true;
 	    main_menu_window_push();
     }
   } else {
@@ -169,4 +174,8 @@ void choose_name_window_push() {
     });
   }
   window_stack_push(s_main_window_choose_name, true);
+}
+
+void main_menu_reload_pass_up() {
+	main_menu_reload();
 }

@@ -1,32 +1,38 @@
+
+#ifdef NOPEBBLE // we are *not* building for pebble
 // Conditional inclusion for platform specific builds
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "shared.h"
+#include "time.h"
 #include <ctype.h>
 
+//ga status 
+//respomse
 
 
 
 int validate_message(char* message); 
+int print_log(char* message, char* filename, char* IPport, char* tofrom);
 
-static int gameStatus(char* parameters[]);
-static int gsAgent(char* parameters[]);
-static int gsClue(char* parameters[]);
-static int gsClaimed(char* parameters[]);
-static int gsSecret(char* parameters[]);
-static int gsResponse(char* parameters[]);
-static int gameOver(char* parameters[]);
-static int teamRecord(char* parameters[]);
-static int faLocation(char* parameters[]);
-static int faClaim(char* parameters[]);
-static int faLog(char* parameters[]);
-static int gaStatus(char* parameters[]);
-static int gaHint(char* parameters[]);
+static int gameStatus(char* parameters[], int total);
+static int gsAgent(char* parameters[], int total);
+static int gsClue(char* parameters[], int total);
+static int gsClaimed(char* parameters[], int total);
+static int gsSecret(char* parameters[], int total);
+static int gsResponse(char* parameters[], int total);
+static int gameOver(char* parameters[], int total);
+static int teamRecord(char* parameters[], int total);
+static int faLocation(char* parameters[], int total);
+static int faClaim(char* parameters[], int total);
+static int faLog(char* parameters[], int total);
+static int gaStatus(char* parameters[], int total);
+static int gaHint(char* parameters[], int total);
 
 static const struct {
   const char *opCodes;
-  int (*func)(char* parameters[]);
+  int (*func)(char* parameters[], int total);
 } codes[] = {
 
   { "FA_LOCATION", faLocation },
@@ -104,7 +110,7 @@ int validate_message(char* message){
 	int fn;
 	for (fn = 0; codes[fn].opCodes != NULL; fn++) {
   		if (strcmp(array[1], codes[fn].opCodes) == 0) {
-  			return((*codes[fn].func)(array));
+  			return((*codes[fn].func)(array, total+1));
   		}
 	}
 	
@@ -125,7 +131,11 @@ int validate_message(char* message){
 }
 
 
-static int gameStatus(char* parameters[]){
+static int gameStatus(char* parameters[], int total){
+	if(total != 10){
+		return 5;
+	}
+
 	char* opcode=  parameters[0];
 	if(strcmp(opcode, "opCode")==1){
 		return 4; 
@@ -139,34 +149,34 @@ static int gameStatus(char* parameters[]){
 		return 4; 
 	}
 	int numclaimed = atoi(parameters[6]); 
-	int total = atoi(parameters[8]); 
+	int tot = atoi(parameters[8]); 
 
 
 	if(strlen(parameters[3])>0 && strlen(parameters[3])<9){
 		for(int i = 0; i< strlen(parameters[3]); i++){
 			if(!isxdigit(parameters[3][i])){
-				return 3; 
+				return 2; 
 			}
 		}
 	}
 	else{
-		return 3; 
+		return 2; 
 	}
 	
 	printf("checking parameter 5\n");
 	if(strlen(parameters[5])>0 && strlen(parameters[5])<9){
 		for(int i = 0; i< strlen(parameters[5]); i++){
 			if(!isxdigit(parameters[5][i])){
-				return 3; 
+				return 2; 
 			}
 		}
 	}
 	else{
-		return 3; 
+		return 2; 
 	}
 
-	if(total <0 || numclaimed > total || numclaimed<0){
-		return 3;
+	if(tot <0 || numclaimed > tot || numclaimed<0){
+		return 2;
 	}
 
 	//check duplicates
@@ -182,7 +192,11 @@ static int gameStatus(char* parameters[]){
 
 	return 0;
 }
-static int gsAgent(char* parameters[]){
+static int gsAgent(char* parameters[], int total){
+	if(total != 16){
+		return 5;
+	}
+
 	char* opcode=  parameters[0];
 	if(strcmp(opcode, "opCode")==1){
 		return 4; 
@@ -294,7 +308,11 @@ static int gsAgent(char* parameters[]){
 
 	return 0;
 }
-static int gsClue(char* parameters[]){
+static int gsClue(char* parameters[], int total){
+	if(total != 10){
+		return 5;
+	}
+
 	char* opcode=  parameters[0];
 	if(strcmp(opcode, "opCode")==1){
 		return 4; 
@@ -365,7 +383,10 @@ static int gsClue(char* parameters[]){
 
 	return 0;
 }
-static int gsClaimed(char* parameters[]){
+static int gsClaimed(char* parameters[], int total){
+	if(total != 14){
+		return 5;
+	}
 
 	char* opcode=  parameters[0];
 	if(strcmp(opcode, "opCode")==1){
@@ -474,7 +495,11 @@ static int gsClaimed(char* parameters[]){
 
 	return 0;
 }
-static int gsSecret(char* parameters[]){
+static int gsSecret(char* parameters[], int total){
+	if(total != 8){
+		return 5;
+	}
+
 	char* opcode=  parameters[0];
 	if(strcmp(opcode, "opCode")==1){
 		return 4; 
@@ -531,10 +556,74 @@ static int gsSecret(char* parameters[]){
 
 	return 0;
 }
-static int gsResponse(char* parameters[]){
-	return 0;
+static int gsResponse(char* parameters[], int total){
+	if(total != 8){
+		return 5;
+	}
+
+	char* opcode=  parameters[0];
+	if(strcmp(opcode, "opCode")==1){
+		return 4; 
+	}
+	char* gameid = parameters[2];
+	if(strcmp(gameid, "gameId")==1){
+		return 4; 
+	}
+	char* respcode = parameters[4];
+	if(strcmp(respcode, "respCode")==1){
+		return 4; 
+	}
+	char* text = parameters[6];
+	if(strcmp(text, "text")==1){
+		return 4; 
+	}
+
+	//game ID
+	if(strlen(parameters[3])>0 && strlen(parameters[3])<9){
+		for(int i = 0; i< strlen(parameters[3]); i++){
+			if(!isxdigit(parameters[3][i])){
+				return 3; 
+			}
+		}
+	}
+	else{
+		return 3; 
+	}
+
+	if(strlen(parameters[7])>140){
+		return 3; 
+	}
+
+	char* array[11]; 
+
+	array[0] = "SH_ERROR_INVALID_MESSAGE";
+	array[1] = "SH_ERROR_INVALID_OPCODE";
+	array[2] = "SH_ERROR_INVALID_FIELD";
+	array[3] = "SH_ERROR_DUPLICATE_FIELD"; 
+	array[4] = "SH_ERROR_INVALID_GAME_ID"; 
+	array[5] = "SH_ERROR_INVALID_TEAMNAME"; 
+	array[6] = "SH_ERROR_INVALID_PLAYERNAME";
+	array[7] = "SH_ERROR_DUPLICATE_PLAYERNAME";
+	array[8] = "SH_ERROR_INVALID_ID"; 
+	array[9] = "SH_CLAIMED"; 
+	array[10] = "SH_CLAIMED_ALREADY"; 
+
+
+	for(int i = 0; i< 11; i++){
+		printf("|%s| , |%s|\n", parameters[5], array[i]);
+		if(strcmp(parameters[5], array[i])== 0){
+			return 0;
+		}
+	}
+	return 1; 
+
+
 }
-static int gameOver(char* parameters[]){
+static int gameOver(char* parameters[], int total){
+	if(total != 6){
+		return 5;
+	}
+
 	char* opcode=  parameters[0];
 	if(strcmp(opcode, "opCode")==1){
 		return 4; 
@@ -567,7 +656,11 @@ static int gameOver(char* parameters[]){
 
 }
 
-static int teamRecord(char* parameters[]){
+static int teamRecord(char* parameters[], int total){
+	if(total != 10){
+		return 5;
+	}
+
 	char* opcode=  parameters[0];
 	if(strcmp(opcode, "opCode")==1){
 		return 4; 
@@ -614,7 +707,11 @@ static int teamRecord(char* parameters[]){
 
 	return 0;
 }
-static int faLocation(char* parameters[]){
+static int faLocation(char* parameters[], int total){
+	if(total != 16){
+		return 5;
+	}
+
 	char* opcode=  parameters[0];
 	if(strcmp(opcode, "opCode")==1){
 		return 4; 
@@ -725,7 +822,11 @@ static int faLocation(char* parameters[]){
 	return 0;
 }
 
-static int faClaim(char* parameters[]){
+static int faClaim(char* parameters[], int total){
+	if(total != 16){
+		return 5;
+	}
+
 	char* opcode=  parameters[0];
 	if(strcmp(opcode, "opCode")==1){
 		return 4; 
@@ -843,7 +944,11 @@ static int faClaim(char* parameters[]){
 
 	return 0;
 }
-static int faLog(char* parameters[]){
+static int faLog(char* parameters[], int total){
+	if(total != 6){
+		return 5;
+	}
+
 	char* opcode=  parameters[0];
 	if(strcmp(opcode, "opCode")==1){
 		return 4; 
@@ -882,7 +987,11 @@ static int faLog(char* parameters[]){
 
 	return 0;
 }
-static int gaStatus(char* parameters[]){
+static int gaStatus(char* parameters[], int total){
+	if(total != 12){
+		return 5;
+	}
+
 	char* opcode=  parameters[0];
 	if(strcmp(opcode, "opCode")==1){
 		return 4; 
@@ -963,7 +1072,10 @@ static int gaStatus(char* parameters[]){
 
 
 }
-static int gaHint(char* parameters[]){
+static int gaHint(char* parameters[], int total){
+	if(total != 14){
+		return 5;
+	}
 
 	char* opcode=  parameters[0];
 	if(strcmp(opcode, "opCode")==1){
@@ -1076,4 +1188,29 @@ static int gaHint(char* parameters[]){
 	return 0;
 }
 
+int print_log(char* message, char* filename, char* IPport, char* tofrom){
+	char timestamp[27];
+  	time_t clk = time(NULL);
+ 	sprintf(timestamp, "(%s", ctime(&clk));
+ 	timestamp[25] = ')';
 
+	char* totalfilename = malloc(strlen("../logs/") + strlen(filename) + 1); 
+	strcpy(totalfilename, "../logs/"); 
+	strcat(totalfilename, filename);
+
+	
+	FILE *file = fopen(totalfilename, "a"); 
+
+	if(file == NULL){
+		return 1;
+	}
+
+	fprintf(file, "%s %s %s: %s\n", timestamp, tofrom, IPport, message); 
+
+	free(totalfilename);
+	fclose(file);
+
+	return 0;
+}
+
+#endif
