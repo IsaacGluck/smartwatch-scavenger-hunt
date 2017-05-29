@@ -9,7 +9,7 @@
 
 //opCode=GAME_STATUS|gameId=FEED|guideId=1d2f3e4a|numClaimed=6|numKrags=8
 //opCode=GS_SECRET|gameId=FEED|guideId=1d2f3e4a|secret=com__dafd_ _cie____50
-//opCode=GS_AGENT|gameId=FEED|pebbleId=8080477D|team=fab4|player=Morgan|latitude=93.706552|longitude=-102.287418|lastContact=28
+//opCode=GS_AGENT|gameId=FEED|pebbleId=8080477D|team=fab4|player=Morgan|latitude=40.706552|longitude=-30.287418|lastContact=28
 //opCode=GS_CLUE|gameId=FEED|guideId=1d2f3e4a|kragId=4321|clue=new clue
 //opCode=GS_CLAIMED|gameId=FEED|guideId=1d2f3e4a|pebbleId=8080477D|kragId=4321|latitude=43.706552|longitude=-72.287418
 //opCode=TEAM_RECORD|gameId=FEED|team=ali|numPlayers=5|numClaimed=12
