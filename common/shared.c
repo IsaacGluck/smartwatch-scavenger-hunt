@@ -1,7 +1,4 @@
 // Conditional inclusion for platform specific builds
-
-
-#ifdef NOPEBBLE // we are *not* building for pebble
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,9 +8,6 @@
 
 //ga status 
 //respomse
-
-#include "shared.h"
-
 
 
 
@@ -992,7 +986,7 @@ static int faLog(char* parameters[], int total){
 	return 0;
 }
 static int gaStatus(char* parameters[], int total){
-	if(total != 10){
+	if(total != 12){
 		return 5;
 	}
 
@@ -1202,7 +1196,6 @@ int print_log(char* message, char* filename, char* IPport, char* tofrom){
 	strcpy(totalfilename, "../logs/"); 
 	strcat(totalfilename, filename);
 
-	printf("total file name: %s", totalfilename);
 	
 	FILE *file = fopen(totalfilename, "a"); 
 
@@ -1219,6 +1212,3 @@ int print_log(char* message, char* filename, char* IPport, char* tofrom){
 }
 
 
-#else // we are building for pebble
-#include <pebble.h>
-#endif
