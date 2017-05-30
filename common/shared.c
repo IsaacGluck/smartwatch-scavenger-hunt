@@ -908,7 +908,7 @@ static int gaHint(char* parameters[], int total){
 
 	//pebbleId
 	if(strlen(parameters[11])==1){
-		if(strcmp(parameters[11], "*") == 0){
+		if(strcmp(parameters[11], "*") == 1){
 			return 3; 
 		}
 	}
