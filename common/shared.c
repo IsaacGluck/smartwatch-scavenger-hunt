@@ -113,9 +113,10 @@ int validate_message(char* m){
 	int fn;
 	for (fn = 0; codes[fn].opCodes != NULL; fn++) {
   		if (strcmp(array[1], codes[fn].opCodes) == 0) {
-            free(message);
-            free(array);
+
   			return((*codes[fn].func)(array, total+1));
+  			free(message);
+            free(array);
   		}
 	}
 	
@@ -180,39 +181,39 @@ static int gsAgent(char* parameters[], int total){
 	}
 
 	char* opcode=  parameters[0];
-	if(strcmp(opcode, "opCode")==1){
+	if(strcmp(opcode, "opCode")!=0){
 		return 4; 
 	}
 	char* gameid = parameters[2];
-	if(strcmp(gameid, "gameId")==1){
+	if(strcmp(gameid, "gameId")!=0){
 		return 4; 
 	}
 
 	char* pebbleID = parameters[4];
-	if(strcmp(pebbleID, "pebbleId")==1){
+	if(strcmp(pebbleID, "pebbleId")!=0){
 		return 4; 
 	}
 
 	char* team = parameters[6];
-	if(strcmp(team, "team")==1){
+	if(strcmp(team, "team")!=0){
 		return 4; 
 	}
 	char* player = parameters[8]; 
-	if(strcmp(player, "player")==1){
+	if(strcmp(player, "player")!=0){
 		return 4; 
 	}
 
 	char* lat = parameters[10];
-	if(strcmp(lat, "latitude") ==1){
+	if(strcmp(lat, "latitude") !=0){
 		return 4;
 	}
 
 	char* lon = parameters[12]; 
-	if(strcmp(lon, "longitude")==1){
+	if(strcmp(lon, "longitude")!=0){
 		return 4;
 	}
 	char* lastcontact = parameters[14]; 
-	if(strcmp(lastcontact, "lastContact")==1){
+	if(strcmp(lastcontact, "lastContact")!=0){
 		return 4;
 	}
 
@@ -297,23 +298,23 @@ static int gsClue(char* parameters[], int total){
 	}
 
 	char* opcode=  parameters[0];
-	if(strcmp(opcode, "opCode")==1){
+	if(strcmp(opcode, "opCode")!=0){
 		return 4; 
 	}
 	char* gameid = parameters[2];
-	if(strcmp(gameid, "gameId")==1){
+	if(strcmp(gameid, "gameId")!=0){
 		return 4; 
 	}
 	char* guideid = parameters[4]; 
-	if(strcmp(guideid, "guideId")==1){
+	if(strcmp(guideid, "guideId")!=0){
 		return 4; 
 	}
 	char* kragid = parameters[6];
-	if(strcmp(kragid, "kragId")==1){
+	if(strcmp(kragid, "kragId")!=0){
 		return 4; 
 	}
 	char* clue = parameters[8]; 
-	if(strcmp(clue, "clue")==1){
+	if(strcmp(clue, "clue")!=0){
 		return 4; 
 	}
 
@@ -373,32 +374,32 @@ static int gsClaimed(char* parameters[], int total){
 	}
 
 	char* opcode=  parameters[0];
-	if(strcmp(opcode, "opCode")==1){
+	if(strcmp(opcode, "opCode")!=0){
 		return 4; 
 	}
 	char* gameid = parameters[2];
-	if(strcmp(gameid, "gameId")==1){
+	if(strcmp(gameid, "gameId")!=0){
 		return 4; 
 	}
 	char* guideid = parameters[4]; 
-	if(strcmp(guideid, "guideId")==1){
+	if(strcmp(guideid, "guideId")!=0){
 		return 4; 
 	}
 	char* pebbleId = parameters[6];
-	if(strcmp(pebbleId, "pebbleId")==1){
+	if(strcmp(pebbleId, "pebbleId")!=0){
 		return 4; 
 	}
 	char* kragId = parameters[8]; 
-	if(strcmp(kragId, "kragId")==1){
+	if(strcmp(kragId, "kragId")!=0){
 		return 4; 
 	}
 	char* lat = parameters[10];
-	if(strcmp(lat, "latitude") ==1){
+	if(strcmp(lat, "latitude") !=0){
 		return 4;
 	}
 
 	char* lon = parameters[12]; 
-	if(strcmp(lon, "longitude")==1){
+	if(strcmp(lon, "longitude")!=0){
 		return 4;
 	}
 
@@ -486,19 +487,19 @@ static int gsSecret(char* parameters[], int total){
 	}
 
 	char* opcode=  parameters[0];
-	if(strcmp(opcode, "opCode")==1){
+	if(strcmp(opcode, "opCode")!=0){
 		return 4; 
 	}
 	char* gameid = parameters[2];
-	if(strcmp(gameid, "gameId")==1){
+	if(strcmp(gameid, "gameId")!=0){
 		return 4; 
 	}
 	char* guideid = parameters[4]; 
-	if(strcmp(guideid, "guideId")==1){
+	if(strcmp(guideid, "guideId")!=0){
 		return 4; 
 	}
 	char* secret = parameters[6]; 
-	if(strcmp(secret, "secret")==1){
+	if(strcmp(secret, "secret")!=0){
 		return 4; 
 	}
 	//game ID
@@ -548,23 +549,23 @@ static int teamRecord(char* parameters[], int total){
 	}
 
 	char* opcode=  parameters[0];
-	if(strcmp(opcode, "opCode")==1){
+	if(strcmp(opcode, "opCode")!=0){
 		return 4; 
 	}
 	char* gameid = parameters[2];
-	if(strcmp(gameid, "gameId")==1){
+	if(strcmp(gameid, "gameId")!=0){
 		return 4; 
 	}
 	char* team = parameters[4]; 
-	if(strcmp(team, "team")==1){
+	if(strcmp(team, "team")!=0){
 		return 4; 
 	}
 	char* numClaimed = parameters[6];
-	if(strcmp(numClaimed, "numClaimed")==1){
+	if(strcmp(numClaimed, "numClaimed")!=0){
 		return 4; 
 	}
 	char* numPlayers = parameters[8]; 
-	if(strcmp(numPlayers, "numPlayers")==1){
+	if(strcmp(numPlayers, "numPlayers")!=0){
 		return 4; 
 	}
 
@@ -600,23 +601,23 @@ static int gaStatus(char* parameters[], int total){
 	}
 
 	char* opcode=  parameters[0];
-	if(strcmp(opcode, "opCode")==1){
+	if(strcmp(opcode, "opCode")!=0){
 		return 4; 
 	}
 	char* gameid = parameters[2];
-	if(strcmp(gameid, "gameId")==1){
+	if(strcmp(gameid, "gameId")!=0){
 		return 4; 
 	}
 	char* guideid = parameters[4]; 
-	if(strcmp(guideid, "guideId")==1){
+	if(strcmp(guideid, "guideId")!=0){
 		return 4; 
 	}
 	char* team = parameters[6];
-	if(strcmp(team, "team")==1){
+	if(strcmp(team, "team")!=0){
 		return 4; 
 	}
 	char* player = parameters[8]; 
-	if(strcmp(player, "player")==1){
+	if(strcmp(player, "player")!=0){
 		return 4; 
 	}
 	// printf("Checking names\n");
@@ -715,15 +716,15 @@ static int gameStatus(char* parameters[], int total){
 	}
 
 	char* opcode=  parameters[0];
-	if(strcmp(opcode, "opCode")==1){
+	if(strcmp(opcode, "opCode")!=0){
 		return 4; 
 	}
 	char* gameid = parameters[2];
-	if(strcmp(gameid, "gameId")==1){
+	if(strcmp(gameid, "gameId")!=0){
 		return 4; 
 	}
 	char* guideid = parameters[4]; 
-	if(strcmp(guideid, "guideId")==1){
+	if(strcmp(guideid, "guideId")!=0){
 		return 4; 
 	}
 	int numclaimed = string_to_int(parameters[7]); 
@@ -775,19 +776,19 @@ static int gsResponse(char* parameters[], int total){
 	}
 
 	char* opcode=  parameters[0];
-	if(strcmp(opcode, "opCode")==1){
+	if(strcmp(opcode, "opCode")!=0){
 		return 4; 
 	}
 	char* gameid = parameters[2];
-	if(strcmp(gameid, "gameId")==1){
+	if(strcmp(gameid, "gameId")!=0){
 		return 4; 
 	}
 	char* respcode = parameters[4];
-	if(strcmp(respcode, "respCode")==1){
+	if(strcmp(respcode, "respCode")!=0){
 		return 4; 
 	}
 	char* text = parameters[6];
-	if(strcmp(text, "text")==1){
+	if(strcmp(text, "text")!=0){
 		return 4; 
 	}
 
@@ -837,31 +838,31 @@ static int gaHint(char* parameters[], int total){
 	}
 
 	char* opcode=  parameters[0];
-	if(strcmp(opcode, "opCode")==1){
+	if(strcmp(opcode, "opCode")!=0){
 		return 4; 
 	}
 	char* gameid = parameters[2];
-	if(strcmp(gameid, "gameId")==1){
+	if(strcmp(gameid, "gameId")!=0){
 		return 4; 
 	}
 	char* guideid = parameters[4]; 
-	if(strcmp(guideid, "guideId")==1){
+	if(strcmp(guideid, "guideId")!=0){
 		return 4; 
 	}
 	char* team = parameters[6];
-	if(strcmp(team, "team")==1){
+	if(strcmp(team, "team")!=0){
 		return 4; 
 	}
 	char* player = parameters[8]; 
-	if(strcmp(player, "player")==1){
+	if(strcmp(player, "player")!=0){
 		return 4; 
 	}
 	char* pebbleID = parameters[10]; 
-	if(strcmp(pebbleID, "pebbleId")==1){
+	if(strcmp(pebbleID, "pebbleId")!=0){
 		return 4; 
 	}
 	char* hint = parameters[12]; 
-	if(strcmp(hint, "hint")==1){
+	if(strcmp(hint, "hint")!=0){
 		return 4; 
 	}
 
@@ -953,39 +954,39 @@ static int faLocation(char* parameters[], int total){
 	}
 
 	char* opcode=  parameters[0];
-	if(strcmp(opcode, "opCode")==1){
+	if(strcmp(opcode, "opCode")!=0){
 		return 4; 
 	}
 	char* gameid = parameters[2];
-	if(strcmp(gameid, "gameId")==1){
+	if(strcmp(gameid, "gameId")!=0){
 		return 4; 
 	}
 
 	char* pebbleID = parameters[4];
-	if(strcmp(pebbleID, "pebbleId")==1){
+	if(strcmp(pebbleID, "pebbleId")!=0){
 		return 4; 
 	}
 
 	char* team = parameters[6];
-	if(strcmp(team, "team")==1){
+	if(strcmp(team, "team")!=0){
 		return 4; 
 	}
 	char* player = parameters[8]; 
-	if(strcmp(player, "player")==1){
+	if(strcmp(player, "player")!=0){
 		return 4; 
 	}
 
 	char* lat = parameters[10];
-	if(strcmp(lat, "latitude") ==1){
+	if(strcmp(lat, "latitude") !=0){
 		return 4;
 	}
 
 	char* lon = parameters[12]; 
-	if(strcmp(lon, "longitude")==1){
+	if(strcmp(lon, "longitude")!=0){
 		return 4;
 	}
 	char* statusReq = parameters[14]; 
-	if(strcmp(statusReq, "statusReq")==1){
+	if(strcmp(statusReq, "statusReq")!=0){
 		return 4;
 	}
 
@@ -1068,39 +1069,39 @@ static int faClaim(char* parameters[], int total){
 	}
 
 	char* opcode=  parameters[0];
-	if(strcmp(opcode, "opCode")==1){
+	if(strcmp(opcode, "opCode")!=0){
 		return 4; 
 	}
 	char* gameid = parameters[2];
-	if(strcmp(gameid, "gameId")==1){
+	if(strcmp(gameid, "gameId")!=0){
 		return 4; 
 	}
 
 	char* pebbleID = parameters[4];
-	if(strcmp(pebbleID, "pebbleId")==1){
+	if(strcmp(pebbleID, "pebbleId")!=0){
 		return 4; 
 	}
 
 	char* team = parameters[6];
-	if(strcmp(team, "team")==1){
+	if(strcmp(team, "team")!=0){
 		return 4; 
 	}
 	char* player = parameters[8]; 
-	if(strcmp(player, "player")==1){
+	if(strcmp(player, "player")!=0){
 		return 4; 
 	}
 
 	char* lat = parameters[10];
-	if(strcmp(lat, "latitude") ==1){
+	if(strcmp(lat, "latitude") !=0){
 		return 4;
 	}
 
 	char* lon = parameters[12]; 
-	if(strcmp(lon, "longitude")==1){
+	if(strcmp(lon, "longitude")!=0){
 		return 4;
 	}
 	char* kragId = parameters[14]; 
-	if(strcmp(kragId, "kragId")==1){
+	if(strcmp(kragId, "kragId")!=0){
 		return 4;
 	}
 
@@ -1191,15 +1192,15 @@ static int faLog(char* parameters[], int total){
 	}
 
 	char* opcode=  parameters[0];
-	if(strcmp(opcode, "opCode")==1){
+	if(strcmp(opcode, "opCode")!=0){
 		return 4; 
 	}
 	char* pebbleId = parameters[2];
-	if(strcmp(pebbleId, "pebbleId")==1){
+	if(strcmp(pebbleId, "pebbleId")!=0){
 		return 4; 
 	}
 	char* text = parameters[4]; 
-	if(strcmp(text, "text")==1){
+	if(strcmp(text, "text")!=0){
 		return 4; 
 	}
 
@@ -1235,15 +1236,15 @@ static int gameOver(char* parameters[], int total){
 	}
 
 	char* opcode=  parameters[0];
-	if(strcmp(opcode, "opCode")==1){
+	if(strcmp(opcode, "opCode")!=0){
 		return 4; 
 	}
 	char* gameid = parameters[2];
-	if(strcmp(gameid, "gameId")==1){
+	if(strcmp(gameid, "gameId")!=0){
 		return 4; 
 	}
 	char* secret = parameters[4]; 
-	if(strcmp(secret, "secret")==1){
+	if(strcmp(secret, "secret")!=0){
 		return 4; 
 	}
 
