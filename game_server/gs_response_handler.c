@@ -287,7 +287,7 @@ respond_with_game_status(int comm_sock, struct sockaddr_in them, game_info_t *gi
     char *guideId = team_get_guideId(team);
     if (guideId == NULL){
         guideId = malloc(MESSAGE_LENGTH);
-        strcpy(guideId, "none");
+        strcpy(guideId, "0000");
     }
     
     strcpy(message,"opCode=GAME_STATUS|gameId=");

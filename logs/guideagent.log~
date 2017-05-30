@@ -1,3 +1,0 @@
-//guide agent log file(Mon May 29 12:55:36 2017) FROM 129.170.214.115@23855: opCode
-(Mon May 29 20:25:48 2017) FROM 129.170.214.115@54872: opCode=GAME_STATUS|gameId=FEED|guideId=0707|numClaimed=5|numKrags=8
-(Mon May 29 20:25:59 2017) FROM 129.170.214.115@54872: opCode=GS_AGENT|gameId=FEED|pebbleId=8080477D|team=aqua|player=Bob|latitude=43.706552|longitude=-72.287418|lastContact=28
