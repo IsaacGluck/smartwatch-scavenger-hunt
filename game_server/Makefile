@@ -7,8 +7,8 @@ L = ../libcs50
 #DEBUG = -DEBUG
 
 PROG = gameserver
-OBJS = gameserver.o gsstruct.o gs_message_handler.o gs_response_handler.o
-LLIBS = $L/libcs50.a $C/common.a
+OBJS = gameserver.o gsstruct.o gs_message_handler.o gs_response_handler.o $C/shared.o $C/common.o
+LLIBS = $L/libcs50.a
 
 
 CFLAGS = -Wall -pedantic -std=gnu11 -ggdb -I$C -I$L -lm $(DEBUG) -DNOPEBBLE
