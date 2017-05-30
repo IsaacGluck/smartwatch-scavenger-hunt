@@ -48,7 +48,7 @@ To run the program, run `./gameserver gameId kff sf port`
 * no 0000 guide agent ID or pebble ID
 
 ##### Non Assumptions:
-
+* Once game starts, unless there are malloc error, the game continues.
 
 ##### Limitations:
 * Because it does not fork for each guide or field agent, once many player connect, the server may not be able to handle all messages.
