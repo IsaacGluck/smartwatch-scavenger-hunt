@@ -854,7 +854,7 @@ static int gaHint(char* parameters[], int total){
 
 	//gmae id 
 	if((int)strlen(parameters[3])>0 && (int)strlen(parameters[3])<9){
-		for(int i = 0; i< strlen(parameters[3]); i++){
+		for(int i = 0; i < (int)strlen(parameters[3]); i++){
 			if(!ishex(parameters[3][i])){
 				return 3; 
 			}
@@ -867,7 +867,7 @@ static int gaHint(char* parameters[], int total){
 	
 	//guide id 
 	if((int)strlen(parameters[5])>0 && (int)strlen(parameters[5])<9){
-		for(int i = 0; i< strlen(parameters[5]); i++){
+		for(int i = 0; i < (int)strlen(parameters[5]); i++){
 			if(!ishex(parameters[5][i])){
 
 				return 3; 
@@ -897,7 +897,7 @@ static int gaHint(char* parameters[], int total){
 	}
 	else{
 		if((int)strlen(parameters[11])>0 && (int)strlen(parameters[11])<9){
-			for(int i = 0; i< strlen(parameters[11]); i++){
+			for(int i = 0; i < (int)strlen(parameters[11]); i++){
 				if(!ishex(parameters[11][i])){
 					return 3; 
 				}
