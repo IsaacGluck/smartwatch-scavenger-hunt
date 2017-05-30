@@ -3,6 +3,8 @@
  *
  * Functions for response based on received message from agent or guide agent
  *
+ * If result = integer: Command
+ *
  * Common Returning value
  * 0: Successfully handled message, and nothing to be done
  * -1: SH_ERROR_INVALID_MESSAGE
@@ -26,6 +28,7 @@
  *
  * GA_STATUS specific returning value
  * 1: Respond with GAME_STATUS and GS_AGENT
+ * 2: Respond with GAME_STATUS, GS_AGENT, and reveal two clue
  *
  * GA_HINT specific returning value
  * 1: Send the message to all FA in the team
@@ -105,6 +108,11 @@ respond(char *opCode, int result, int comm_sock, struct sockaddr_in them, game_i
         if (result == 1){
             respond_with_game_status(comm_sock, them, gi, message_from);
             respond_with_gs_agent(comm_sock, them, gi, message_from);
+        }
+        else if (result == 2){
+            respond_with_game_status(comm_sock, them, gi, message_from);
+            respond_with_gs_agent(comm_sock, them, gi, message_from);
+            respond_with_gs_clue(comm_sock, them, gi, message_from);
         }
     }
     else if (strcmp(opCode, "GA_HINT") == 0){

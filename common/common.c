@@ -1,18 +1,12 @@
-#ifdef NOPEBBLE // we are *not* building for pebble
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#else // we are building for pebble
-#include <pebble.h>
-#endif
 
 
 /**************** file-local global variables ****************/
 static const int MESSAGE_LENGTH = 8192;
 
-
-#ifdef NOPEBBLE // we are *not* building for pebble
 
 /* return the integer value of the given hex */
 unsigned int stringHexToDec(char* hex){
@@ -34,8 +28,6 @@ char *decToStringHex(unsigned int dec){
     
     return hex;
 }
-
-#endif
 
 
 /* return the array created from the message
