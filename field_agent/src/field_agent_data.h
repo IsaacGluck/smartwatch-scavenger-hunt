@@ -23,6 +23,9 @@ typedef struct fieldagent_info {
 
 	bool game_started;
 	bool game_over_received;
+	bool wrong_name;
+	bool krag_claimed;
+	bool krag_claimed_already;
 
 	char* krag_to_submit;
 	bool submit_krag;

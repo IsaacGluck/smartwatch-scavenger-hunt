@@ -139,7 +139,7 @@ void message_GAME_OVER(char* message)
 	char* message_gameID = NULL;
 	char* secret = NULL;
 
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 6; i++) {
 		if (strcmp(tokenized_message[i], "gameID") == 0) {
 			message_gameID = tokenized_message[i+1];
 		}
@@ -177,7 +177,7 @@ void message_GAME_STATUS(char* message)
 	char* numClaimed_s = NULL;
 	char* numKrags_s = NULL;
 
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 10; i++) {
 		if (strcmp(tokenized_message[i], "gameID") == 0) {
 			message_gameID = tokenized_message[i+1];
 		}
@@ -210,10 +210,68 @@ void message_GAME_STATUS(char* message)
 }
 
 
+
+
+// SH_ERROR_INVALID_MESSAGE
+// SH_ERROR_INVALID_OPCODE
+// SH_ERROR_INVALID_FIELD
+// SH_ERROR_DUPLICATE_FIELD
+// SH_ERROR_INVALID_GAME_ID
+// SH_ERROR_INVALID_TEAMNAME
+// SH_ERROR_INVALID_ID
+
+
+// SH_ERROR_INVALID_PLAYERNAME
+// SH_ERROR_DUPLICATE_PLAYERNAME
+// SH_CLAIMED
+// SH_CLAIMED_ALREADY
+
 // opCode=GS_RESPONSE|gameId=0707|respCode=SH_ERROR_INVALID_OPCODE|text=Unrecognized opCode 'GA_FOO'
 void message_GS_RESPONSE(char* message)
 {
+	char** tokenized_message = tokenize(message);
 
+	char* message_gameID = NULL;
+	char* respCode = NULL;
+	char* text = NULL;
+
+	for (int i = 0; i < 8; i++) {
+		if (strcmp(tokenized_message[i], "gameID") == 0) {
+			message_gameID = tokenized_message[i+1];
+		}
+
+		if (strcmp(tokenized_message[i], "respCode") == 0) {
+			respCode = tokenized_message[i+1];
+		}
+
+		if (strcmp(tokenized_message[i], "text") == 0) {
+			text = tokenized_message[i+1];
+		}
+	}
+
+	if (message_gameID == NULL || respCode == NULL || text == NULL) {
+		return;
+	}
+
+	if (strcmp(message_gameID, FA_INFO->gameID) != 0) { // wrong gameID
+		APP_LOG(APP_LOG_LEVEL_INFO, "Wrong gameID in: %s\n", message); // just log don't do anything
+		return;
+	}
+
+	if(strcmp(respCode, "SH_ERROR_INVALID_PLAYERNAME") == 0 || strcmp(respCode, "SH_ERROR_DUPLICATE_PLAYERNAME") == 0) {
+		FA_INFO->wrong_name = true;
+	}
+
+	if(strcmp(respCode, "SH_CLAIMED_ALREADY") == 0) {
+		FA_INFO->krag_claimed_already = true;
+	}
+
+	if(strcmp(respCode, "SH_CLAIMED") == 0) {
+		FA_INFO->krag_claimed = true;
+	}
+
+
+	free(tokenized_message);
 }
 
 

@@ -63,7 +63,9 @@ void create_info()
 
 	FA_INFO->game_started = false;
 	FA_INFO->game_started = false;
-
+	FA_INFO->wrong_name = false;
+	FA_INFO->krag_claimed = false;
+	FA_INFO->krag_claimed_already = false;
 	FA_INFO->submit_krag = false;
 }
 

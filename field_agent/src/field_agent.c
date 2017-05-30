@@ -20,7 +20,7 @@ static char *fa_claim = "opCode=FA_CLAIM|"
 												"latitude=43.706552|"
 												"longitude=-72.287418|"
 												"kragId=8080";
-
+static char* error_message;
 
 // static function defintions
 // base functions
@@ -44,6 +44,7 @@ static void send_message(char *message);
 static void init() {
   /* 1. Setup the info struct with the FA data */
   create_info();
+  error_message = malloc(200);
 
   /* 2. Register our tick_handler function with TickTimerService. */
   tick_timer_service_subscribe(SECOND_UNIT, tick_handler);
@@ -85,6 +86,7 @@ static void deinit() {
 
     /* 3. Free memory. */
     delete_info();
+    free(error_message);
 
 }
 
@@ -105,6 +107,28 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
     window_stack_pop_all(false); // pop all windows
     dialog_message_window_push(FA_INFO->known_chars);
     return; // do no more
+  }
+
+  if (FA_INFO->wrong_name) { // SH_ERROR_INVALID_PLAYERNAME or SH_ERROR_DUPLICATE_PLAYERNAME
+    char buff[51] = "";
+    snprintf(buff, sizeof(buff), "Name '%s' could not be used. Please choose again.", FA_INFO->name);
+    strcpy(error_message, buff);
+    window_stack_pop(false); // pop all windows
+    choose_name_window_push();
+    dialog_message_window_push(error_message);
+    FA_INFO->wrong_name = false;
+  }
+
+  if (FA_INFO->krag_claimed_already) {
+    char buff[51] = "Sorry, the krag you submitted was already claimed.";
+    strcpy(error_message,buff);
+    dialog_message_window_push(error_message);
+    FA_INFO->krag_claimed_already = false;
+  }
+
+  if (FA_INFO->krag_claimed) {
+
+    FA_INFO->krag_claimed = false;
   }
 
   /* 1. Only send a request/message every 5 seconds. */
@@ -137,6 +161,12 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 
         // strcpy(FA_INFO->known_chars, secret_buff);
         // FA_INFO->game_over_received = true;
+
+        // Test wrong name
+        // FA_INFO->wrong_name = true;
+
+        // Test claimed already
+        // FA_INFO->krag_claimed_already = true;
 
         break;
       default:
