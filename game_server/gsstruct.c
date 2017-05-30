@@ -125,7 +125,7 @@ static void find_pebbleId(void *arg, const char *key, void *item);
 static void find_fa_with_pebbleId(void *arg, const char *key, void *item);
 static void find_guideId(void *arg, const char *key, void *item);
 // <<<<<<< HEAD
-static void send_hint_to_everyone(void *arg, const char *key, void *item);
+// static void send_hint_to_everyone(void *arg, const char *key, void *item);
 // =======
 // >>>>>>> 009d26ebf669804895e094d3467c60631318f554 - ISAAC
 static void send_message_to_everyone(void *arg, const char *key, void *item);
@@ -143,7 +143,7 @@ static void set_char_delete(void *item);
 static void set_fa_delete(void *item);
 
 //#ifdef DEBUG_TEST
-static void krag_set_print(FILE *fp, const char *key, void *item);
+// static void krag_set_print(FILE *fp, const char *key, void *item);
 //#endif
 
 
@@ -1170,21 +1170,21 @@ krag_get_latitude(krag_t *krag){
 <<<<<<< HEAD
  * return NULL if it does not exist
  */
-char *
-krag_get_kragId(krag_t *krag){
-    if (krag == NULL) return NULL;
-    char *kragId = decToStringHex(krag->kragID);
-    return kragId;
-}
-
-// /*
-//  * return 0 if it does not exist
-//  */
-// unsigned int
+// char *
 // krag_get_kragId(krag_t *krag){
-//     if (krag == NULL) return 0;
-//     return krag->kragID;
+//     if (krag == NULL) return NULL;
+//     char *kragId = decToStringHex(krag->kragID);
+//     return kragId;
 // }
+
+/*
+ * return 0 if it does not exist
+ */
+unsigned int
+krag_get_kragId(krag_t *krag){
+    if (krag == NULL) return 0;
+    return krag->kragID;
+}
 // =======
 //  * return 0 if it does not exist
 //  */
@@ -1550,11 +1550,11 @@ krag_print(krag_t *krag){
     free(val);
 }
 
-static void
-krag_set_print(FILE *fp, const char *key, void *item){
-    krag_t *krag = item;
-    printf("key: %s\n", key);
-    krag_print(krag);
-}
+// static void
+// krag_set_print(FILE *fp, const char *key, void *item){
+//     krag_t *krag = item;
+//     printf("key: %s\n", key);
+//     krag_print(krag);
+// }
 
 

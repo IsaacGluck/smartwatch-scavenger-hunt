@@ -146,12 +146,12 @@ float krag_get_longitude(krag_t *krag);
 <<<<<<< HEAD
  * return NULL if it does not exist
  */
-char *krag_get_kragId(krag_t *krag);
+// char *krag_get_kragId(krag_t *krag);
 
-// /*
-//  * return 0 if it does not exist
-//  */
-// unsigned int krag_get_kragId(krag_t *krag);
+/*
+ * return 0 if it does not exist
+ */
+unsigned int krag_get_kragId(krag_t *krag);
 // =======
 //  * return 0 if it does not exist
 //  */
