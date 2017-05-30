@@ -285,6 +285,9 @@ int fn_fa_claim(char *rest_of_line, game_info_t *gi, struct sockaddr_in them){
         free_message_fields(gameId, pebbleId, team_name,
             player_name, latitude, longitude, NULL, kragId, NULL, NULL);
         token_delete(token);
+#ifdef DEBUG
+        printf("latitude and longitude cannot be confirmed\n");
+#endif
         return -1;
     }
     
@@ -565,6 +568,7 @@ token_new(char *rest_of_line){
     new_token->right = malloc(MESSAGE_LENGTH);
     new_token->rest_of_line = rest_of_line;
     if (new_token->left == NULL || new_token->right == NULL){
+        
         fprintf(stderr, "token_new failed due to not being able to malloc memory\n");
         return NULL;
     }

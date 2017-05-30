@@ -20,6 +20,7 @@ static const int MESSAGE_LENGTH = 8192;
 /* return the integer value of the given hex */
 unsigned int stringHexToDec(char* hex){
     if (hex == NULL) return 0;
+    if (strlen(hex)>8) return 0;
     unsigned int decimalNumber;
     sscanf(hex,"%x", &decimalNumber);
 
