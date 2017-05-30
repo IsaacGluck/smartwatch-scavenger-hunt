@@ -5,7 +5,10 @@
 #include "message_handler.h"
 #include "field_agent_data.h"
 
-
+char* create_fa_location(char* statusReq);
+char* create_fa_claim(char* kragId);
+char* create_fa_log(char* text);
+void incoming_message(char* message);
 
 
 char* create_fa_location(char* statusReq)
@@ -16,13 +19,6 @@ char* create_fa_location(char* statusReq)
 	}
 	
 	char buff[500] = "";
-	// snprintf(buff, sizeof(buff),
-	// 	"opCode=FA_LOCATION|gameId=%s|pebbleId=%s|team=%s|player=%s|latitude=%s|longitude=%s|statusReq=%s",
-	// 	FA_INFO->gameID, FA_INFO->pebbleID, FA_INFO->team, FA_INFO->name, FA_INFO->latitude, FA_INFO->longitude, statusReq);
-
-	// APP_LOG(APP_LOG_LEVEL_INFO, "\nCREATED: %s\n\n", buff);
-
-	// strcpy(FA_LOCATION, buff);
 
 	strncat(buff, "opCode=FA_LOCATION|gameId=", sizeof(buff));
 	strncat(buff, FA_INFO->gameID, sizeof(buff) - strlen(buff));
@@ -42,9 +38,6 @@ char* create_fa_location(char* statusReq)
 	memcpy(FA_LOCATION, buff, 500);
 
 
-
-	// APP_LOG(APP_LOG_LEVEL_INFO, "\nCREATED: %s\n\n", FA_LOCATION);
-
 	return FA_LOCATION;
 }
 
@@ -58,13 +51,6 @@ char* create_fa_claim(char* kragId)
 
 
 	char buff[500] = "";
-	// snprintf(buff, sizeof(buff),
-	// 	"opCode=FA_LOCATION|gameId=%s|pebbleId=%s|team=%s|player=%s|latitude=%s|longitude=%s|statusReq=%s",
-	// 	FA_INFO->gameID, FA_INFO->pebbleID, FA_INFO->team, FA_INFO->name, FA_INFO->latitude, FA_INFO->longitude, statusReq);
-
-	// APP_LOG(APP_LOG_LEVEL_INFO, "\nCREATED: %s\n\n", buff);
-
-	// strcpy(FA_LOCATION, buff);
 
 	strncat(buff, "opCode=FA_CLAIM|gameId=", sizeof(buff));
 	strncat(buff, FA_INFO->gameID, sizeof(buff) - strlen(buff));
@@ -84,17 +70,43 @@ char* create_fa_claim(char* kragId)
 	memcpy(FA_CLAIM, buff, 500);
 
 
-
-
-
-	// char temp[500];
-	// snprintf(temp, sizeof(temp),
-	// 	"opCode=FA_CLAIM|gameId=%s|pebbleId=%s|team=%s|player=%s|latitude=%s|longitude=%s|kragId=%s",
-	// 	FA_INFO->gameID, FA_INFO->pebbleID, FA_INFO->team, FA_INFO->name, FA_INFO->latitude, FA_INFO->longitude, kragId);
-
 	return FA_CLAIM;
 }
 
+
+char* create_fa_log(char* text)
+{
+	char* FA_LOG = malloc(500);
+	if (FA_LOG == NULL) {
+		return NULL;
+	}
+
+	// text can be max 141 characters
+	if ((int)strlen(text) > 141) {
+		text[141] = '\0';
+	}
+
+	char buff[500] = "";
+
+	strncat(buff, "opCode=FA_LOG|pebbleId=", sizeof(buff));
+	strncat(buff, FA_INFO->pebbleID, sizeof(buff) - strlen(buff));
+	strncat(buff, "|text=", sizeof(buff));
+	strncat(buff, text, sizeof(buff) - strlen(buff));
+
+	memcpy(FA_LOG, buff, 500);
+
+
+	return FA_LOG;
+}
+
+
+
+
+
+void incoming_message(char* message)
+{
+	
+}
 
 
 

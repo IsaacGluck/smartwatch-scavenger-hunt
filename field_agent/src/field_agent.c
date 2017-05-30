@@ -176,6 +176,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         // Log the value sent as part of the received message.
         char *msg = msg_tuple->value->cstring;
         APP_LOG(APP_LOG_LEVEL_INFO, "Got AppKeyrecvMsg: %s\n", msg);
+        incoming_message(msg);
     }
 
     /* 3. Check to see if a location message received. */

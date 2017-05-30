@@ -122,7 +122,6 @@ int validate_message(char* message){
 	}
 
 
-	//Sends command to log file
 	int fn;
 	for (fn = 0; codes[fn].opCodes != NULL; fn++) {
   		if (strcmp(array[1], codes[fn].opCodes) == 0) {
