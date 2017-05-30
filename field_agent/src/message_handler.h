@@ -15,13 +15,13 @@ char* create_fa_log(char* text);
 
 void incoming_message(char* message);
 
-void message_GAME_OVER(char* message);
+void message_GAME_OVER(char** tokenized_message);
 
-void message_GAME_STATUS(char* message);
+void message_GAME_STATUS(char** tokenized_message);
 
-void message_GS_RESPONSE(char* message);
+void message_GS_RESPONSE(char** tokenized_message);
 
-void message_GA_HINT(char* message);
+void message_GA_HINT(char** tokenized_message);
 
 
 
