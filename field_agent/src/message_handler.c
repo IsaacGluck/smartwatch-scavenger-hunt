@@ -127,7 +127,7 @@ void incoming_message(char* message)
 		APP_LOG(APP_LOG_LEVEL_INFO, "Received message: %s\n", message); // just log don't do anything
 	}
 
-	deleteOpCode(opcode_data);
+	free(opcode_data);
 }
 
 

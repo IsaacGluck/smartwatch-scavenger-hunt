@@ -118,7 +118,7 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
         reqOption++;
         break;
       case 1 :
-        request_location();
+        // request_location();
         if(FA_INFO->game_started){
           char* FA_LOCATION = create_fa_location("0");
           send_message(FA_LOCATION);
