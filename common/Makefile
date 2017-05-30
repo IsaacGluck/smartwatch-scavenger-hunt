@@ -13,6 +13,8 @@ $(LIB): $(OBJS)
 	ar cr $(LIB) $(OBJS)
 
 shared.o: shared.h
+common.o: common.h
+
 .PHONY: clean sourcelist
 
 sourcelist: Makefile *.md *.c *.h

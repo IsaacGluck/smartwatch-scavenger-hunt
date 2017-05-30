@@ -1,15 +1,16 @@
 /*****************************************************************/
-/* This program */
+/* This program is the menu to choose a name at the beginning of a game. */
 // radio button code drawn from https://github.com/pebble-examples/ui-patterns/blob/master/src/windows/radio_button_window.c
 /*****************************************************************/
 #include "choose_name.h"
 #include "field_agent_data.h"
 #include "main_menu.h"
 
-
+// File global variables
 static Window *s_main_window_choose_name;
 static MenuLayer *choose_name_menulayer;
 
+// Variables to be used throughout the menu
 static char isaac[6] = "Isaac";
 static char morgan[7] = "Morgan";
 static char laya[5] = "Laya";
