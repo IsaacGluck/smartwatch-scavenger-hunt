@@ -21,6 +21,8 @@ void message_GAME_STATUS(char* message);
 
 void message_GS_RESPONSE(char* message);
 
+void message_GA_HINT(char* message);
+
 
 
 

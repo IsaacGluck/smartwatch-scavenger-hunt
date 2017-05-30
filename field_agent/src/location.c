@@ -24,8 +24,6 @@ location_t* parse_location(char* location_s)
 		return NULL; // could not tokenize the location_s
 	}
 
-	// double latitude_d = string_to_double(latitude_string);
-	// double longitude_d = string_to_double(longitude_string);
 
 	location_t* location = malloc(sizeof(location_t)); // must free later
 	if (location == NULL){return NULL;}

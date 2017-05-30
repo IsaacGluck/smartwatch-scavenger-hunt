@@ -20,7 +20,8 @@ static char *fa_claim = "opCode=FA_CLAIM|"
 												"latitude=43.706552|"
 												"longitude=-72.287418|"
 												"kragId=8080";
-
+static char* error_message;
+char pebbleId_init_string[5] = "init";
 
 // static function defintions
 // base functions
@@ -44,6 +45,7 @@ static void send_message(char *message);
 static void init() {
   /* 1. Setup the info struct with the FA data */
   create_info();
+  error_message = malloc(200);
 
   /* 2. Register our tick_handler function with TickTimerService. */
   tick_timer_service_subscribe(SECOND_UNIT, tick_handler);
@@ -78,6 +80,11 @@ int main(void) {
 // deinit
 static void deinit() {
     /* 1. Remove all windows from the stack */
+    // Window* window = window_stack_pop(false);
+    // while (window != NULL) {
+    //   window_destroy(window);
+    //   window = window_stack_pop(false);
+    // }
     window_stack_pop_all(false); 
 
     /* 2. Unsubscribe from sensors. */
@@ -85,12 +92,12 @@ static void deinit() {
 
     /* 3. Free memory. */
     delete_info();
+    free(error_message);
 
 }
 
 // tick_handler
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
-  // APP_LOG(APP_LOG_LEVEL_INFO, "Tick.");
   static int seconds = 5;
   static int reqOption = 0;
 
@@ -103,24 +110,53 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 
   if (FA_INFO->game_over_received) {
     window_stack_pop_all(false); // pop all windows
-    dialog_message_window_push(FA_INFO->known_chars);
+    dialog_message_window_push(FA_INFO->end_message);
     return; // do no more
+  }
+
+  if (FA_INFO->wrong_name) { // SH_ERROR_INVALId_PLAYERNAME or SH_ERROR_DUPLICATE_PLAYERNAME
+    char buff[51] = "";
+    snprintf(buff, sizeof(buff), "Name '%s' could not be used. Please choose again.", FA_INFO->name);
+    strcpy(error_message, buff);
+    window_stack_pop(false); // pop all windows
+    choose_name_window_push();
+    dialog_message_window_push(error_message);
+    FA_INFO->wrong_name = false;
+  }
+
+  if (FA_INFO->krag_claimed_already) {
+    char buff[51] = "Sorry, the krag you submitted was already claimed.";
+    strcpy(error_message,buff);
+    dialog_message_window_push(error_message);
+    FA_INFO->krag_claimed_already = false;
+  }
+
+  if (FA_INFO->krag_claimed) {
+    char buff[51] = "The KRAG you submitted was claimed!";
+    strcpy(error_message,buff);
+    dialog_message_window_push(error_message);
+    if (FA_INFO->num_left > 0) {
+      FA_INFO->num_left = FA_INFO->num_left - 1;
+    }
+    FA_INFO->num_claimed = FA_INFO->num_claimed + 1;
+    FA_INFO->krag_claimed = false;
   }
 
   /* 1. Only send a request/message every 5 seconds. */
   if(seconds == 0) {
     switch(reqOption) {
       case 0 :
-        if (FA_INFO->pebbleID == NULL) {
+        if (strcmp(FA_INFO->pebbleId, pebbleId_init_string) == 0) {
           request_pebbleId();
         }
+        print_FA();
         request_location();
         reqOption++;
         break;
       case 1 :
-        request_location();
-        if(FA_INFO->game_started){
-          char* FA_LOCATION = create_fa_location("0");
+        // request_location();
+        if(FA_INFO->game_started && strcmp(FA_INFO->pebbleId, pebbleId_init_string) != 0){
+          char* FA_LOCATION = create_fa_location("1");
           send_message(FA_LOCATION);
           free(FA_LOCATION);
         }
@@ -137,6 +173,15 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 
         // strcpy(FA_INFO->known_chars, secret_buff);
         // FA_INFO->game_over_received = true;
+
+        // Test wrong name
+        // FA_INFO->wrong_name = true;
+
+        // Test claimed already
+        // FA_INFO->krag_claimed_already = true;
+
+        // Test claimed
+        // FA_INFO->krag_claimed = true;
 
         break;
       default:
@@ -171,7 +216,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
       AppKeySendMsg,          // Send a message over Bluetooth to the companion smartphone and then on to the Game Server
       AppKeyRecvMsg,          // A message from the Game Server is available (arrived over Bluetooth)
       AppKeyLocation,         // Request your GPS location from the companion smartphone
-      AppKeyPebbleId,         // Request your unique pebble ID from the companion smartphone
+      AppKeyPebbleId,         // Request your unique pebble Id from the companion smartphone
       AppKeySendError         // Error: companion app can't connect to the Proxy (and ultimately the Game Server).
     };
     */
@@ -217,9 +262,9 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     Tuple *id_tuple = dict_find(iterator, AppKeyPebbleId);
     if(id_tuple) {
         // Log the value sent as part of the received message.
-        char *pebbleID = id_tuple->value->cstring;
-        APP_LOG(APP_LOG_LEVEL_INFO, "Got AppKeyPebbleId: %s\n", pebbleID);
-        strcpy(FA_INFO->pebbleID, pebbleID);
+        char *pebbleId = id_tuple->value->cstring;
+        APP_LOG(APP_LOG_LEVEL_INFO, "Got AppKeyPebbleId: %s\n", pebbleId);
+        strcpy(FA_INFO->pebbleId, pebbleId);
     }
 
     /* 5. Check to see if an error message was received. */
