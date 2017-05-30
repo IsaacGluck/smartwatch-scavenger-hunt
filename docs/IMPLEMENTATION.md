@@ -440,170 +440,315 @@ If opCode=
 
 
 ## FIELD AGENT
-### Methods
+### Modules
 
+#### field_agent_data
+##### Structs
+-   ```c
+    typedef struct fieldagent_info {
+        char *gameId;
+        char* pebbleId;
+        char* name;
+        char* team;
+        char* latitude;
+        char* longitude;
+        char* end_message;
+        char* krag_to_submit;
+        char** hints_received;
+
+        int num_hints;
+        int num_claimed;
+        int num_left;
+        int time_passed;
+
+        bool game_started;
+        bool game_over_received;
+        bool wrong_name;
+        bool krag_claimed;
+        bool krag_claimed_already;
+        bool submit_krag;
+    } fieldagent_info_t;
+    ```
+
+##### Variables
+-   `fieldagent_info_t *FA_INFO;`
+
+##### Methods
+-   `void create_info();`
+    - malloc the char* fields of the struct and the struct itself
+    - initialize as many fields as possible
+
+-   `void delete_info();`
+    - free the memory associated with the fields of the struct
+    - free the struct
+
+-   `void print_FA();`
+    - add to the logs certain fields of the FA_INFO
+
+
+ 
+#### field_agent
+##### Variables
+- `static time_t start;`
+- `static char* error_message;`
+- `static int malloc_size = 200;`
+- `char pebbleId_init_string[5] = "init";`
+
+##### Methods
 - `int main(void);`
-    - *Pseudocode*
-        - Calls init, app_event_loop(), and deinit 
+    - Call init, app_event_loop(), and deinit
 
 - `static void init();`
-    - *Pseudocode*
-        - Create main Window element.
-        - Set handlers to manage the elements inside the window.
-        - Register our tick_handler function with TickTimerService.
-        - Show the Window on the watch, with animated=true.
-        - Choose name window is displayed from the start.
-        - Set the handlers for AppMessage inbox/outbox events. Set these handlers BEFORE calling open, otherwise you might miss a message.
-        - open the app message communication protocol. Request as much space as possible, because our messages can be quite large at times.
-        - setup the FA_INFO `fieldagent_info_t` struct
+    - Call create_info()
+    - malloc the error_message
+    - Register our tick_handler function with TickTimerService
+    - Push the choose name window
+    - Set the start time
+    - Set the handlers for AppMessage inbox/outbox events
+    - Open the app message communication protocol
 
 - `static void deinit();`
-	- *Pseudocode*
-        - Destroy the window, unsubscribe from sensors, and free memory.
-
-- `static void main_window_load(Window *window);`
-	- *Pseudocode*
-        - Setup the choose name window and add the menu layer.
-
-- `static void main_window_unload(Window *window);`
-	- *Pseudocode*
-        - Destroy the menu layer.
+    - Pop all the windows
+    - Unsubscribe from the timer
+    - Call delete_info() to remove memory associated with the FA_INFO
+    - Free the error_message
 
 - `static void tick_handler(struct tm *tick_time, TimeUnits units_changed);`
-	- *Pseudocode*
-        - Send a FA_LOCATION every 15 seconds
-        - Request location every 10 seconds
-        - Check for messages every 5 seconds
+    - If submit_krag is true, send an FA_CLAIM
+    - If game_over_received is true, pop all the windows and push a dialog_message_window with a game over message
+    - If wrong_name is true, pop windows, push the choose_name window, and push a dialog_message_window with a error_message
+    - If krag_claimed is true, push a dialog_message_window with a error_message message, update the FA_INFO struct
+    - request a location update every 10 seconds
+    - Every 15 seconds, if the game has started and the pebbleId has been fetched, send a FA_LOCATION, and update the time elapsed
 
 - `static void update_time();`
-	- *Pseudocode*
-        - update the time and display it
+    -
 
 - `static void inbox_received_callback(DictionaryIterator *iterator, void *context);`
-	- *Pseudocode*
-        - check the dictionary iterator to see if a message was received
-        - call the correct function depending on if there's a message
+    -
 
 - `static void outbox_sent_callback(DictionaryIterator *iterator, void *context);`
-	- *Pseudocode*
-        - log the message sent
+    -
 
 - `static void inbox_dropped_callback(AppMessageResult reason, void *context);`
-	- *Pseudocode*
-        - log the incoming message dropped
+    -
 
 - `static void outbox_failed_callback(DictionaryIterator *iter, AppMessageResult reason, void *context);`
-	- *Pseudocode*
-        - log the failed to send message
+    -
 
 - `static void request_pebbleId();`
-	- *Pseudocode*
-        - prepare the outbox
-        - send a request pebble ID message
-        - log errors and success messages
+    -
 
 - `static void request_location();`
-	- *Pseudocode*
-        - prepare the outbox
-        - send a request location message
-        - log errors and success messages
+    -
 
 - `static void send_message(char *message);`
-	- *Pseudocode*
-        - prepare the outbox
-        - send the message provided
-        - log errors and success messages
-
-- `uint16_t get_num_rows_callback(MenuLayer *menu_layer, uint16_t section_index, void *context);`
-	- *Pseudocode*
-        - return the number of rows in the choose name menu
-
-- `void draw_row_callback(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *context);`
-	- *Pseudocode*
-        - draw the rows of the choose name menu - the four names to choose from and the join game text
-
-- `int16_t get_cell_height_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *context);`
-    - *Pseudocode*
-        - return the height of each row in the choose name menu
-
-- `void select_callback(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context);`
-	- *Pseudocode*
-           -  Called when the user joins the game
-           -  Sets the name they chose in the FA_INFO struct
-           -  switches to the main game screen window
-           -  sends a FA_LOCATION message to let the server know the FA joined the game
-
-- `void send_FA_LOCATION();`
-	- *Pseudocode*
-        -  create and validate the FA_LOCATION message and send it
-
-- `void send_FA_CALIM();`
-	- *Pseudocode*
-        -  create and validate the FA_CALIM message and send it
-
-- `void send_FA_LOG();`
-	- *Pseudocode*
-        -  create and validate the FA_LOG message and send it
-
-The following functions implement the krag input window
-- `static char* selection_handle_get_text(int index, void *context);`
-  - *Pseudocode*
-    - get the character from the box
-
-- `static void selection_handle_complete(void *context);`
-  - *Pseudocode*
-    - set the callbacks for the krag input
-
-- `static void selection_handle_inc(int index, uint8_t clicks, void *context);`
-  - *Pseudocode*
-    - increment the int entered with the buttons
-
-- `static void selection_handle_dec(int index, uint8_t clicks, void *context);`
-  - *Pseudocode*
-    - decrement the int entered with the buttons
-
-- `PinWindow* pin_window_create(PinWindowCallbacks callbacks);`
-  - *Pseudocode*
-    - create the krag input window and its layers
-
-- `void pin_window_destroy(PinWindow *pin_window);`
-  - *Pseudocode*
-    - destroy the krag input window
-
-- `void pin_window_push(PinWindow *pin_window, bool animated);`
-  - *Pseudocode*
-    - add the krag input window on the stack
-
-- `void pin_window_pop(PinWindow *pin_window, bool animated);`
-  - *Pseudocode*
-    - remove the krag input window from the stack
-
-- `bool pin_window_get_topmost_window(PinWindow *pin_window);`
-  - *Pseudocode*
-    - make the krag input window the top of the stakc
-
-- `void pin_window_set_highlight_color(PinWindow *pin_window, GColor color);`
-  - *Pseudocode*
-    - set the highlight color of the krag input
+    -
 
 
-### Data structures
-```c
-typedef struct fieldagent_info {
-	char *gameID;
-	char* pebbleId;
-	char* name;
-	char* team;
-	double latitude;
-	double longitude;
-	int num_claimed;
-	int num_left;
-	char* known_chars;
-	char** hiints_received;
-} fieldagent_info_t;
-```
 
-- Also an array of hints as strings
+
+#### choose_name
+
+// File global variables
+static Window *s_main_window_choose_name;
+static MenuLayer *choose_name_menulayer;
+
+// Variables to be used throughout the menu
+static char isaac[6] = "Isaac";
+static char morgan[7] = "Morgan";
+static char laya[5] = "Laya";
+static char kazuma[7] = "Kazuma";
+static int s_current_selection = 1; // for choosing the name, start at 1 from the menu
+
+// Setup the radion menu layer to choose a name
+//
+static uint16_t get_num_rows_callback_choose_name(MenuLayer *menu_layer, uint16_t section_index, void *context);
+
+//
+static void draw_row_callback_choose_name(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *context);
+
+// 
+static int16_t get_cell_height_callback_choose_name(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *context);
+
+//
+static void select_callback_choose_name(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context);
+
+// main_window
+static void window_load_choose_name(Window *window);
+
+// window_unload_choose_name
+static void window_unload_choose_name(Window *window);
+
+
+void choose_name_window_push();
+
+void main_menu_reload_pass_up();
+
+
+
+
+
+#### main_menu
+
+static Window *s_main_window_main_menu = NULL;
+static MenuLayer *s_menu_layer_main_menu = NULL;
+static PinWindow *pin_window;
+
+static int s_current_selection_main_menu = 0;
+
+void pin_window_complete_callback(PIN pin, void *context);
+
+static uint16_t get_num_rows_callback_main_menu(MenuLayer *menu_layer, uint16_t section_index, void *context);
+
+static void draw_row_callback_main_menu(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *context);
+
+static int16_t get_cell_height_callback_main_menu(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *context);
+
+static void select_callback_main_menu(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context);
+
+static void window_load_main_menu(Window *window);
+
+static void window_unload_main_menu(Window *window);
+
+
+void main_menu_window_push();
+
+void main_menu_reload();
+
+
+
+
+
+
+#### pin_window
+
+typedef struct {
+  char digits[PIN_WINDOW_NUM_CELLS + 1];
+} PIN;
+
+typedef void (*PinWindowComplete)(PIN pin, void *context);
+
+typedef struct PinWindowCallbacks {
+    PinWindowComplete pin_complete;
+} PinWindowCallbacks;
+
+typedef struct {
+  Window *window;
+  TextLayer *main_text, *sub_text;
+  Layer *selection;
+  GColor highlight_color;
+  StatusBarLayer *status;
+  PinWindowCallbacks callbacks;
+
+  PIN pin;
+  char field_buffs[PIN_WINDOW_NUM_CELLS][2];
+  int8_t field_selection;
+} PinWindow;
+
+
+static char* selection_handle_get_text(int index, void *context);
+
+static void selection_handle_complete(void *context);
+
+static void selection_handle_inc(int index, uint8_t clicks, void *context);
+
+static void selection_handle_dec(int index, uint8_t clicks, void *context);
+
+
+PinWindow* pin_window_create(PinWindowCallbacks callbacks);
+
+void pin_window_destroy(PinWindow *pin_window);
+
+void pin_window_push(PinWindow *pin_window, bool animated);
+
+void pin_window_pop(PinWindow *pin_window, bool animated);
+
+bool pin_window_get_topmost_window(PinWindow *pin_window);
+
+void pin_window_set_highlight_color(PinWindow *pin_window, GColor color);
+
+
+
+
+
+
+#### hints_window
+
+static Window *s_main_window_hints_window = NULL;
+static MenuLayer *s_menu_layer_hints_window = NULL;
+static int s_current_selection_main_menu = 0;
+
+
+static uint16_t get_num_rows_callback_hints_window(MenuLayer *menu_layer, uint16_t section_index, void *context);
+
+static void draw_row_callback_hints_window(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *context);
+
+static int16_t get_cell_height_callback_hints_window(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *context);
+
+static void select_callback_hints_window(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context);
+
+static void window_load_hints_window(Window *window);
+
+static void window_unload_hints_window(Window *window);
+
+
+void hints_window_window_push();
+
+
+
+
+#### message_dialog
+
+static Window *s_window;
+static TextLayer *s_text_layer;
+static char* message = NULL;
+
+
+static void window_load(Window *window);
+
+static void window_unload(Window *window);
+
+
+void dialog_message_window_push(char* input_message);
+
+
+
+
+#### location
+
+typedef struct location_struct {
+    char* latitude;
+    char* longitude;
+} location_t;
+
+location_t *parse_location(char* location_s);
+
+
+
+#### message_handler
+
+static char GAME_STATUS[12] = "GAME_STATUS";
+static char GS_RESPONSE[12] = "GS_RESPONSE";
+static char GAME_OVER[10] = "GAME_OVER";
+static char GA_HINT[8] = "GA_HINT";
+
+char* create_fa_location(char* statusReq);
+
+char* create_fa_claim(char* kragId);
+
+char* create_fa_log(char* text);
+
+void incoming_message(char* message);
+
+void message_GAME_OVER(char* message);
+
+void message_GAME_STATUS(char* message);
+
+void message_GS_RESPONSE(char* message);
+
+void message_GA_HINT(char* message);
+
 
 
 
