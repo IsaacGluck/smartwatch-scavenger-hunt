@@ -113,9 +113,10 @@ int validate_message(char* m){
 	int fn;
 	for (fn = 0; codes[fn].opCodes != NULL; fn++) {
   		if (strcmp(array[1], codes[fn].opCodes) == 0) {
+            int result = (*codes[fn].func)(array, total+1);
             free(message);
             free(array);
-  			return((*codes[fn].func)(array, total+1));
+  			return result;
   		}
 	}
 	
