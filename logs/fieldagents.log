@@ -1,1 +1,5 @@
-//field agent log server
+//field agent log server(Tue May 30 16:41:01 2017) FA 129.170.213.207@58480: opCode=FA_LOG|pebbleId=8080477D|text=displayed hint "go west"
+(Tue May 30 16:41:50 2017) FA 129.170.213.207@58480: opCode=FA_LOG|pebbleId=8080477D|text=displayed hint "go west"
+(Tue May 30 16:41:51 2017) FA 129.170.213.207@58480: opCode=FA_LOG|pebbleId=8080477D|text=displayed hint "go west"
+(Tue May 30 16:41:52 2017) FA 129.170.213.207@58480: opCode=FA_LOG|pebbleId=8080477D|text=displayed hint "go west"
+(Tue May 30 16:41:53 2017) FA 129.170.213.207@58480: opCode=FA_LOG|pebbleId=8080477D|text=displayed hint "go west"
