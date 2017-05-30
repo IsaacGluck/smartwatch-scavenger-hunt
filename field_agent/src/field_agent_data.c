@@ -11,6 +11,7 @@ static int max_num_hints = 10;
 static int max_hint_size = 141;
 static char start_string[5] = "None";
 static int malloc_size = 200;
+static char init_loc[4] = "0.0";
 
 
 // Initializes the FA_INFO defined in field_agent_data.h
@@ -46,6 +47,8 @@ void create_info()
 	strcpy(FA_INFO->team, teamName);
 	strcpy(FA_INFO->gameId, init_gameId);
 	strcpy(FA_INFO->pebbleId, pebbleId_init_string);
+	strcpy(FA_INFO->latitude, init_loc);
+	strcpy(FA_INFO->longitude, init_loc);	
 	FA_INFO->time_passed = 0;
 	FA_INFO->num_claimed = 0;
 	FA_INFO->num_hints = 0;
