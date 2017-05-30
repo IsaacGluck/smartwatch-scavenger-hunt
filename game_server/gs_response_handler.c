@@ -274,7 +274,9 @@ static void respond_with_gs_clue(int comm_sock, struct sockaddr_in them, game_in
  */
 static void
 send_gs_clue(int comm_sock, game_info_t *gi, char *message_from, krag_t *krag){
+#ifdef DEBUG
     krag_print(krag);
+#endif
     
     char *message = malloc(MESSAGE_LENGTH);
     strcpy(message,"opCode=GS_CLUE|gameId=");
@@ -341,6 +343,7 @@ static void respond_with_gs_claimed(int comm_sock, struct sockaddr_in them, game
     if (ga == NULL){
         free(message);
         free(gameId);
+        free(kragId);
         return;
     }
     else{
@@ -640,7 +643,7 @@ get_team(char *message_from, game_info_t *gi){
     }
     char *pebbleId = get_token(message_from, "pebbleId");
     if (pebbleId != NULL){
-        team_t *team = game_info_find_pebbleId(gi, pebbleId);
+        team_t *team = game_info_find_team_pebbleId(gi, pebbleId);
         free(pebbleId);
         return team;
     }
