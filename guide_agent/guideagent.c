@@ -203,6 +203,7 @@ int main(const int argc, char *argv[]){
       		}
 
       	if (FD_ISSET(comm_sock, &rfds)) {
+      		printf("RECIEVING METHODS\n");
 			handle_socket(comm_sock, &them, game);
      	 }
 
