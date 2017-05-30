@@ -76,8 +76,8 @@ int main(void) {
 
 // deinit
 static void deinit() {
-    /* 1. Destroy the window. */
-    // window_destroy(s_main_window);
+    /* 1. Remove all windows from the stack */
+    window_stack_pop_all(false); 
 
     /* 2. Unsubscribe from sensors. */
     tick_timer_service_unsubscribe();
@@ -208,7 +208,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     }
 
     /* 5. Check to see if an error message was received. */
-    Tuple *error_tuple = dict_find(iterator, AppKeyLocation);
+    Tuple *error_tuple = dict_find(iterator, AppKeySendError);
     if(error_tuple) {
         // Log the value sent as part of the received message.
         char *error = error_tuple->value->cstring;

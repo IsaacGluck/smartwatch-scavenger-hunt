@@ -3,12 +3,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-
+#else // we are building for pebble
+#include <pebble.h>
+#endif
 
 
 /**************** file-local global variables ****************/
 static const int MESSAGE_LENGTH = 8192;
 
+
+#ifdef NOPEBBLE // we are *not* building for pebble
 unsigned int stringHexToDec(char* hex){
     if (hex == NULL) return 0;
     unsigned int decimalNumber;
@@ -26,6 +30,7 @@ char *decToStringHex(unsigned int dec){
     return hex;
 }
 
+#endif
 
 
 // not robust
@@ -43,7 +48,7 @@ char **getOpCode(char *message){
     int state = 0;     // currently reading the opCode?
                        // 0: no     1: yes
     
-    for(int i = 0; i < strlen(message); i++){
+    for(int i = 0; i < (int)strlen(message); i++){
         if (state == 0){
             tokens[1][k] = message[i];
             k++;
@@ -74,7 +79,7 @@ char **getOpCode(char *message){
             j++;
         }
         
-        if (i == strlen(message)-1){
+        if (i == (int)strlen(message)-1){
             tokens[1][k] = '\0';
         }
     }
@@ -87,8 +92,3 @@ void deleteopCode(char **token){
     free(token[1]);
     free(token);
 }
-
-
-#else // we are building for pebble
-#include <pebble.h>
-#endif

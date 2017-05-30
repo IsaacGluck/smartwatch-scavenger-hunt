@@ -15,7 +15,7 @@ static int s_current_selection_main_menu = 0;
 
 void pin_window_complete_callback(PIN pin, void *context)
 {
-  pin.digits[4] = '\0';
+  // pin.digits[4] = '\0';
   APP_LOG(APP_LOG_LEVEL_INFO, "Submitted pin: %s\n", &pin.digits);
   strcpy(FA_INFO->krag_to_submit, pin.digits);
   FA_INFO->submit_krag = true;
@@ -120,14 +120,16 @@ static void window_load_main_menu(Window *window)
 
   // Set up the pin window
   PinWindowCallbacks pin_window_callback = {.pin_complete = pin_window_complete_callback};
-  pin_window = pin_window_create(pin_window_callback); // must destroy this at some point
+  pin_window = pin_window_create(pin_window_callback);
 }
 
 static void window_unload_main_menu(Window *window)
 {
   pin_window_destroy(pin_window);
+  pin_window = NULL;
 
   menu_layer_destroy(s_menu_layer_main_menu);
+  s_menu_layer_main_menu = NULL;
 
   window_destroy(window);
   s_main_window_main_menu = NULL;
