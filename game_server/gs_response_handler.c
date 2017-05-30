@@ -54,16 +54,24 @@
 /**************** file-local global variables ****************/
 static const int MESSAGE_LENGTH = 8192;
 
-static void handle_result_message(int result, int comm_sock, struct sockaddr_in them, game_info_t *gi, char *message_from);
-static void respond_with_game_status(int comm_sock, struct sockaddr_in them, game_info_t *gi, char *message_from);
-static void respond_with_gs_clue(int comm_sock, struct sockaddr_in them, game_info_t *gi, char *message_from);
-static void respond_with_gs_secret(int comm_sock, struct sockaddr_in them, game_info_t *gi, char *message_from);
-static void respond_with_gs_agent(int comm_sock, struct sockaddr_in them, game_info_t *gi, char *message_from);
-static void respond_with_gs_claimed(int comm_sock, struct sockaddr_in them, game_info_t *gi, char *message_from);
+static void handle_result_message(int result, int comm_sock, struct sockaddr_in them,
+                                  game_info_t *gi, char *message_from);
+static void respond_with_game_status(int comm_sock, struct sockaddr_in them,
+                                     game_info_t *gi, char *message_from);
+static void respond_with_gs_clue(int comm_sock, struct sockaddr_in them,
+                                 game_info_t *gi, char *message_from);
+static void respond_with_gs_secret(int comm_sock, struct sockaddr_in them,
+                                   game_info_t *gi, char *message_from);
+static void respond_with_gs_agent(int comm_sock, struct sockaddr_in them,
+                                  game_info_t *gi, char *message_from);
+static void respond_with_gs_claimed(int comm_sock, struct sockaddr_in them,
+                                    game_info_t *gi, char *message_from);
 static void send_gs_agent(void *arg, const char *key, void *item);
-static void send_hint_to_everyone_in_team(int comm_sock, struct sockaddr_in them, game_info_t *gi, char *message_from);
+static void send_hint_to_everyone_in_team(int comm_sock, struct sockaddr_in them,
+                                          game_info_t *gi, char *message_from);
 static void send_gs_clue(int comm_sock, game_info_t *gi, char *message_from, krag_t *krag);
-static void respond_with_ga_hint(int comm_sock, struct sockaddr_in them, char *message_from, game_info_t *gi);
+static void respond_with_ga_hint(int comm_sock, struct sockaddr_in them,
+                                 char *message_from, game_info_t *gi);
 static void send_game_over_to_everyone(void *arg, const char *key, void *item);
 static void send_team_record_to_everyone(void *arg, const char *key, void *item);
 static team_t *get_team(char *message_from, game_info_t *gi);
@@ -74,14 +82,15 @@ static char *get_token(char *message, char *left_hand_side);
 /* respond based on the resulting value of message handler function
  */
 void
-respond(char *opCode, int result, int comm_sock, struct sockaddr_in them, game_info_t *gi, char *message_from){
+respond(char *opCode, int result, int comm_sock, struct sockaddr_in them,
+        game_info_t *gi, char *message_from){
     if (opCode == NULL || gi == NULL || message_from == NULL){
         return;
     }
     
-#ifdef DEBUG
-    printf("Result value is: %d", result);
-#endif
+    #ifdef DEBUG
+    printf("Result value is: %d\n", result);
+    #endif
     
     if (result < 0){
         handle_result_message(result, comm_sock, them, gi, message_from);
@@ -134,7 +143,8 @@ respond(char *opCode, int result, int comm_sock, struct sockaddr_in them, game_i
 /* handle the result messages for result < 0
  */
 static void
-handle_result_message(int result, int comm_sock, struct sockaddr_in them, game_info_t *gi, char *message_from){
+handle_result_message(int result, int comm_sock, struct sockaddr_in them,
+                      game_info_t *gi, char *message_from){
     if (gi == NULL || message_from == NULL){
         return;
     }
@@ -144,57 +154,95 @@ handle_result_message(int result, int comm_sock, struct sockaddr_in them, game_i
         exit(99);
     }
     
+    // initialize parameters
     char *message = malloc(MESSAGE_LENGTH);
+    char *gameId = game_info_get_gameId(gi);
+    if (message == NULL || gameId == NULL){
+        if (message != NULL)free(message);
+        if (gameId != NULL)free(gameId);
+    }
+    
+    
     strcpy(message,"opCode=GS_RESPONSE|gameId=");
     int i = strlen(message);
-    char *gameId = game_info_get_gameId(gi);
     strcpy(&(message[i]), gameId);
     i = strlen(message);
     strcpy(&(message[i]), "|respCode=");
     i = strlen(message);
     if (result == -1){
-        strcpy(&(message[i]), "SH_ERROR_INVALID_MESSAGE");
+        strcpy(&(message[i]), "SH_ERROR_INVALID_MESSAGE|text=");
+        i = strlen(message);
+        strcpy(&(message[i]), message_from);
     }
     else if (result == -2){
-        strcpy(&(message[i]), "SH_ERROR_INVALID_OPCODE");
+        strcpy(&(message[i]), "SH_ERROR_INVALID_OPCODE|text=opCode: ");
+        i = strlen(message);
+        char *token = get_token(message, "opCode");
+        strcpy(&(message[i]), token);
+        free(token);
     }
     else if (result == -3){
-        strcpy(&(message[i]), "SH_ERROR_INVALID_FIELD");
+        strcpy(&(message[i]), "SH_ERROR_INVALID_FIELD|text=Invalid field exists.");
     }
     else if (result == -4){
-        strcpy(&(message[i]), "SH_ERROR_INVALID_GAME_ID");
+        strcpy(&(message[i]), "SH_ERROR_INVALID_GAME_ID|text=gameId: ");
+        i = strlen(message);
+        char *token = get_token(message, "gameId");
+        strcpy(&(message[i]), token);
+        free(token);
     }
     else if (result == -5){
-        strcpy(&(message[i]), "SH_ERROR_INVALID_TEAMNAME");
+        strcpy(&(message[i]), "SH_ERROR_INVALID_TEAMNAME|text=team name:");
+        i = strlen(message);
+        char *token = get_token(message, "team");
+        strcpy(&(message[i]), token);
+        free(token);
     }
     else if (result == -6){
-        strcpy(&(message[i]), "SH_ERROR_INVALID_PLAYERNAME");
+        strcpy(&(message[i]), "SH_ERROR_INVALID_PLAYERNAME|text=player name: ");
+        i = strlen(message);
+        char *token = get_token(message, "player");
+        strcpy(&(message[i]), token);
+        free(token);
     }
     else if (result == -7){
-        strcpy(&(message[i]), "SH_ERROR_INVALID_ID");
+        strcpy(&(message[i]), "SH_ERROR_INVALID_ID|text=");
+        i = strlen(message);
+        strcpy(&(message[i]), message_from);
+        i = strlen(message);
+        strcpy(&(message[i]), " has invalid id");
     }
     else if (result == -8){
-        strcpy(&(message[i]), "SH_DUPLICATE_PLAYERNAME");
+        strcpy(&(message[i]), "SH_DUPLICATE_PLAYERNAME|text=");
+        i = strlen(message);
+        char *token = get_token(message, "player");
+        strcpy(&(message[i]), token);
+        free(token);
     }
     else if (result == -9){
-        strcpy(&(message[i]), "SH_ERROR_DUPLICATE_FIELD");
+        strcpy(&(message[i]), "SH_ERROR_DUPLICATE_FIELD|text=");
+        i = strlen(message);
+        strcpy(&(message[i]), message_from);
+        i = strlen(message);
+        strcpy(&(message[i]), " has invalid field");
     }
     else if (result == -10){
-        strcpy(&(message[i]), "SH_CLAIMED");
+        strcpy(&(message[i]), "SH_CLAIMED|text=Successfully claimed krag");
     }
     else if (result == -11){
-        strcpy(&(message[i]), "SH_CLAIMED_ALREADY");
+        strcpy(&(message[i]), "SH_CLAIMED_ALREADY|text=This krag has already been claimed");
     }
-    i = strlen(message);
-    strcpy(&(message[i]), "|text=");
-    i = strlen(message);
-    strcpy(&(message[i]), message_from);
     
-    if (sendto(comm_sock, message, strlen(message), 0, (struct sockaddr *) &them, sizeof(them)) < 0) {
+    if (sendto(comm_sock, message, strlen(message), 0,
+               (struct sockaddr *) &them, sizeof(them)) < 0) {
         perror("sending in datagram socket");
         exit(6);
     }
+    
+    #ifdef DEBUG
     printf("Out message: %s\n", message);
+    #endif
+    
     free(gameId);
     free(message);
 }
@@ -206,34 +254,42 @@ handle_result_message(int result, int comm_sock, struct sockaddr_in them, game_i
  */
 static void
 respond_with_game_status(int comm_sock, struct sockaddr_in them, game_info_t *gi, char *message_from){
+    // initialize parameters
+    team_t *team = get_team(message_from, gi);
+    if (team == NULL) return;
+    
     char *message = malloc(MESSAGE_LENGTH);
+    char *gameId = game_info_get_gameId(gi);
+    char *guideId = team_get_guideId(team);
+    char *numClaimed = malloc(15);
+    char *numKrags = malloc(15);
+    if (message == NULL || gameId == NULL || guideId == NULL
+        || numClaimed == NULL || numKrags == NULL){
+        if (message != NULL)free(message);
+        if (gameId != NULL)free(gameId);
+        if (guideId != NULL)free(guideId);
+        if (numClaimed != NULL)free(numClaimed);
+        if (numKrags != NULL)free(numKrags);
+        return;
+    }
+    
     strcpy(message,"opCode=GAME_STATUS|gameId=");
     int i = strlen(message);
-    char *gameId = game_info_get_gameId(gi);
     strcpy(&(message[i]), gameId);
     i = strlen(message);
     
     strcpy(&(message[i]), "|guideId=");
     i = strlen(message);
-    team_t *team = get_team(message_from, gi);
-    char *guideId = team_get_guideId(team);
-    if (guideId == NULL){
-        strcpy(&(message[i]), "none");
-    }
-    else{
-        strcpy(&(message[i]), guideId);
-    }
+    strcpy(&(message[i]), guideId);
     i = strlen(message);
     
     strcpy(&(message[i]), "|numClaimed=");
     i = strlen(message);
-    char *numClaimed = malloc(15);
     sprintf(numClaimed, "%d", team_get_numClaimed(team));
     strcpy(&(message[i]), numClaimed);
     i = strlen(message);
     strcpy(&(message[i]), "|numKrags=");
     i = strlen(message);
-    char *numKrags = malloc(15);
     sprintf(numKrags, "%d", game_info_get_numKrags(gi));
     strcpy(&(message[i]), numKrags);
     
@@ -241,9 +297,13 @@ respond_with_game_status(int comm_sock, struct sockaddr_in them, game_info_t *gi
         perror("sending in datagram socket");
         exit(6);
     }
+    
+    #ifdef DEBUG
     printf("Out message: %s\n", message);
+    #endif
+    
     free(gameId);
-    if (guideId!= NULL) free(guideId);
+    free(guideId);
     free(numClaimed);
     free(numKrags);
     free(message);
@@ -258,12 +318,18 @@ static void respond_with_gs_clue(int comm_sock, struct sockaddr_in them, game_in
     team_t *team = get_team(message_from, gi);
     // reveal two and send both clues
     // First time is if number of reveled krags is less than number of total krags
+    #ifdef DEBUG
     printf("num_krags: %d\tnum_revealed: %d\n",game_info_get_numKrags(gi),team_get_numRevealed(team));
+    #endif
+    
     if (team_get_numRevealed(team) < game_info_get_numKrags(gi)){
         krag_t *krag = game_info_reveal_krag(gi, team);
         if (krag != NULL) send_gs_clue(comm_sock, gi, message_from, krag);
     }
+    
+    #ifdef DEBUG
     printf("num_krags: %d\tnum_revealed: %d\n",game_info_get_numKrags(gi),team_get_numRevealed(team));
+    #endif
     
     // Second time is if number of revealed krags is less than number of total krags
     if (team_get_numRevealed(team) < game_info_get_numKrags(gi)){
@@ -278,9 +344,9 @@ static void respond_with_gs_clue(int comm_sock, struct sockaddr_in them, game_in
  */
 static void
 send_gs_clue(int comm_sock, game_info_t *gi, char *message_from, krag_t *krag){
-#ifdef DEBUG
+    #ifdef DEBUG
     krag_print(krag);
-#endif
+    #endif
     
     char *message = malloc(MESSAGE_LENGTH);
     strcpy(message,"opCode=GS_CLUE|gameId=");
@@ -315,7 +381,10 @@ send_gs_clue(int comm_sock, game_info_t *gi, char *message_from, krag_t *krag){
     
     ga_send_to(team_get_guide(team), comm_sock, message);
     
+    #ifdef DEBUG
     printf("Out message: %s\n", message);
+    #endif
+    
     free(gameId);
     if (guideId!= NULL) free(guideId);
     free(kragId);
@@ -377,7 +446,10 @@ static void respond_with_gs_claimed(int comm_sock, struct sockaddr_in them, game
     if (strcmp(longitude,"1000") != 0) strcpy(&(message[i]), longitude);
     
     ga_send_to(ga, comm_sock, message);
+    
+    #ifdef DEBUG
     printf("Out message: %s\n", message);
+    #endif
     
     free(gameId);
     free(pebbleId);
@@ -424,7 +496,10 @@ static void respond_with_gs_secret(int comm_sock, struct sockaddr_in them, game_
     if (ga != NULL){
         ga_send_to(ga, comm_sock, message);
     }
+    
+    #ifdef DEBUG
     printf("Out message: %s\n", message);
+    #endif
     
     free(gameId);
     if (guideId!= NULL) free(guideId);
@@ -495,7 +570,10 @@ send_gs_agent(void *arg, const char *key, void *item){
     if (strcmp(lastContact,"-1") != 0)strcpy(&(message[i]), lastContact);
     
     ga_send_to(ga, gifaga_get_comm_sock(gifaga), message);
+    
+    #ifdef DEBUG
     printf("Out message: %s\n", message);
+    #endif
     
     free(gameId);
     free(pebbleId);
@@ -508,7 +586,7 @@ send_gs_agent(void *arg, const char *key, void *item){
 }
 
 /**************** send_hint_to_everyone_in_team ****************/
-/* send ga hint to everyone
+/* send ga hint to all fa in team
  * opCode=GA_HINT|gameId=|guideId=|team=|player=|pebbleId=|hint=
  */
 static void
@@ -518,7 +596,10 @@ send_hint_to_everyone_in_team(int comm_sock, struct sockaddr_in them, game_info_
         return;
     }
     team_send_message_to_everyone(team, message_from, comm_sock);
-    printf("Out message to everyone: %s\n", message_from);
+    
+    #ifdef DEBUG
+    printf("Out message to all fa in team: %s\n", message_from);
+    #endif
 }
 
 /**************** respond_with_ga_hint ****************/
@@ -530,7 +611,11 @@ respond_with_ga_hint(int comm_sock, struct sockaddr_in them, char *message_from,
     char *pebbleId = get_token(message_from, "pebbleId");
     fa_t *fa = game_info_find_fa_pebbleId(gi, pebbleId);
     fa_send_to(fa, comm_sock, message_from);
+    
+    #ifdef DEBUG
     printf("Out message: %s\n", message_from);
+    #endif
+    
     free(pebbleId);
 }
 
@@ -542,7 +627,7 @@ respond_with_ga_hint(int comm_sock, struct sockaddr_in them, char *message_from,
 void
 send_game_over(int comm_sock, game_info_t *gi){
     char *message = malloc(MESSAGE_LENGTH);
-    strcpy(message,"opCode=GS_AGENT|gameId=");
+    strcpy(message,"opCode=GAME_OVER|gameId=");
     int i = strlen(message);
     char *gameId = game_info_get_gameId(gi);
     strcpy(&(message[i]), gameId);
@@ -573,18 +658,21 @@ send_game_over_to_everyone(void *arg, const char *key, void *item){
     ga_send_to(team_get_guide(team), comm_sock, message);
     team_send_message_to_everyone(team, message, comm_sock);
     
+    #ifdef DEBUG
     printf("Out message: %s\n", message);
+    #endif
+    
     free(message);
 }
 
 /**************** send_team_record ****************/
-/* Send TEAM RECORD to all agents
+/* Send TEAM RECORD to all agentsResult value i
  * opCode=TEAM_RECORD|gameId=|team=|numClaimed=|numPlayers=
  */
 void
 send_team_record(int comm_sock, game_info_t *gi){
     char *message = malloc(MESSAGE_LENGTH);
-    strcpy(message,"opCode=GS_AGENT|gameId=");
+    strcpy(message,"opCode=TEAM_RECORD|gameId=");
     int i = strlen(message);
     char *gameId = game_info_get_gameId(gi);
     strcpy(&(message[i]), gameId);
@@ -627,7 +715,9 @@ send_team_record_to_everyone(void *arg, const char *key, void *item){
     ga_send_to(team_get_guide(team), comm_sock, message);
     team_send_message_to_everyone(team, message, comm_sock);
     
+    #ifdef DEBUG
     printf("Out message: %s\n", message);
+    #endif
     
     free(numClaimed);
     free(team_name);
