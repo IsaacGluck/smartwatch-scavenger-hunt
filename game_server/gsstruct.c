@@ -222,7 +222,8 @@ team_send_message_to_everyone(team_t *team, char *message, int comm_sock){
     // allocate memory
     send_message_t *send_message = malloc(sizeof(send_message_t));
     if (send_message == NULL){
-        fprintf(stderr, "team_send_message_to_everyone failed due to not being able to malloc memory\n");
+        fprintf(stderr,
+                "team_send_message_to_everyone failed due to not being able to malloc memory\n");
         return;
     }
     send_message->message = message;
@@ -1094,11 +1095,6 @@ reveal_krag_helper(void *arg, const char *key, void *item){
     }
 }
 
-// <<<<<<< HEAD
-// <<<<<<< HEAD
-// =======
-// =======
-// >>>>>>> 009d26ebf669804895e094d3467c60631318f554 - ISAAC
 /**************** game_info_send_message_to_everyone ****************/
 /* Send message to all agents in the game
  */
@@ -1125,13 +1121,7 @@ game_info_send_message_to_everyone(game_info_t *gi, char *message, int comm_sock
 }
 
 
-// <<<<<<< HEAD
 
-// >>>>>>> kazuma
-
-
-// =======
-// >>>>>>> 009d26ebf669804895e094d3467c60631318f554 - ISAAC
 /*********************************************************/
 /**************** functions for krag *********************/
 /*********************************************************/
@@ -1355,7 +1345,8 @@ fa_delete(fa_t *fa){
 void
 fa_send_to(fa_t *fa, int comm_sock, char *message){
     if (fa == NULL || message == NULL) return;
-    if (sendto(comm_sock, message, strlen(message), 0, (struct sockaddr *) &(fa->them), sizeof(fa->them)) < 0) {
+    if (sendto(comm_sock, message, strlen(message), 0,
+               (struct sockaddr *) &(fa->them), sizeof(fa->them)) < 0) {
         perror("sending in datagram socket");
         exit(6);
     }
@@ -1466,10 +1457,15 @@ ga_get_id(ga_t *ga){
 void
 ga_send_to(ga_t *ga, int comm_sock, char *message){
     if (ga == NULL || message == NULL) return;
-    if (sendto(comm_sock, message, strlen(message), 0, (struct sockaddr *) &(ga->them), sizeof(ga->them)) < 0) {
+    if (sendto(comm_sock, message, strlen(message), 0,
+               (struct sockaddr *) &(ga->them), sizeof(ga->them)) < 0) {
         perror("sending in datagram socket");
         exit(6);
     }
+    
+    #ifdef DEBUG
+    printf("sent message to: %s\nMessage: \t%s\n", ga->name, message);
+    #endif
 }
 
 /*********************************************************/
@@ -1564,7 +1560,8 @@ krag_print(krag_t *krag){
         return;
     }
     char *val = decToStringHex(krag->kragID);
-    printf("kragID: %s\n\tlongitude: %f\n\tlatitude: %f\n\tclue: %s\n\n", val, krag->longitude, krag->latitude, krag->clue);
+    printf("kragID: %s\n\tlongitude: %f\n\tlatitude: %f\n\tclue: %s\n\n",
+           val, krag->longitude, krag->latitude, krag->clue);
     free(val);
 }
 

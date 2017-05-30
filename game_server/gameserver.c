@@ -124,6 +124,7 @@ main(const int argc, char *argv[]){
         }
     }
     
+    printf("game ended\n\n");
     send_game_over(comm_sock, gi);
     send_team_record(comm_sock, gi);
     
