@@ -131,15 +131,82 @@ void incoming_message(char* message)
 }
 
 
-
+// opCode=GAME_OVER|gameId=FEED|secret=computer science 50 rocks!
 void message_GAME_OVER(char* message)
 {
+	char** tokenized_message = tokenize(message);
 
+	char* message_gameID = NULL;
+	char* secret = NULL;
+
+	for (int i = 0; i < 3; i++) {
+		if (strcmp(tokenized_message[i], "gameID") == 0) {
+			message_gameID = tokenized_message[i+1];
+		}
+
+		if (strcmp(tokenized_message[i], "secret") == 0) {
+			secret = tokenized_message[i+1];
+		}
+	}
+
+	if (message_gameID == NULL || secret == NULL) {
+		return;
+	}
+
+	if (strcmp(message_gameID, FA_INFO->gameID) != 0) { // wrong gameID
+		APP_LOG(APP_LOG_LEVEL_INFO, "Wrong gameID in: %s\n", message); // just log don't do anything
+		return;
+	}
+
+	char secret_buff[200];
+	snprintf(secret_buff, sizeof(secret_buff), "Game over!\n The secret was: %s", secret);
+
+	strcpy(FA_INFO->known_chars, secret_buff);
+	FA_INFO->game_over_received = true;
+
+
+	free(tokenized_message);
 }
 
+// opCode=GAME_STATUS|gameId=FEED|guideId=0707|numClaimed=5|numKrags=8
 void message_GAME_STATUS(char* message)
 {
+	char** tokenized_message = tokenize(message);
 
+	char* message_gameID = NULL;
+	char* numClaimed_s = NULL;
+	char* numKrags_s = NULL;
+
+	for (int i = 0; i < 3; i++) {
+		if (strcmp(tokenized_message[i], "gameID") == 0) {
+			message_gameID = tokenized_message[i+1];
+		}
+
+		if (strcmp(tokenized_message[i], "numClaimed") == 0) {
+			numClaimed_s = tokenized_message[i+1];
+		}
+
+		if (strcmp(tokenized_message[i], "numKrags") == 0) {
+			numKrags_s = tokenized_message[i+1];
+		}
+	}
+
+	if (message_gameID == NULL || numClaimed_s == NULL || numKrags_s == NULL) {
+		return;
+	}
+
+	if (strcmp(message_gameID, FA_INFO->gameID) != 0) { // wrong gameID
+		APP_LOG(APP_LOG_LEVEL_INFO, "Wrong gameID in: %s\n", message); // just log don't do anything
+		return;
+	}
+
+	int numClaimed = string_to_int(numClaimed_s);
+	int numKrags = string_to_int(numKrags_s);
+
+	FA_INFO->num_claimed = numClaimed;
+	FA_INFO->num_left = numKrags - numClaimed;
+
+	free(tokenized_message);
 }
 
 void message_GS_RESPONSE(char* message)

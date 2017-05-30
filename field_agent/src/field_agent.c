@@ -6,6 +6,7 @@
 #include "field_agent_data.h"
 #include "location.h"
 #include "choose_name.h"
+#include "message_dialog.h"
 #include "message_handler.h"
 
 
@@ -100,6 +101,11 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
     FA_INFO->submit_krag = false; 
   }
 
+  if (FA_INFO->game_over_received) {
+    window_stack_pop_all(false); // pop all windows
+    dialog_message_window_push(FA_INFO->known_chars);
+    return; // do no more
+  }
 
   /* 1. Only send a request/message every 5 seconds. */
   if(seconds == 0) {
@@ -124,6 +130,14 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
         request_location();
         main_menu_reload_pass_up();
         reqOption = 0;
+
+        // Test Game Over
+        // char secret_buff[200];
+        // snprintf(secret_buff, sizeof(secret_buff), "Game over!\n The secret was: qwertyuiop");
+
+        // strcpy(FA_INFO->known_chars, secret_buff);
+        // FA_INFO->game_over_received = true;
+
         break;
       default:
         reqOption = 0;
