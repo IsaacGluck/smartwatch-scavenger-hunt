@@ -251,34 +251,46 @@ static void handle_socket(int comm_sock, struct sockaddr_in them, game_info_t *g
         
         // first write to the log file
         char *ipaddress = getIP(comm_sock, them); //get the IP Adress
-        print_log(buf, "gameserver.log", "string", "FROM"); //print it to the log file
+        print_log(buf, "gameserver.log", ipaddress, "FROM"); //print it to the log file
         
-        // get the opCode and rest of the line
-        char **tokens;
-        tokens = getOpCode(buf);
-        char *opCode = tokens[0];
-        char *rest_of_message = tokens[1];
-        printf("opCode: %s\n\trest of message: %s\n\n", opCode, rest_of_message);
+        // validate the message
+        result = validate_message(buf);
         
-        
-        // dispatch the appropriate function
-        int fn;
-        for (fn = 0; dispatch[fn].opCode != NULL; fn++){
-            if (strcmp(opCode, dispatch[fn].opCode) == 0){
-                result = (*dispatch[fn].func)(rest_of_message, gi, them);
-                break;
+        // if valid message
+        if (result == 0){
+            // get the opCode and rest of the line
+            char **tokens;
+            tokens = getOpCode(buf);
+            char *opCode = tokens[0];
+            char *rest_of_message = tokens[1];
+            printf("opCode: %s\n\trest of message: %s\n\n", opCode, rest_of_message);
+            
+            
+            // dispatch the appropriate function
+            int fn;
+            for (fn = 0; dispatch[fn].opCode != NULL; fn++){
+                if (strcmp(opCode, dispatch[fn].opCode) == 0){
+                    result = (*dispatch[fn].func)(rest_of_message, gi, them);
+                    break;
+                }
             }
+            if (dispatch[fn].opCode == NULL){
+                printf("\n\nUnknown command\n\n");
+            }
+            
+            // based on the result, respond correctly
+            respond(opCode, result, comm_sock, them, gi, buf);
+            
+            free(tokens[0]);
+            free(tokens[1]);
+            free(tokens);
         }
-        if (dispatch[fn].opCode == NULL){
-            printf("\n\nUnknown command\n\n");
+        else if (result == 1){
+            respond("GENERAL", result, comm_sock, them, gi, buf);
         }
-        
-        // based on the result, respond correctly
-        respond(opCode, result, comm_sock, them, gi, buf);
-        
-        free(tokens[0]);
-        free(tokens[1]);
-        free(tokens);
+        else if (result == 6){
+            respond("GENERAL", -2, comm_sock, them, gi, buf);
+        }
     }
     free(buf);
 }
