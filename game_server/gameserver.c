@@ -122,6 +122,9 @@ main(const int argc, char *argv[]){
         }
     }
     
+    send_game_over(comm_sock, gi);
+    send_team_record(comm_sock, gi);
+    
     close(comm_sock);
     game_info_delete(gi);
     putchar('\n');
@@ -241,7 +244,6 @@ static void handle_socket(int comm_sock, struct sockaddr_in them, game_info_t *g
         exit(8);
     }
     else if (nbytes > 0){
-        printf("message: %s\n", buf);
         buf[nbytes] = '\0';            // null terminate string
         
         char **tokens;
@@ -264,8 +266,6 @@ static void handle_socket(int comm_sock, struct sockaddr_in them, game_info_t *g
         if (dispatch[fn].opCode == NULL){
             printf("\n\nUnknown command\n\n");
         }
-        
-        printf("result of dispatch is: %d\n", result);
         
         respond(opCode, result, comm_sock, them, gi, buf);
         

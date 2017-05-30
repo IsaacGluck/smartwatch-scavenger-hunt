@@ -11,7 +11,7 @@ OBJS = gameserver.o gsstruct.o gs_message_handler.o gs_response_handler.o
 LLIBS = $L/libcs50.a $C/common.a
 
 
-CFLAGS = -Wall -pedantic -std=c11 -ggdb -I$C -I$L -lm $(DEBUG)
+CFLAGS = -Wall -pedantic -std=gnu11 -ggdb -I$C -I$L -lm $(DEBUG)
 CC = gcc
 MAKE = make
 
