@@ -1,5 +1,7 @@
 /*****************************************************************/
-/* This program          */
+/* This program dealts with initializing and deinitializing the app, and starting the app_event_loop.
+ * It also subscribes to services and sets up the inbox and outbox.
+ */
 /*****************************************************************/
 #include <pebble.h>
 #include "key_assembly.h"
@@ -74,11 +76,6 @@ int main(void) {
 // deinit
 static void deinit() {
     /* 1. Remove all windows from the stack */
-    // Window* window = window_stack_pop(false);
-    // while (window != NULL) {
-    //   window_destroy(window);
-    //   window = window_stack_pop(false);
-    // }
     window_stack_pop_all(false); 
 
     /* 2. Unsubscribe from sensors. */
@@ -95,6 +92,7 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   static int seconds = 5;
   static int reqOption = 0;
 
+  // A krag was submitted try and send a claim
   if (FA_INFO->submit_krag) {
     char* FA_CLAIM = create_fa_claim(FA_INFO->krag_to_submit);
     send_message(FA_CLAIM);
@@ -102,22 +100,25 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
     FA_INFO->submit_krag = false; 
   }
 
+  // A game over was just received, end the game
   if (FA_INFO->game_over_received) {
     window_stack_pop_all(false); // pop all windows
     dialog_message_window_push(FA_INFO->end_message);
     return; // do no more
   }
 
+  // The game server got a wrong name, restart the game
   if (FA_INFO->wrong_name) { // SH_ERROR_INVALId_PLAYERNAME or SH_ERROR_DUPLICATE_PLAYERNAME
     char buff[51] = "";
     snprintf(buff, sizeof(buff), "Name '%s' could not be used. Please choose again.", FA_INFO->name);
     strcpy(error_message, buff);
-    window_stack_pop(false); // pop all windows
+    window_stack_pop(false); // pop windows
     choose_name_window_push();
     dialog_message_window_push(error_message);
     FA_INFO->wrong_name = false;
   }
 
+  // The krag submitted was already claimed, display this to the user
   if (FA_INFO->krag_claimed_already) {
     char buff[51] = "Sorry, the krag you submitted was already claimed.";
     strcpy(error_message,buff);
@@ -125,6 +126,7 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
     FA_INFO->krag_claimed_already = false;
   }
 
+  // The krag was claimed successfully
   if (FA_INFO->krag_claimed) {
     char buff[51] = "The KRAG you submitted was claimed!";
     strcpy(error_message,buff);
@@ -140,6 +142,7 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   if(seconds == 0) {
     switch(reqOption) {
       case 0 :
+        // If the pebble ID hasn't been gotten, get it
         if (strcmp(FA_INFO->pebbleId, pebbleId_init_string) == 0) {
           request_pebbleId();
         }
@@ -148,7 +151,7 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
         reqOption++;
         break;
       case 1 :
-        // request_location();
+        // If the game is started, and you've successfully gotten your pebble ID, send the FA_LOCATION
         if(FA_INFO->game_started && strcmp(FA_INFO->pebbleId, pebbleId_init_string) != 0){
           char* FA_LOCATION = create_fa_location("1");
           send_message(FA_LOCATION);
@@ -157,8 +160,10 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
         reqOption++;
         break;
       case 2 :
+        update_time(); // update the time elapsed(in minutes) in the game
+
         request_location();
-        main_menu_reload_pass_up();
+        main_menu_reload_pass_up(); // reload the data in the main menu
         reqOption = 0;
 
         // Test Game Over
@@ -186,12 +191,9 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   } else {
     seconds--;
   }
-
-    /* 2. Update time on watchface. */
- 
 }
 
-// update_time
+// updates the time elapsed in the game
 static void update_time() {
   time_t current; // current second
   int elapsed = 0; // initialize elapsed time
@@ -258,7 +260,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         // Log the value sent as part of the received message.
         char *pebbleId = id_tuple->value->cstring;
         APP_LOG(APP_LOG_LEVEL_INFO, "Got AppKeyPebbleId: %s\n", pebbleId);
-        strcpy(FA_INFO->pebbleId, pebbleId);
+        strcpy(FA_INFO->pebbleId, pebbleId); // add the pebble ID to the FA_INFO struct
     }
 
     /* 5. Check to see if an error message was received. */
