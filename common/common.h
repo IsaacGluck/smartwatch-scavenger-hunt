@@ -15,6 +15,9 @@ int stringHexToDec(char* hex);
  */
 char *decToStringHex(unsigned int dec);
 
+/* This method gets the IP address of the server */
+char *getIP(int comm_sock, struct sockaddr_in them);
+
 /* return the array created from the message
  * array[0] contains opCode
  * array[1] contains rest of the line (opCode excluded)

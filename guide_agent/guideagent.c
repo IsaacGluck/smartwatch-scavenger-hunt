@@ -89,8 +89,7 @@ static int checkArgs(const int argc, char *argv[], char* variables[], struct soc
 static void createGameStruct(void* g, char* variables[]); //initialize all of the things in game struct 
 static void dealWithInfo(void* g, char* m, char* firstpart, int secondpart); //deal with the messages that surver sends 
 static char* GA_STATUSReturn(void* g); //sends a status to server 
-static char* GA_HINTReturn(void* g, char* h); //sends hint to server 
-static char* getIP(int comm_sock, struct sockaddr_in *themp); //sets the IP adress 
+static char* GA_HINTReturn(void* g, char* h); //sends hint to server
 static void freememory(void* g); //frees the memory in the game 
 
 //print methods 
@@ -421,32 +420,6 @@ static void createGameStruct(void* g, char* variables[]){
 	game->hints = hints;
 	bag_t* end = bag_new();  //bag of end data 
 	game->gameOverInfo = end; 
-
-}
-
-//This method gets the IP address of the server 
-static char* getIP(int comm_sock, struct sockaddr_in *themp){
- 	//much of this code was taken from examples in class 
-	struct sockaddr_in sender;		 // sender of this message
-
-	//first half before the @
-	char* firstpart = inet_ntoa(sender.sin_addr);
-
-	//secand half after the @ 
-	int secondpart = ntohs(sender.sin_port);
-
-    char* ipaddress = malloc(strlen(firstpart) + secondpart + 2); 
-	
-	strcpy(ipaddress, firstpart);
-	strcat(ipaddress, "@");
-	//printf("here i am alive and well and happy \n");
-
-	//cat and stuff to make it all in one string 
-	char stringnum[10];
-	sprintf(stringnum, "%d", secondpart);
-	strcat(ipaddress, stringnum);
-
-	return ipaddress; //return string 
 
 }
 
