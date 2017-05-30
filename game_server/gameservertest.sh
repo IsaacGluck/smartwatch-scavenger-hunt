@@ -25,7 +25,7 @@ echo "usage: gameserver.sh"
 exit 1
 fi
 
-valgrind --leak-check=full ./gameserver FEED ./kiff ./secret 2872
+valgrind --leak-check=full ./gameserver FEED ../examples/krags ./secret 2872
 
 
 echo "finished testing"
