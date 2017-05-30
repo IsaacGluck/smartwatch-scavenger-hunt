@@ -101,6 +101,7 @@ void delete_info()
 
 	if (FA_INFO != NULL) {
 		free(FA_INFO);
+		FA_INFO = NULL;
 	}
 }
 
