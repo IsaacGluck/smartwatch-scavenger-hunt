@@ -15,7 +15,7 @@
 
 
 
-int validate_message(char* message);
+int validate_message(char* m);
 char** tokenize(char* message);
 
 #ifdef NOPEBBLE // we are *not* building for pebble
@@ -76,9 +76,13 @@ void print_shared() {
 }
 
 
-int validate_message(char* message){
+int validate_message(char* m){
 	// printf("IN THIS METHOD MEH\n");
 	//check size max is 8191, if not, return -1 
+
+	char* message = malloc(strlen(m)+1);
+	strcpy(message, m); 
+
 	if(strlen(message)> 8191 && strlen(message)>0){
 		return -1;  
 	}
@@ -118,6 +122,7 @@ int validate_message(char* message){
 		//if error about parameters types return 2 
 		//if duplicates retrn 3
 		//if errors about parameters that there should be return 4 
+	free(message);
 	return 0;
 }
 
