@@ -32,14 +32,14 @@ void create_info()
 {
 	FA_INFO = malloc(sizeof(fieldagent_info_t)); // must free this later
 
-	FA_INFO->gameID = malloc(100);
-	FA_INFO->pebbleID = malloc(100);
-	FA_INFO->name = malloc(100);
-	FA_INFO->team = malloc(100);
-	FA_INFO->latitude = malloc(100);
-	FA_INFO->longitude = malloc(100);
-	FA_INFO->known_chars = malloc(100);
-	FA_INFO->krag_to_submit = malloc(100);
+	FA_INFO->gameID = malloc(141);
+	FA_INFO->pebbleID = malloc(141);
+	FA_INFO->name = malloc(141);
+	FA_INFO->team = malloc(141);
+	FA_INFO->latitude = malloc(141);
+	FA_INFO->longitude = malloc(141);
+	FA_INFO->known_chars = malloc(200);
+	FA_INFO->krag_to_submit = malloc(141);
 	FA_INFO->hints_received = malloc(max_num_hints * sizeof(char*));
 
 	if (FA_INFO->gameID == NULL || FA_INFO->pebbleID == NULL || FA_INFO->name == NULL || FA_INFO->team == NULL ||
@@ -57,12 +57,11 @@ void create_info()
 
 
 	strcpy(FA_INFO->team, teamName);
-	// FA_INFO->team = teamName; // initialize the team name to the set name
 	strcpy(FA_INFO->gameID, init_gameID);
-	// FA_INFO->gameID = init_gameID; // initialize the gameID to 0
 	FA_INFO->time_passed = 0;
 	FA_INFO->num_claimed = 0;
 
+	FA_INFO->game_started = false;
 	FA_INFO->game_started = false;
 
 	FA_INFO->submit_krag = false;
