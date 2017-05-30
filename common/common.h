@@ -7,6 +7,11 @@
 #ifndef __COMMON_H_
 #define __COMMON_H_
 
+#ifdef NOPEBBLE // we are *not* building for pebble
+#include <arpa/inet.h>
+#include <sys/select.h>
+
+
 /* return the integer value of the given hex */
 int stringHexToDec(char* hex);
 
@@ -17,6 +22,8 @@ char *decToStringHex(unsigned int dec);
 
 /* This method gets the IP address of the server */
 char *getIP(int comm_sock, struct sockaddr_in them);
+
+#endif
 
 /* return the array created from the message
  * array[0] contains opCode
