@@ -109,7 +109,7 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 
   // The game server got a wrong name, restart the game
   if (FA_INFO->wrong_name) { // SH_ERROR_INVALId_PLAYERNAME or SH_ERROR_DUPLICATE_PLAYERNAME
-    char buff[51] = "";
+    char buff[100] = "";
     snprintf(buff, sizeof(buff), "Name '%s' could not be used. Please choose again.", FA_INFO->name);
     strcpy(error_message, buff);
     window_stack_pop(false); // pop windows
@@ -128,10 +128,18 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 
   // The krag submitted was already invalid, display this to the user
   if (FA_INFO->invalid_krag_claimed) {
-    char buff[51] = "Sorry, the krag you submitted was invalid.";
+    char buff[43] = "Sorry, the krag you submitted was invalid.";
     strcpy(error_message, buff);
     dialog_message_window_push(error_message);
     FA_INFO->invalid_krag_claimed = false;
+  }
+
+  // The message submitted was invalid
+  if (FA_INFO->invalid_message) {
+    char buff[65] = "Sorry, the server didn't know how to deal with the message sent.";
+    strcpy(error_message, buff);
+    dialog_message_window_push(error_message);
+    FA_INFO->invalid_message = false;
   }
 
   // The krag was claimed successfully

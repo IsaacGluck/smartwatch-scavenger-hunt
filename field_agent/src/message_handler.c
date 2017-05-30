@@ -287,6 +287,10 @@ void message_GS_RESPONSE(char** tokenized_message)
 		FA_INFO->invalid_krag_claimed = true;
 	}
 
+	if (strcmp(respCode, "SH_ERROR_INVALID_MESSAGE") == 0) {
+		FA_INFO->invalid_message = true;
+	}
+
 
 	// free(tokenized_message);
 }
