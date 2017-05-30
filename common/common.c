@@ -13,6 +13,8 @@ static const int MESSAGE_LENGTH = 8192;
 
 
 #ifdef NOPEBBLE // we are *not* building for pebble
+
+/* return the integer value of the given hex */
 unsigned int stringHexToDec(char* hex){
     if (hex == NULL) return 0;
     unsigned int decimalNumber;
@@ -21,6 +23,9 @@ unsigned int stringHexToDec(char* hex){
     return decimalNumber;
 }
 
+/* return the char * of the given unsigned decimal number
+ * has to be freed by caller
+ */
 char *decToStringHex(unsigned int dec){
     // initialize
     char *hex = malloc(9);
@@ -33,8 +38,15 @@ char *decToStringHex(unsigned int dec){
 #endif
 
 
-// not robust
-// no error check and handling
+/* return the array created from the message
+ * array[0] contains opCode
+ * array[1] contains rest of the line (opCode excluded)
+ *
+ * the message must be valid, required to use validate function
+ * beforehand.
+ *
+ * has to be freed by caller
+ */
 char **getOpCode(char *message){
     char **tokens = malloc(2 * sizeof(char *));
     for (int i = 0; i < 2; i ++){
@@ -85,10 +97,4 @@ char **getOpCode(char *message){
     }
     free(buf);
     return tokens;
-}
-
-void deleteOpCode(char **token){
-    free(token[0]);
-    free(token[1]);
-    free(token);
 }
