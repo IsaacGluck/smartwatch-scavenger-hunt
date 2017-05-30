@@ -256,7 +256,7 @@ static void handle_socket(int comm_sock, struct sockaddr_in them, game_info_t *g
         free(ipaddress);
         
         #ifdef DEBUG
-        printf("Recieved message: %s\n", buf);
+        printf("\n\nRecieved message: %s\n", buf);
         #endif
         
         // validate the message

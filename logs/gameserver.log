@@ -237,3 +237,21 @@
 (Tue May 30 16:45:22 2017) FROM 129.170.213.207@58480: opCode=GAME_STATUS|gameId=feed|guideId=0134|numClaimed=0|numKrags=6
 (Tue May 30 16:45:28 2017) FROM 129.170.213.207@58480: opCode=FA_LOCATION|gameId=0|pebbleId=80804774|team=aqua|player=Charlie|latitude=43.736552|longitude=-72.257418|statusReq=1opCode=GA_HINT|gameId=feed|guideId=0134|team=aqua|player=morgan|pebbleId=*|hint=hint
 (Tue May 30 16:45:47 2017) FROM 129.170.213.207@58480: opCode=GA_HINT|gameId=feed|guideId=0134|team=aqua|player=morgan|pebbleId=*|hint=hint
+(Tue May 30 16:52:07 2017) FROM 129.170.213.207@32808: opCode=GA_STATUS|gameId=0|guideId=0134|team=aqua|player=morgan|statusReq=1
+(Tue May 30 16:52:07 2017) FROM 129.170.213.207@32808: opCode=GAME_STATUS|gameId=feed|guideId=0134|numClaimed=0|numKrags=6
+(Tue May 30 16:52:07 2017) TO 129.170.213.207@32808: opCode=GS_CLUE|gameId=feed|guideId=0134|kragId=89db|clue=five
+(Tue May 30 16:52:07 2017) TO 129.170.213.207@32808: opCode=GS_CLUE|gameId=feed|guideId=0134|kragId=45da|clue=two
+(Tue May 30 16:52:07 2017) FROM 129.170.213.207@32808: start
+(Tue May 30 16:52:12 2017) FROM 129.170.213.207@58480: opCode=FA_LOCATION|gameId=0|pebbleId=8080477D|team=aqua|player=Alice|latitude=43.706552|longitude=-72.287418|statusReq=1
+(Tue May 30 16:52:12 2017) FROM 129.170.213.207@58480: opCode=GAME_STATUS|gameId=feed|guideId=0134|numClaimed=0|numKrags=6
+(Tue May 30 16:52:12 2017) FROM 129.170.213.207@58480: opCode=FA_LOCATION|gameId=0|pebbleId=80804774|team=aqua|player=Charlie|latitude=43.736552|longitude=-72.257418|statusReq=1
+(Tue May 30 16:52:12 2017) FROM 129.170.213.207@58480: opCode=GAME_STATUS|gameId=feed|guideId=0134|numClaimed=0|numKrags=6
+(Tue May 30 16:52:14 2017) FROM 129.170.213.207@32808: opCode=GA_STATUS|gameId=feed|guideId=0134|team=aqua|player=morgan|statusReq=1
+(Tue May 30 16:52:14 2017) FROM 129.170.213.207@32808: opCode=GAME_STATUS|gameId=feed|guideId=0134|numClaimed=0|numKrags=6
+(Tue May 30 16:52:14 2017) TO 129.170.213.207@32808: opCode=GS_AGENT|gameId=feed|pebbleId=80804774|team=aqua|player=Charlie|latitude=43.736553|longitude=-72.257416|lastContact=2
+(Tue May 30 16:52:14 2017) TO 129.170.213.207@32808: opCode=GS_AGENT|gameId=feed|pebbleId=8080477D|team=aqua|player=Alice|latitude=43.706551|longitude=-72.287415|lastContact=2
+(Tue May 30 16:52:19 2017) FROM 129.170.213.207@32808: opCode=GA_HINT|gameId=feed|guideId=0134|team=aqua|player=morgan|pebbleId=*|hint=this is a hint
+(Tue May 30 16:56:26 2017) FROM 129.170.213.207@58480: opCode=FA_LOCATION|gameId=0|pebbleId=8080477D|team=aqua|player=Alice|latitude=43.706552|longitude=-72.287418|statusReq=1
+(Tue May 30 16:56:26 2017) FROM 129.170.213.207@58480: opCode=GAME_STATUS|gameId=feed|guideId=none|numClaimed=0|numKrags=6
+(Tue May 30 16:56:27 2017) FROM 129.170.213.207@58480: opCode=FA_LOCATION|gameId=0|pebbleId=80804774|team=aqua|player=Charlie|latitude=43.736552|longitude=-72.257418|statusReq=1
+(Tue May 30 16:56:27 2017) FROM 129.170.213.207@58480: opCode=GAME_STATUS|gameId=feed|guideId=none|numClaimed=0|numKrags=6
