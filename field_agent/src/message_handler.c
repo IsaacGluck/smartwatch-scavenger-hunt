@@ -138,6 +138,12 @@ void incoming_message(char* message)
 // opCode=GAME_OVER|gameId=FEED|secret=computer science 50 rocks!
 void message_GAME_OVER(char* message)
 {
+	int validated = validate_message(message);
+	if (validated != 0) {
+		APP_LOG(APP_LOG_LEVEL_INFO, "Could no validate message: %s\n", message);
+		return;
+	}
+
 	char** tokenized_message = tokenize(message);
 
 	char* message_gameId = NULL;
@@ -175,6 +181,12 @@ void message_GAME_OVER(char* message)
 // opCode=GAME_STATUS|gameId=FEED|guideId=0707|numClaimed=5|numKrags=8
 void message_GAME_STATUS(char* message)
 {
+	int validated = validate_message(message);
+	if (validated != 0) {
+		APP_LOG(APP_LOG_LEVEL_INFO, "Could no validate message: %s\n", message);
+		return;
+	}
+
 	char** tokenized_message = tokenize(message);
 
 	char* message_gameId = NULL;
@@ -233,6 +245,12 @@ void message_GAME_STATUS(char* message)
 // opCode=GS_RESPONSE|gameId=0707|respCode=SH_ERROR_INVALId_OPCODE|text=Unrecognized opCode 'GA_FOO'
 void message_GS_RESPONSE(char* message)
 {
+	int validated = validate_message(message);
+	if (validated != 0) {
+		APP_LOG(APP_LOG_LEVEL_INFO, "Could no validate message: %s\n", message);
+		return;
+	}
+
 	char** tokenized_message = tokenize(message);
 
 	char* message_gameId = NULL;
@@ -282,6 +300,12 @@ void message_GS_RESPONSE(char* message)
 // opCode=GA_HINT|gameId=FEED|guideId=0707|team=aqua|player=Alice|pebbleId=8080477D|hint=Bob, look inside the cafe!
 void message_GA_HINT(char* message)
 {
+	int validated = validate_message(message);
+	if (validated != 0) {
+		APP_LOG(APP_LOG_LEVEL_INFO, "Could no validate message: %s\n", message);
+		return;
+	}
+
 	char** tokenized_message = tokenize(message);
 
 	char* message_gameId = NULL;

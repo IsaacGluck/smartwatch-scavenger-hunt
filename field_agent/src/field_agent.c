@@ -260,7 +260,13 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         // Log the value sent as part of the received message.
         char *pebbleId = id_tuple->value->cstring;
         APP_LOG(APP_LOG_LEVEL_INFO, "Got AppKeyPebbleId: %s\n", pebbleId);
-        strcpy(FA_INFO->pebbleId, pebbleId); // add the pebble ID to the FA_INFO struct
+        char temp[33] = "0123456789abcdef0123456789abcdef"; // the emulator pebbleId
+        if (strcmp(pebbleId, temp) == 0){
+          char emulator_pebbleId[9] = "12345678";
+          strcpy(FA_INFO->pebbleId, emulator_pebbleId); // add the pebble ID to the FA_INFO struct
+        } else {
+          strcpy(FA_INFO->pebbleId, pebbleId); // add the pebble ID to the FA_INFO struct
+        }
     }
 
     /* 5. Check to see if an error message was received. */
