@@ -23,56 +23,66 @@ In the common file we will have the following methods that are useful to everyth
 
 ### Methods 
 #### The Guide Agent will have the following methods: 
-* `void validateArguments(const in argc, char *argv[])` 
+* `int main(const int argc, char *argv[])`
+    * *Use*: Runs the code and continuously waits for input from STDIN or the server in a while loop. Calls upon needed functions 
+    * *PsuedoCode*:
+        *  Check arguments
+        *  create the game struct
+        *  send first game status method
+        *  continiously look for STDIN or message from the server and call upon correct method to deal with that
+* `void checkArgs(const in argc, char *argv[], char* variables[], struct sockaddr_in *themp)` 
     * *Use*: Validates command lines arguments 
     * *PsuedoCode*:  
         * Takes in Arugments passed to main 
         * Splits them into variables 
         * Make sure the right number of arguments are given 
-        * Make sure each input is of the right type and not NULL 
+        * Make sure each input is of the right type and not NULL
+        * Checks the length of all variables and their types 
+        * initializes fields of server address 
+        * create the socket
         * Exist with a status of non zero if anything is wrong
-* `int ConnectSocket(const int argc, char* argv[], struct sockaddr_in *themp)`
-    * *Use*: Creates and connects the Guide Agent to the Game Server
-    * *PsuedoCode*: 
-      * look up hostname specified by command line
-      * Initialize fields of the server adress 
-      * Create socket 
-      * Return Socket 
-* `FILE CreateGameStruct(Gamestruct g, argv[])` 
-    * *Use*: Creates game struct, creates log file
+* `static void createGameStruct(void* g, char* variables[])` 
+    * *Use*: Creates game struct and initalizes all of the variables in it
     * *Psuedocode*: 
         * Takes all arguments passed in and places them into the game struct using setter methods 
-        * Tries to open log file, if it does, returns pointer to log file 
-        * If not, exits with a zero status 
+        * Create the needed hashtable and bag requests
+        * initialize data we dont have yet to zero or an empty string 
     
-* `char* SendStatus(GameStruct g)`
-    * *Use*: sends the server the current game status in a specified way 
+* `static char* GA_STATUSReturn(void* g)`
+    * *Use*: sends the server the current game status in a specified way via the format given. 
     * *PsuedoCode*: 
-        * Retrieves the game Id, Guide ID, team, and player from the Gamestruct 
-        * Determines if a status is requested
+        * Retrieves the game Id, Guide ID, team, and player from the Gamestruct passed in  
         * Malloc a string 
         * Does string manipulation to get everything in the right order and format 
         * Returns the string which is the op code to be sent 
-* `char* SendHint(GameStruct g)`
-    * *Use*: sends a hint to a specific field agent 
+* `static char* GA_HINTReturn(void* g, char* h)`
+    * *Use*: returns the properly formatted code to send a hint with the inserted data  
     * *PsudoCode*: 
-        * Asks user to input who the hint is going to and stores that in a variable
-        * Asks the user what the hint is and stores that in a variable 
-        * Retrieves the gameID, team
-        * Look up peddlieID with the persons name
-        * if name does not exist, print "non existant name" 
+        * parses the string to find out who the hint is for and what the hint is 
+        * Retrieves the gameID, team from the struct given 
+        * if the person to send the hint to is *, send it to everyone and set that to pebble ID 
+        * Otherwise, use the pebble ID given
+        * if pebbleID  does not exist, print "non existant name" 
         * Malloc a string
         * Put the string together in the proper format using string manipulation 
         * return the string to be sent across the server 
-* `void DealWithInfo(char* line, GameStruct g)`
-    * *Use*: takes in recieved line, prints to file, send arguments next function
+* `static void dealWithInfo(void* g, char* m, char* firstpart, int secondpart)`
+    * *Use*: takes in recieved line, prints to file, send arguments next function depending on their op code 
     * *PsuedoCode*: 
-        * Prints the line to the file 
+        * Prints the line to the file using the common log print method 
+        * Determine the total amount of poles for the size of the array
         * Does string manipulation to determine the op code
-        * Parses the rest of the string into an array
+        * Parses the rest of the string into an array of determined size
         * Send the Array to the right function in the function table Via the Opcode determined
         * If opcode doesnt exist, print error message 
-* `void StatusUpdate(char[] arr, GameStruct g)`
+        * free data
+* `static void freememory(void * g)`
+    * *Use:* Frees the memory in the game struct 
+    *  *psuedocode*: 
+        * calls all delete methods for hashtable and bags 
+        * frees memory with malloced strings 
+# Function table functions 
+* `static void gameStatus(char * parameters [], void * g); `
     * *Use*: updates the game with opCode status update information 
     * *PsuedoCode*: 
         * array[0] should be game ID so check that this is the same game ID that the game struct has
@@ -80,14 +90,17 @@ In the common file we will have the following methods that are useful to everyth
         * Array[2] is the number of claimed krags and update this in the game struct if it is not currently accurate 
         * Array[3] is the number of krags in total and make sure this is also correct 
         * If any data is not correct, print the error message 
-* `void AgentUpdate(char[] arr, GameStruct g)`
+        * print error message at the end 
+* `static void gsAgent(char* parameters[], void* g);`
     * *Use*: updates the agent info with opCode agent information
     * *PsuedoCode*: 
         * Array[0] is the game ID so check that
         * Array[1] is the pebble ID. Look up player and chec that Array[2] (team) and Array[3] (player name) are all correct. 
+        * if the player is correct then update everything 
         * Update the latitute Array[4]
         * Update the longitude Array[5]
         * Update last contacted Array[6] 
+        * if the player does not yet exist, create a new player with all of this information 
 * `void Clue(char[] arr, GameStruct g)`
     * *Use*: updates the clue bag
     * *Psuedocode*: 
@@ -96,63 +109,105 @@ In the common file we will have the following methods that are useful to everyth
         * Add Krag ID to the hashtable of Krags 
         * Add Clue to the hashtable of Clues 
         * Print the new clue out for the guide agent 
-* `void Secret(Char[] arr, GameStruct g);`
-    * *Use*: updates the secret 
+* `static void gsSecret(char* parameters[], void* g);`
+    * *Use*: updates the secret when given the secret op code
     * *PsuedoCode*: 
         * Check Array[0] (game ID) and Array[1] (guide ID) to make sure they are correct with the game struct 
         * If not correct, print error message
         * Update the secret in the game struct with Array[2] 
         * Print the new secret message out for the guide agent 
-*  `void Response(char[] arr, GameStruct g)`
+*  `static void gsResponse(char* parameters[], void* g);`
     * *Use:* looks at response code from server 
     * *Psuedocode:* 
         * Check Array[0] and make sure the Game ID given matches the one in the game struct 
-        * Agent will then look at the response code and take recovery method if need be 
-*  `void Claimed(char[] arr, GameStruct g)`
+        * Agent will then look at the response code and print it so recovery action is taken 
+*  `static void gsClaimed(char* parameters[], void* g)`
     * *Use*: Gives and updates information about the krag claimed 
     * *PsuedoCode:*
         * Check Array[0] (Game ID) and Array[1] (guide ID) with the information from the game struct 
-        * look up the player from the hashtable of players using the pebble ID (Array[3])
-        * If the player does not exist or the guide agent is not correct, print error message and exit the method 
-        * Create a new Krag object by using the kragID (Array[4]) and the lat and long (Array[5] and Array[6]) 
-        * Make sure the krag ID does not exist in the hashtable of krags already 
-* `char* TeamRecord(char[] arr, GameStruct g)`
-    * *Use*: prints end of game team information
+        * look up the krag from the hashtable of players using the krag ID (Array[3])
+        * if the krag doesnt exist then do nothing
+        * if the krag does exist, update its parameters and set the lat, long and id of the claimer 
+* `static void gsClue(char* parameters[], void* g)`
+    * *Use:* updates the game struct when a clue was given and keeps track of the krags
+    * *psuedocode*: 
+        * get a clue for a krag
+        * check to see if we have seen that clue before  
+        * if not, create a new krag for that clue. Initialize values as empty, null or 0 except for the clue and krag ID 
+        * Insert this krag into the hash table of krags 
+* `static void teamRecord(char* parameters[], void* g)`
+    * *Use*: stores the end of the game informaton to be printed later 
     * *psuedoCode*: 
-        * validate Array[0] (game id) with the game struct 
-        * print array[1] team and then the number of players on the team array[2] and the number of krags claimed array[3]
-        * Malloc a string 
-        * Store all of these into a string and return that string 
-* `void WriteToLog(FILE filename, char* message)`
-    * *Use*: writes the char* and the time stamp to the log file
+        * create a new game over struct 
+        * instantiate all teh data with the array parameters gave 
+        * add this to the bag of game over structs 
+* `static void gameOver(char* parameters[], void* g)`
+    * *Use*: prints all the team information and exits the game 
     * *Psuedocode*: 
-        * open the file 
-        * if the file is not writable exit 
-        * cat the message to the end of the file 
-        * close the file 
-* `void PrintAgentUpdate(GameStruct g, int pebbleID)`
-    * *Use*:  prints when an agent is updated
+        * loops through the bag of game over struct
+        * prints the information
+        * prints the final secret given
+        * calls memory free method 
+        * exits the game 
+* `static void faLocation(char* parameters[], void* g);`
+    * *Use*: here in case error occurs. Does nothing 
+    * *Psuedocode*: 
+        * does nothing 
+        * if there is an error comes here instead of seg faulting 
+* `static void faClaim(char* parameters[], void* g);`
+    * *Use*: here in case error occurs. Does nothing 
+    * *Psuedocode*: 
+        * does nothing 
+        * if there is an error comes here instead of seg faulting 
+* `static void faLog(char* parameters[], void* g)`
+    * *Use*: here in case error occurs. Does nothing 
+    * *Psuedocode*: 
+        * does nothing 
+        * if there is an error comes here instead of seg faulting 
+## Print methods 
+* `static void agentPrint(void *arg, const char *key, void *item)`
+    * *Use*:  prints all the agents information 
     * *PseudoCode*: 
-        * using getter methods, receiver the agent information from looking it up with the pebble ID in the game struct 
-        * put all the information into a nicely layed out char 
-        * print the char for the guide agent 
-* `void PrintClue(GameStruct g, char* clue)`
-    * *Use*:  prints when an clue is updated
+        * used as a helper method to hashtable 
+        * print all the agents information in an organized set up 
+* `static void foundkragPrint(void *arg, const char *key, void *item)`
+    * *Use*:  prints all the found krags 
     * *PseudoCode*: 
-        * get the information from the game struct pertaining to the clue 
-        * Print the clue in an organized fashion and all other information associated with it from the game struct 
-* `void PrintSecret(char* secret)`
-    * *use*: prints when the secret is updated
+        * used as a helper method to hashtable iterate. 
+        * if there is a krag that has been found and has a latitude and longitute, it prints the information assocaited with that krag 
+* `static void unfoundkragPrint(void *arg, const char *key, void *item)`
+    * *Use*:  prints all the unfound krags 
+    * *PseudoCode*: 
+        * used as a helper method to hashtable iterate. 
+        * if there is a unkrag that has been found and has a latitude and longitute of 0, it prints the information assocaited with that krag 
+
+* `static void endingPrint(FILE *fp, void *item)`
+    * *use*: prints the information team is given
     * *psuedocode*:
-        * print the char* secret that is passed out to the console 
-* `void MegaPrint(gameStruct g)`
+        * used as a helper method to bag iterate
+        * loops through the bag and prints all the information in the team struct in an organzied format 
+* `static void gameStructPrint(void* g);`
     * *Use*: prints when the user requests all information reprinted
     * *Psuedocode*: 
         * print all the relative information stored in the game struct
         * Print the game id, agent id, team name, number of krags found, total number of krags, current secret 
         * for each guide agent print their pebble id and location 
-        * print a list of all the clues recieved
-        * print the list of all the hints sent 
+        * print a list of all the krags left to find and the krags that have been found 
+## delete methods 
+* `static void mydeletehash(void *item)`
+    * *Use*: deletes all the items in the hash table 
+    * *Psuedocode*: 
+        * gets the void * item 
+        * removes all the items in the hashtable by calling free on them 
+* `static void mydeletebag(void *item)`
+    * *Use*: deletes all the items in the bag
+    * *Psuedocode*: 
+        * gets the void * item 
+        * removes all the items in the bag by calling free on them 
+* `static void mydeletebagend(void *item)`
+    * *Use*: deletes all the items in the bag for the bag that keeps all the ending information
+    * *Psuedocode*: 
+        * Doesnt actually do anything just needed to iterate through the bag. 
 
 ### Data Structures 
 * Hashtable 
@@ -163,9 +218,12 @@ In the common file we will have the following methods that are useful to everyth
 * Agent Struct 
     * Used to store information about an agent on the team     
     * *Variables:* char* name, hex pebbleID, Int Latitude, Int Longitude 
+* GameOver struct 
+    * Used to store the team information the server gives the game agent at the end of the game 
+    * *variables:* char* gameID, char* team, int numplayers, int numclaimed 
 * Krag Struct 
     * Used to keep track of Krags and their relative information 
-    * *Variables:* char* kragID, int latitude, int longitude 
+    * *Variables:* char* kragID, int latitude, int longitude, clue, char* pebble ID of person who found them
 * Function Struct 
     * Use: Store the functions for the different op codes in this table array so can use them and look them up easily 
     * *Variables:* char* command, coid (*func)(Array Of Tokens)  
@@ -175,6 +233,7 @@ In the common file we will have the following methods that are useful to everyth
     * *Variables*: Hex GameID, Hex GuideID, char* TeamName, int TotalKrags, char* Secret, int ClaimedKrags, int LastContacted, int Update, char* PlayerName 
     * Other Data Structures contained 
         * Bag char* Hints
+        * Bag char* GameOver 
         * HashTable Krags Krags
         * Hahtable Agent Agent, 
 
@@ -183,10 +242,11 @@ In the common file we will have the following methods that are useful to everyth
 * The Log file will be opened in the WriteToFile method and closed in that as well. 
 * Error messages will be printed to console if response code is received 
 * Program exits with non zero status if any error occurs with initilizeing standard arguments or opening the log file 
+
 ### Memory and Resource Management 
 * Log file is only file and this will be opened and closed within the write to file message so no memory is leaked
 * After the game over op code has been recieved, the game struct and all of its compenents such as the Krags hash table, Agent Hashtable, and hints bag will be freed. 
-* Each string that is malloced to send to the game server will be freed after it is print 
+* Each string that is malloced to send to the game server is freed after it is print 
 
 
 
