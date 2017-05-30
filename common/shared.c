@@ -84,6 +84,7 @@ int validate_message(char* m){
 	strcpy(message, m); 
 
 	if(strlen(message)> 8191 && strlen(message)>0){
+        free(message);
 		return -1;  
 	}
 
@@ -96,12 +97,15 @@ int validate_message(char* m){
 
 	char** array = tokenize(message);
 	if (array == NULL) {
+        free(message);
 		return 1;
 	}
 
 	//array wasnt set right 
 	for(int i = 0; i <= total; i++){
 		if(array[i] == NULL){
+            free(message);
+            free(array);
 			return 1; 
 		}
 	}
@@ -109,11 +113,15 @@ int validate_message(char* m){
 	int fn;
 	for (fn = 0; codes[fn].opCodes != NULL; fn++) {
   		if (strcmp(array[1], codes[fn].opCodes) == 0) {
+            free(message);
+            free(array);
   			return((*codes[fn].func)(array, total+1));
   		}
 	}
 	
 	if (codes[fn].opCodes == NULL){
+        free(message);
+        free(array);
   		// printf("Unknown command: '%s'\n", array[1]);
   		return 6;
  	 }
@@ -123,6 +131,7 @@ int validate_message(char* m){
 		//if duplicates retrn 3
 		//if errors about parameters that there should be return 4 
 	free(message);
+    free(array);
 	return 0;
 }
 

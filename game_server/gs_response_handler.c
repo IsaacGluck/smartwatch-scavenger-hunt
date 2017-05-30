@@ -207,7 +207,7 @@ handle_result_message(int result, int comm_sock, struct sockaddr_in them, game_i
 static void
 respond_with_game_status(int comm_sock, struct sockaddr_in them, game_info_t *gi, char *message_from){
     char *message = malloc(MESSAGE_LENGTH);
-    strcpy(message,"opCode=GS_RESPONSE|gameId=");
+    strcpy(message,"opCode=GAME_STATUS|gameId=");
     int i = strlen(message);
     char *gameId = game_info_get_gameId(gi);
     strcpy(&(message[i]), gameId);
