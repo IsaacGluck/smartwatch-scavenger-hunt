@@ -683,6 +683,7 @@ int print_log(char* message, char* filename, char* IPport, char* tofrom){
 	FILE *file = fopen(totalfilename, "a"); 
 
 	if(file == NULL){
+        free(totalfilename);
 		return 1;
 	}
 
