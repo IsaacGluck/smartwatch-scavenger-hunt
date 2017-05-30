@@ -2,9 +2,9 @@ L = ../libcs50
 M = ../common
 
 CC=gcc
-CFLAGS=-Wall -pedantic -std=c11 -ggdb -I$L
+CFLAGS=-Wall -pedantic -std=c11 -ggdb -I$L -DNOPEBBLE
 PROG = guideagent
-OBJS = guideagent.o
+OBJS = guideagent.o $M/shared.o $M/common.o
 LIBS = -lm 
 LLIBS =  $L/libcs50.a-Linux $M/common.a 
 
