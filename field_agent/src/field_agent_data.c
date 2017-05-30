@@ -1,46 +1,31 @@
 /*****************************************************************/
-/* This program          */
+/* This program sets up the main data structure to be passed*/
 /*****************************************************************/
 #include "field_agent_data.h"
 
+// File global variables
 static char teamName[7] = "views6";
 static char pebbleId_init_string[5] = "init";
 static char init_gameId[2] = "0";
 static int max_num_hints = 10;
 static int max_hint_size = 141;
 static char start_string[5] = "None";
+static int malloc_size = 200;
 
 
-
-
-// char *gameId;
-// 	char* pebbleId;
-// 	char* name;
-// 	char* team;
-// 	int time_passed;
-// 	char* latitude;
-// 	char* longitude;
-// 	int num_claimed;
-// 	int num_left;
-// 	char* known_chars;
-// 	char** hints_received;
-
-// 	bool game_started;
-
-// 	char* krag_to_submit;
-
+// Initializes the FA_INFO defined in field_agent_data.h
 void create_info()
 {
 	FA_INFO = malloc(sizeof(fieldagent_info_t)); // must free this later
 
-	FA_INFO->gameId = malloc(141);
-	FA_INFO->pebbleId = malloc(141);	
-	FA_INFO->name = malloc(141);
-	FA_INFO->team = malloc(141);
-	FA_INFO->latitude = malloc(141);
-	FA_INFO->longitude = malloc(141);
-	FA_INFO->end_message = malloc(200);
-	FA_INFO->krag_to_submit = malloc(141);
+	FA_INFO->gameId = malloc(malloc_size);
+	FA_INFO->pebbleId = malloc(malloc_size);	
+	FA_INFO->name = malloc(malloc_size);
+	FA_INFO->team = malloc(malloc_size);
+	FA_INFO->latitude = malloc(malloc_size);
+	FA_INFO->longitude = malloc(malloc_size);
+	FA_INFO->end_message = malloc(malloc_size);
+	FA_INFO->krag_to_submit = malloc(malloc_size);
 	FA_INFO->hints_received = malloc(max_num_hints * sizeof(char*));
 
 	if (FA_INFO->gameId == NULL || FA_INFO->pebbleId == NULL || FA_INFO->name == NULL || FA_INFO->team == NULL ||
@@ -49,6 +34,7 @@ void create_info()
 		return;
 	}
 
+	// Initialize the hints to None
 	for (int i = 0; i < max_num_hints; i++){
 		FA_INFO->hints_received[i] = malloc(max_hint_size + 1);
 		if (FA_INFO->hints_received[i] != NULL) {
@@ -56,7 +42,7 @@ void create_info()
 		}
 	}
 
-
+	// Initialize as many of the fields as possible
 	strcpy(FA_INFO->team, teamName);
 	strcpy(FA_INFO->gameId, init_gameId);
 	strcpy(FA_INFO->pebbleId, pebbleId_init_string);
@@ -72,7 +58,7 @@ void create_info()
 	FA_INFO->submit_krag = false;
 }
 
-
+// free the memory associated with the FA_INFO struct
 void delete_info()
 {
 	if (FA_INFO->gameId != NULL) {
@@ -117,21 +103,7 @@ void delete_info()
 
 
 
-
-
-// Test functions
-// typedef struct fieldagent_info {
-// 	char *gameId;
-// 	char* pebbleId;
-// 	char* name;
-// 	char* team;
-// 	double latitude;
-// 	double longitude;
-// 	int num_claimed;
-// 	int num_left;
-// 	char* known_chars;
-// 	char** hints_received;
-// } fieldagent_info_t;
+// Test function to print some of the fields of the FA_INFO
 void print_FA()
 {
 	if (FA_INFO == NULL) {

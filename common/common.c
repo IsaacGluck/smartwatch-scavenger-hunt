@@ -1,12 +1,19 @@
+#ifdef NOPEBBLE // we are *not* building for pebble
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#else // we are building for pebble
+#include <pebble.h>
+#endif
+
 
 
 /**************** file-local global variables ****************/
 static const int MESSAGE_LENGTH = 8192;
 
+
+#ifdef NOPEBBLE // we are *not* building for pebble
 
 /* return the integer value of the given hex */
 unsigned int stringHexToDec(char* hex){
@@ -29,6 +36,7 @@ char *decToStringHex(unsigned int dec){
     return hex;
 }
 
+#endif
 
 /* return the array created from the message
  * array[0] contains opCode
@@ -49,15 +57,14 @@ char **getOpCode(char *message){
     int j = 0;
     int k = 0;
     int m = 0;
-    int state = 0;     // currently reading the opCode?
-                       // 0: no     1: yes
+    int state = 0;  // currently reading the opCode?
+                    // 0: no     1: yes
     
     for(int i = 0; i < (int)strlen(message); i++){
         if (state == 0){
             tokens[1][k] = message[i];
             k++;
-        }
-        else {
+        } else {
             tokens[0][m] = message[i];
             m++;
         }
@@ -69,16 +76,14 @@ char **getOpCode(char *message){
                 k -= 7;
             }
             j = 0;
-        }
-        else if (message[i] == '|'){
+        } else if (message[i] == '|'){
             buf[j] = '\0';
             j = 0;
             if (state == 1){
                 state = 0;
                 tokens[0][m-1] = '\0';
             }
-        }
-        else{
+        } else {
             buf[j] = message[i];
             j++;
         }

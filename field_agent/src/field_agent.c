@@ -12,16 +12,10 @@
 
 // Globals
 static time_t start;
-static char *fa_claim = "opCode=FA_CLAIM|"
-												"gameId=FEED|"
-												"pebbleId=8080477D|"
-												"team=aqua|"
-												"player=Alice|"
-												"latitude=43.706552|"
-												"longitude=-72.287418|"
-												"kragId=8080";
 static char* error_message;
+static int malloc_size = 200;
 char pebbleId_init_string[5] = "init";
+
 
 // static function defintions
 // base functions
@@ -45,7 +39,7 @@ static void send_message(char *message);
 static void init() {
   /* 1. Setup the info struct with the FA data */
   create_info();
-  error_message = malloc(200);
+  error_message = malloc(malloc_size);
 
   /* 2. Register our tick_handler function with TickTimerService. */
   tick_timer_service_subscribe(SECOND_UNIT, tick_handler);

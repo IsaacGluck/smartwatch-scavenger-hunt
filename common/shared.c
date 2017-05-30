@@ -1,5 +1,4 @@
-
-
+#ifdef NOPEBBLE // we are *not* building for pebble
 // Conditional inclusion for platform specific builds
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,12 +8,17 @@
 #include "time.h"
 #include <ctype.h>
 #include <stdbool.h>
+#else // we are building for pebble
+#include <pebble.h>
+#endif
+
 
 
 
 int validate_message(char* message);
 char** tokenize(char* message);
 
+#ifdef NOPEBBLE // we are *not* building for pebble
 int print_log(char* message, char* filename, char* IPport, char* tofrom);
 
 static int gsAgent(char* parameters[], int total);
@@ -23,9 +27,12 @@ static int gsClaimed(char* parameters[], int total);
 static int gsSecret(char* parameters[], int total);
 static int teamRecord(char* parameters[], int total);
 static int gaStatus(char* parameters[], int total);
-static int gaHint(char* parameters[], int total);
+#endif
+
+
 static int gameStatus(char* parameters[], int total);
 static int gsResponse(char* parameters[], int total);
+static int gaHint(char* parameters[], int total);
 static int faLocation(char* parameters[], int total);
 static int faClaim(char* parameters[], int total);
 static int faLog(char* parameters[], int total);
@@ -48,10 +55,10 @@ static const struct {
   { "GAME_STATUS", gameStatus },
   { "GAME_OVER", gameOver },
   { "GS_RESPONSE", gsResponse },
+  { "GA_HINT", gaHint },
 
   #ifdef NOPEBBLE // we are *not* building for pebble
   { "GA_STATUS", gaStatus },
-  { "GA_HINT", gaHint },
   { "GS_AGENT", gsAgent },
   { "GS_CLUE", gsClue },
   { "GS_CLAIMED", gsClaimed },
@@ -150,6 +157,8 @@ char** tokenize(char* message)
 	return array;
 }
 
+
+#ifdef NOPEBBLE // we are *not* building for pebble
 
 static int gsAgent(char* parameters[], int total){
 	if(total != 16){
@@ -571,122 +580,6 @@ static int teamRecord(char* parameters[], int total){
 	return 0;
 }
 
-static int gaHint(char* parameters[], int total){
-	if(total != 14){
-		return 5;
-	}
-
-	char* opcode=  parameters[0];
-	if(strcmp(opcode, "opCode")==1){
-		return 4; 
-	}
-	char* gameid = parameters[2];
-	if(strcmp(gameid, "gameId")==1){
-		return 4; 
-	}
-	char* guideid = parameters[4]; 
-	if(strcmp(guideid, "guideId")==1){
-		return 4; 
-	}
-	char* team = parameters[6];
-	if(strcmp(team, "team")==1){
-		return 4; 
-	}
-	char* player = parameters[8]; 
-	if(strcmp(player, "player")==1){
-		return 4; 
-	}
-	char* pebbleID = parameters[10]; 
-	if(strcmp(pebbleID, "pebbleId")==1){
-		return 4; 
-	}
-	char* hint = parameters[12]; 
-	if(strcmp(hint, "hint")==1){
-		return 4; 
-	}
-
-	//gmae id 
-	if(strlen(parameters[3])>0 && strlen(parameters[3])<9){
-		for(int i = 0; i< strlen(parameters[3]); i++){
-			if(!ishex(parameters[3][i])){
-				return 3; 
-			}
-		}
-	}
-	else{
-
-		return 3; 
-	}
-	
-	//guide id 
-	if(strlen(parameters[5])>0 && strlen(parameters[5])<9){
-		for(int i = 0; i< strlen(parameters[5]); i++){
-			if(!ishex(parameters[5][i])){
-
-				return 3; 
-			}
-		}
-	}
-	else{
-
-		return 3; 
-	}
-
-	//team
-	if((int)strlen(parameters[7]) < 0 || (int)strlen(parameters[7]) > 11){
-		return 3; 
-	}
-
-	//player 
-	if((int)strlen(parameters[9]) < 0 || (int)strlen(parameters[9]) > 11){
-		return 3; 
-	}
-
-	//pebbleId
-	if(strlen(parameters[11])==1){
-		if(strcmp(parameters[11], "*") == 0){
-			return 3; 
-		}
-	}
-	else{
-		if(strlen(parameters[11])>0 && strlen(parameters[11])<9){
-			for(int i = 0; i< strlen(parameters[11]); i++){
-				if(!ishex(parameters[11][i])){
-					return 3; 
-				}
-			}
-		}
-		else{
-
-			return 3; 
-		}
-	}
-
-	if(strlen(parameters[13])>140){
-		// printf("return 1\n");
-		return 3; 
-	}
-
-	//comparing for the same answers
-	if(strcmp(parameters[3], parameters[5]) == 0 || strcmp(parameters[3], parameters[7]) == 0 || strcmp(parameters[3], parameters[9]) == 0 || strcmp(parameters[3], parameters[11]) == 0 || strcmp(parameters[3], parameters[13]) == 0 ){
-		return 3; 
-	}
-	if(strcmp(parameters[5], parameters[7]) == 0 || strcmp(parameters[5], parameters[9]) == 0 || strcmp(parameters[5], parameters[11]) == 0 || strcmp(parameters[5], parameters[13]) == 0 ){
-		return 3; 
-	}
-	if(strcmp(parameters[7], parameters[9]) == 0 || strcmp(parameters[7], parameters[11]) == 0 || strcmp(parameters[7], parameters[13]) == 0 ){
-		return 3; 
-	}
-	if( strcmp(parameters[9], parameters[11]) == 0 || strcmp(parameters[9], parameters[13]) == 0 ){
-		return 3; 
-	}
-	if(strcmp(parameters[11], parameters[13]) == 0 ){
-		return 3;
-	}
-
-	return 0;
-}
-
 static int gaStatus(char* parameters[], int total){
 	if(total != 12){
 		return 5;
@@ -796,9 +689,7 @@ int print_log(char* message, char* filename, char* IPport, char* tofrom){
 	return 0;
 }
 
-
-
-
+#endif
 
 
 // FA required
@@ -925,6 +816,122 @@ static int gsResponse(char* parameters[], int total){
 		}
 	}
 	return 1; 
+}
+
+static int gaHint(char* parameters[], int total){
+	if(total != 14){
+		return 5;
+	}
+
+	char* opcode=  parameters[0];
+	if(strcmp(opcode, "opCode")==1){
+		return 4; 
+	}
+	char* gameid = parameters[2];
+	if(strcmp(gameid, "gameId")==1){
+		return 4; 
+	}
+	char* guideid = parameters[4]; 
+	if(strcmp(guideid, "guideId")==1){
+		return 4; 
+	}
+	char* team = parameters[6];
+	if(strcmp(team, "team")==1){
+		return 4; 
+	}
+	char* player = parameters[8]; 
+	if(strcmp(player, "player")==1){
+		return 4; 
+	}
+	char* pebbleID = parameters[10]; 
+	if(strcmp(pebbleID, "pebbleId")==1){
+		return 4; 
+	}
+	char* hint = parameters[12]; 
+	if(strcmp(hint, "hint")==1){
+		return 4; 
+	}
+
+	//gmae id 
+	if((int)strlen(parameters[3])>0 && (int)strlen(parameters[3])<9){
+		for(int i = 0; i< strlen(parameters[3]); i++){
+			if(!ishex(parameters[3][i])){
+				return 3; 
+			}
+		}
+	}
+	else{
+
+		return 3; 
+	}
+	
+	//guide id 
+	if((int)strlen(parameters[5])>0 && (int)strlen(parameters[5])<9){
+		for(int i = 0; i< strlen(parameters[5]); i++){
+			if(!ishex(parameters[5][i])){
+
+				return 3; 
+			}
+		}
+	}
+	else{
+
+		return 3; 
+	}
+
+	//team
+	if((int)strlen(parameters[7]) < 0 || (int)strlen(parameters[7]) > 11){
+		return 3; 
+	}
+
+	//player 
+	if((int)strlen(parameters[9]) < 0 || (int)strlen(parameters[9]) > 11){
+		return 3; 
+	}
+
+	//pebbleId
+	if(strlen(parameters[11])==1){
+		if(strcmp(parameters[11], "*") == 0){
+			return 3; 
+		}
+	}
+	else{
+		if((int)strlen(parameters[11])>0 && (int)strlen(parameters[11])<9){
+			for(int i = 0; i< strlen(parameters[11]); i++){
+				if(!ishex(parameters[11][i])){
+					return 3; 
+				}
+			}
+		}
+		else{
+
+			return 3; 
+		}
+	}
+
+	if(strlen(parameters[13])>140){
+		// printf("return 1\n");
+		return 3; 
+	}
+
+	//comparing for the same answers
+	if(strcmp(parameters[3], parameters[5]) == 0 || strcmp(parameters[3], parameters[7]) == 0 || strcmp(parameters[3], parameters[9]) == 0 || strcmp(parameters[3], parameters[11]) == 0 || strcmp(parameters[3], parameters[13]) == 0 ){
+		return 3; 
+	}
+	if(strcmp(parameters[5], parameters[7]) == 0 || strcmp(parameters[5], parameters[9]) == 0 || strcmp(parameters[5], parameters[11]) == 0 || strcmp(parameters[5], parameters[13]) == 0 ){
+		return 3; 
+	}
+	if(strcmp(parameters[7], parameters[9]) == 0 || strcmp(parameters[7], parameters[11]) == 0 || strcmp(parameters[7], parameters[13]) == 0 ){
+		return 3; 
+	}
+	if( strcmp(parameters[9], parameters[11]) == 0 || strcmp(parameters[9], parameters[13]) == 0 ){
+		return 3; 
+	}
+	if(strcmp(parameters[11], parameters[13]) == 0 ){
+		return 3;
+	}
+
+	return 0;
 }
 
 static int faLocation(char* parameters[], int total){
