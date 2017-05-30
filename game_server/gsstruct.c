@@ -1492,6 +1492,7 @@ set_fa_delete(void *item){
 /*********** helper functions for debugging **************/
 /*********************************************************/
 
+#ifdef DEBUG
 /**************** krag_print ****************/
 /* Print the data stored in krag
  */
@@ -1512,5 +1513,5 @@ krag_set_print(FILE *fp, const char *key, void *item){
     printf("key: %s\n", key);
     krag_print(krag);
 }
-
+#endif
 

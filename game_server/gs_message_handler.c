@@ -56,7 +56,9 @@ static const int MESSAGE_LENGTH = 8192;
 static token_t *token_new();
 static void token_next(token_t *token);
 static void token_delete(token_t *token);
-static void free_message_fields(char *gameId, char *pebbleId, char *team_name, char *player_name, char *latitude, char *longitude, char *statusReq, char *kragId, char *guideId, char *hint);
+static void free_message_fields(char *gameId, char *pebbleId,
+        char *team_name, char *player_name, char *latitude, char *longitude,
+        char *statusReq, char *kragId, char *guideId, char *hint);
 
 
 
@@ -76,6 +78,13 @@ int fn_fa_location(char *rest_of_line, game_info_t *gi, struct sockaddr_in them)
     char *longitude = malloc(MESSAGE_LENGTH);
     char *statusReq = malloc(MESSAGE_LENGTH);
     if (gameId == NULL || pebbleId == NULL || team_name == NULL || player_name == NULL || latitude == NULL || longitude == NULL || statusReq == NULL){
+        if(gameId == NULL) free(gameId);
+        if(pebbleId == NULL) free(pebbleId);
+        if(team_name == NULL) free(team_name);
+        if(player_name == NULL) free(player_name);
+        if(latitude == NULL) free(latitude);
+        if(longitude == NULL) free(longitude);
+        if(statusReq == NULL) free(statusReq);
         return -99;
     }
     
@@ -118,6 +127,8 @@ int fn_fa_location(char *rest_of_line, game_info_t *gi, struct sockaddr_in them)
         // if team is not known, register team
         team_t *team = game_info_find_team(gi, team_name);
         if (team == NULL){
+            
+            // register the team and get the team
             game_info_register_team(gi, team_name);
             team = game_info_find_team(gi, team_name);
             team_print(team);
@@ -128,7 +139,10 @@ int fn_fa_location(char *rest_of_line, game_info_t *gi, struct sockaddr_in them)
                 return -5;
             }
         }
+        
+        #ifdef DEBUG
         printf("%s\n",player_name);
+        #endif
         
         // If there is already a player with the same name in the team,
         // ignore and return -8
@@ -249,9 +263,13 @@ int fn_fa_claim(char *rest_of_line, game_info_t *gi, struct sockaddr_in them){
         token_delete(token);
         return -1;
     }
+    
+#ifdef DEBUG
     printf("latitude|longitude confirmed\n");
     krag_print(krag);
     printf("team_name: %s\n",team_name);
+#endif
+    
     // If the krag has not been claimed by this team
     if ((status = krag_has_claimed(krag, team_name)) == 1){
         printf("status: %d", status);

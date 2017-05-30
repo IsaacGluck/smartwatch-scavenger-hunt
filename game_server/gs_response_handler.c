@@ -274,7 +274,9 @@ static void respond_with_gs_clue(int comm_sock, struct sockaddr_in them, game_in
  */
 static void
 send_gs_clue(int comm_sock, game_info_t *gi, char *message_from, krag_t *krag){
+#ifdef DEBUG
     krag_print(krag);
+#endif
     
     char *message = malloc(MESSAGE_LENGTH);
     strcpy(message,"opCode=GS_CLUE|gameId=");
