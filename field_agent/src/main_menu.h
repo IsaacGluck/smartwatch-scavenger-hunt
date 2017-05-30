@@ -7,7 +7,7 @@
 #include <pebble.h>
 
 
-#define MAIN_MENU_WINDOW_NUM_ROWS     9
+#define MAIN_MENU_WINDOW_NUM_ROWS     8
 #define MAIN_MENU_WINDOW_CELL_HEIGHT  44
 
 void main_menu_window_push();

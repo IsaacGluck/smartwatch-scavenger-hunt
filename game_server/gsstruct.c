@@ -127,6 +127,10 @@ static find_id_t * game_info_find_id(game_info_t *gi, char *id,
 static void find_pebbleId(void *arg, const char *key, void *item);
 static void find_fa_with_pebbleId(void *arg, const char *key, void *item);
 static void find_guideId(void *arg, const char *key, void *item);
+// <<<<<<< HEAD
+// static void send_hint_to_everyone(void *arg, const char *key, void *item);
+// =======
+// >>>>>>> 009d26ebf669804895e094d3467c60631318f554 - ISAAC
 static void send_message_to_everyone(void *arg, const char *key, void *item);
 static void reveal_krag_helper(void *arg, const char *key, void *item);
 
@@ -1043,7 +1047,15 @@ game_info_reveal_krag(game_info_t *gi, team_t *team){
     
     // if all krags are revealed,
     // end the game and return NULL
-    if (gi->num_krags <= team->num_revealed) {
+// <<<<<<< HEAD
+// <<<<<<< HEAD
+    if (gi->num_krags >= team->num_claimed_krags) {
+// =======
+    // if (gi->num_krags <= team->num_revealed) { WHICH ONE IS IT?????? -ISAAC
+// >>>>>>> kazuma
+// =======
+    // if (gi->num_krags <= team->num_revealed) {
+// >>>>>>> 009d26ebf669804895e094d3467c60631318f554
         game_info_change_game_status(gi);
         return NULL;
     }
@@ -1090,6 +1102,11 @@ reveal_krag_helper(void *arg, const char *key, void *item){
     }
 }
 
+// <<<<<<< HEAD
+// <<<<<<< HEAD
+// =======
+// =======
+// >>>>>>> 009d26ebf669804895e094d3467c60631318f554 - ISAAC
 /**************** game_info_send_message_to_everyone ****************/
 /* Send message to all agents in the game
  */
@@ -1116,6 +1133,13 @@ game_info_send_message_to_everyone(game_info_t *gi, char *message, int comm_sock
 }
 
 
+// <<<<<<< HEAD
+
+// >>>>>>> kazuma
+
+
+// =======
+// >>>>>>> 009d26ebf669804895e094d3467c60631318f554 - ISAAC
 /*********************************************************/
 /**************** functions for krag *********************/
 /*********************************************************/
@@ -1178,6 +1202,17 @@ krag_get_latitude(krag_t *krag){
 
 /**************** krag_get_kragId ****************/
 /* Return the kragId of the krag
+<<<<<<< HEAD
+ * return NULL if it does not exist
+ */
+// char *
+// krag_get_kragId(krag_t *krag){
+//     if (krag == NULL) return NULL;
+//     char *kragId = decToStringHex(krag->kragID);
+//     return kragId;
+// }
+
+/*
  * return 0 if it does not exist
  */
 unsigned int
@@ -1185,6 +1220,15 @@ krag_get_kragId(krag_t *krag){
     if (krag == NULL) return 0;
     return krag->kragID;
 }
+// =======
+//  * return 0 if it does not exist
+//  */
+// unsigned int
+// krag_get_kragId(krag_t *krag){
+//     if (krag == NULL) return 0;
+//     return krag->kragID;
+// }
+// >>>>>>> 009d26ebf669804895e094d3467c60631318f554 - ISAAC
 
 /**************** krag_get_clue ****************/
 /* Return the clue of the krag
@@ -1573,4 +1617,3 @@ fa_print(fa_t *fa){
     printf("\tlongitude: %lf\n\tlatitude: %lf", fa->longitude, fa->latitude);
 }
 #endif
-

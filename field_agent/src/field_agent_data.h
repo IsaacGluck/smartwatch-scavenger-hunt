@@ -9,8 +9,8 @@
 
 // Global Structs
 typedef struct fieldagent_info {
-	char *gameID;
-	char* pebbleID;
+	char *gameId;
+	char* pebbleId;
 	char* name;
 	char* team;
 	int time_passed;
@@ -18,11 +18,15 @@ typedef struct fieldagent_info {
 	char* longitude;
 	int num_claimed;
 	int num_left;
-	char* known_chars;
+	char* end_message;
 	char** hints_received;
+	int num_hints;
 
 	bool game_started;
 	bool game_over_received;
+	bool wrong_name;
+	bool krag_claimed;
+	bool krag_claimed_already;
 
 	char* krag_to_submit;
 	bool submit_krag;
