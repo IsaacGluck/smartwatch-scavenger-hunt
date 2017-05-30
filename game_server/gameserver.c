@@ -39,6 +39,7 @@
 #include "file.h"
 #include "set.h"
 #include "common.h"
+#include "shared.h"
 #include "gsstruct.h"
 #include "gs_message_handler.h"
 #include "gs_response_handler.h"
@@ -54,7 +55,8 @@ static const int MESSAGE_LENGTH = 8192;
 
 /**************** local functions ****************/
 /* not visible outside this file */
-static void parse_command_line_arguments(const int argc, char *argv[], game_info_t *gi, int *comm_sock, struct sockaddr_in *server);
+static void parse_command_line_arguments(const int argc, char *argv[],
+                    game_info_t *gi, int *comm_sock, struct sockaddr_in *server);
 static int set_up_udp(int port, int *comm_sock, struct sockaddr_in *server);
 static void handle_stdin(int comm_sock, struct sockaddr_in *themp, game_info_t *gi);
 static void handle_socket(int comm_sock, struct sockaddr_in them, game_info_t *gi);
@@ -246,32 +248,44 @@ static void handle_socket(int comm_sock, struct sockaddr_in them, game_info_t *g
     else if (nbytes > 0){
         buf[nbytes] = '\0';            // null terminate string
         
-        char **tokens;
-        tokens = getOpCode(buf);
-        char *opCode = tokens[0];
-        char *rest_of_message = tokens[1];
-        printf("opCode: %s\n\trest of message: %s\n\n", opCode, rest_of_message);
+        // validate the message
+        int result = validate_message(buf);
         
-        
-        
-        // dispatch the appropriate function
-        int fn;
-        int result;
-        for (fn = 0; dispatch[fn].opCode != NULL; fn++){
-            if (strcmp(opCode, dispatch[fn].opCode) == 0){
-                result = (*dispatch[fn].func)(rest_of_message, gi, them);
-                break;
+        // if valid message
+        if (result == 0){
+            // get the opCode and rest of the line
+            char **tokens;
+            tokens = getOpCode(buf);
+            char *opCode = tokens[0];
+            char *rest_of_message = tokens[1];
+            printf("opCode: %s\n\trest of message: %s\n\n", opCode, rest_of_message);
+            
+            
+            // dispatch the appropriate function
+            int fn;
+            for (fn = 0; dispatch[fn].opCode != NULL; fn++){
+                if (strcmp(opCode, dispatch[fn].opCode) == 0){
+                    result = (*dispatch[fn].func)(rest_of_message, gi, them);
+                    break;
+                }
             }
+            if (dispatch[fn].opCode == NULL){
+                printf("\n\nUnknown command\n\n");
+            }
+            
+            // based on the result, respond correctly
+            respond(opCode, result, comm_sock, them, gi, buf);
+            
+            free(tokens[0]);
+            free(tokens[1]);
+            free(tokens);
         }
-        if (dispatch[fn].opCode == NULL){
-            printf("\n\nUnknown command\n\n");
+        else if (result == 1){
+            respond("GENERAL", result, comm_sock, them, gi, buf);
         }
-        
-        respond(opCode, result, comm_sock, them, gi, buf);
-        
-        free(tokens[0]);
-        free(tokens[1]);
-        free(tokens);
+        else if (result == 6){
+            respond("GENERAL", -2, comm_sock, them, gi, buf);
+        }
     }
     free(buf);
 }
