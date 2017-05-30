@@ -602,6 +602,11 @@ game_info_set_kiff(game_info_t *gi, char *kiff){
     
     fclose(fp);
     gi->num_krags = num_krags;
+    
+    #ifdef DEBUG
+    set_print(gi->krags, stdout, &krag_set_print);
+    #endif
+    
     return 0;
 }
 
@@ -672,7 +677,11 @@ game_info_set_secret_code(game_info_t *gi, char *sf){
         fprintf(stderr, "Error: the format of sf is wrong\n");
         return 1;
     }
-    printf("%s\n\n", line);
+    
+    #ifdef DEBUG
+    printf("\nSecret string is: %s\n\n", line);
+    #endif
+    
     strcpy(gi->secret_code, line);
     free(line);
     fclose(fp);
