@@ -26,5 +26,5 @@
   "proxyWSSServerURL": "flume.cs.dartmouth.edu", 
   "proxyWSSServerPort": 2144, 
   "targetServerURL": "flume.cs.dartmouth.edu", 
-  "targetServerPort": 34607
+  "targetServerPort": 2872
 }

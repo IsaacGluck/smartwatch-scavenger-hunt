@@ -4,6 +4,7 @@
 #include "field_agent_data.h"
 
 static char teamName[7] = "views6";
+static char pebbleId_init_string[5] = "init";
 static char init_gameId[2] = "0";
 static int max_num_hints = 10;
 static int max_hint_size = 141;
@@ -33,7 +34,7 @@ void create_info()
 	FA_INFO = malloc(sizeof(fieldagent_info_t)); // must free this later
 
 	FA_INFO->gameId = malloc(141);
-	FA_INFO->pebbleId = NULL;	
+	FA_INFO->pebbleId = malloc(141);	
 	FA_INFO->name = malloc(141);
 	FA_INFO->team = malloc(141);
 	FA_INFO->latitude = malloc(141);
@@ -58,6 +59,7 @@ void create_info()
 
 	strcpy(FA_INFO->team, teamName);
 	strcpy(FA_INFO->gameId, init_gameId);
+	strcpy(FA_INFO->pebbleId, pebbleId_init_string);
 	FA_INFO->time_passed = 0;
 	FA_INFO->num_claimed = 0;
 	FA_INFO->num_hints = 0;

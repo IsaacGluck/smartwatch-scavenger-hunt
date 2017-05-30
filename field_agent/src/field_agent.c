@@ -21,6 +21,7 @@ static char *fa_claim = "opCode=FA_CLAIM|"
 												"longitude=-72.287418|"
 												"kragId=8080";
 static char* error_message;
+char pebbleId_init_string[5] = "init";
 
 // static function defintions
 // base functions
@@ -79,6 +80,11 @@ int main(void) {
 // deinit
 static void deinit() {
     /* 1. Remove all windows from the stack */
+    // Window* window = window_stack_pop(false);
+    // while (window != NULL) {
+    //   window_destroy(window);
+    //   window = window_stack_pop(false);
+    // }
     window_stack_pop_all(false); 
 
     /* 2. Unsubscribe from sensors. */
@@ -140,8 +146,7 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   if(seconds == 0) {
     switch(reqOption) {
       case 0 :
-        if (FA_INFO->pebbleId == NULL) {
-          FA_INFO->pebbleId = malloc(141);
+        if (strcmp(FA_INFO->pebbleId, pebbleId_init_string) == 0) {
           request_pebbleId();
         }
         print_FA();
@@ -150,7 +155,7 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
         break;
       case 1 :
         // request_location();
-        if(FA_INFO->game_started && FA_INFO->pebbleId != NULL){
+        if(FA_INFO->game_started && strcmp(FA_INFO->pebbleId, pebbleId_init_string) != 0){
           char* FA_LOCATION = create_fa_location("1");
           send_message(FA_LOCATION);
           free(FA_LOCATION);
