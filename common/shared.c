@@ -772,7 +772,7 @@ static int gameStatus(char* parameters[], int total){
 }
 
 static int gsResponse(char* parameters[], int total){
-	return 100;
+	// return 100;
 
 	if(total != 8){
 		return 5;
