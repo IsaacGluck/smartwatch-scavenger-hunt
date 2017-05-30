@@ -294,7 +294,7 @@ char *team_get_guideId(team_t *team){
  */
 int
 team_get_numClaimed(team_t *team){
-    if (team == NULL) return 0;
+    if (team == NULL) return -1;
     return team->num_claimed_krags;
 }
 
@@ -425,7 +425,7 @@ game_info_get_gameId(game_info_t *gi){
 /* return number of krags in this game*/
 int
 game_info_get_numKrags(game_info_t *gi){
-    if (gi == NULL) return 0;
+    if (gi == NULL) return -1;
     return gi->num_krags;
 }
 
