@@ -73,10 +73,10 @@ int game_info_set_gameID(game_info_t *gi, char *gameID_in_hex);
  */
 void game_info_change_game_status(game_info_t *gi);
 
-/* set the kiff and builds the set of krags
+/* set the kff and builds the set of krags
  * return 0 if success, 1 if error
  */
-int game_info_set_kiff(game_info_t *gi, char *kiff);
+int game_info_set_kff(game_info_t *gi, char *kff);
 
 /* set the secret code
  * return 0 if success, 1 if error

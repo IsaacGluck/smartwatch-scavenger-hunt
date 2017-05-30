@@ -181,7 +181,7 @@ handle_result_message(int result, int comm_sock, struct sockaddr_in them,
     if (result == -1){
         strcpy(&(message[i]), "SH_ERROR_INVALID_MESSAGE|text=");
         i = strlen(message);
-        strcpy(&(message[i]), message_from);
+        strcpy(&(message[i]), "message sent was invalid");
     }
     else if (result == -2){
         strcpy(&(message[i]), "SH_ERROR_INVALID_OPCODE|text=opCode: ");
@@ -217,9 +217,7 @@ handle_result_message(int result, int comm_sock, struct sockaddr_in them,
     else if (result == -7){
         strcpy(&(message[i]), "SH_ERROR_INVALID_ID|text=");
         i = strlen(message);
-        strcpy(&(message[i]), message_from);
-        i = strlen(message);
-        strcpy(&(message[i]), " has invalid id");
+        strcpy(&(message[i]), "Text has invalid id");
     }
     else if (result == -8){
         strcpy(&(message[i]), "SH_DUPLICATE_PLAYERNAME|text=player name: ");
@@ -231,9 +229,7 @@ handle_result_message(int result, int comm_sock, struct sockaddr_in them,
     else if (result == -9){
         strcpy(&(message[i]), "SH_ERROR_DUPLICATE_FIELD|text=");
         i = strlen(message);
-        strcpy(&(message[i]), message_from);
-        i = strlen(message);
-        strcpy(&(message[i]), " has invalid field");
+        strcpy(&(message[i]), "Text has invalid field");
     }
     else if (result == -10){
         strcpy(&(message[i]), "SH_CLAIMED|text=Successfully claimed krag");
