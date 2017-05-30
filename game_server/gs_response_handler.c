@@ -252,7 +252,7 @@ static void respond_with_gs_clue(int comm_sock, struct sockaddr_in them, game_in
         if (krag != NULL) send_gs_clue(comm_sock, gi, message_from, krag);
     }
     printf("num_krags: %d\tnum_revealed: %d\n",game_info_get_numKrags(gi),team_get_numRevealed(team));
-
+    
     // Second time is if number of revealed krags is less than number of total krags
     if (team_get_numRevealed(team) < game_info_get_numKrags(gi)){
         krag_t *krag = game_info_reveal_krag(gi, get_team(message_from, gi));
@@ -291,7 +291,7 @@ send_gs_clue(int comm_sock, game_info_t *gi, char *message_from, krag_t *krag){
     i = strlen(message);
     unsigned int kragid = krag_get_kragId(krag);
     char *kragId = decToStringHex(kragid);
-
+    
     strcpy(&(message[i]), kragId);
     i = strlen(message);
     strcpy(&(message[i]), "|clue=");
@@ -538,7 +538,7 @@ send_game_over(int comm_sock, game_info_t *gi){
     strcpy(&(message[i]), secret);
     
     game_info_send_message_to_everyone(gi, message, comm_sock, &send_game_over_to_everyone);
-
+    
     free(secret);
     free(message);
     free(gameId);
@@ -681,4 +681,3 @@ get_token(char *message, char *left_hand_side){
         return NULL;
     }
 }
-
