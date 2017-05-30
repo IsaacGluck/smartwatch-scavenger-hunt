@@ -141,14 +141,16 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
     switch(reqOption) {
       case 0 :
         if (FA_INFO->pebbleId == NULL) {
+          FA_INFO->pebbleId = malloc(141);
           request_pebbleId();
         }
+        print_FA();
         request_location();
         reqOption++;
         break;
       case 1 :
         // request_location();
-        if(FA_INFO->game_started){
+        if(FA_INFO->game_started && FA_INFO->pebbleId != NULL){
           char* FA_LOCATION = create_fa_location("1");
           send_message(FA_LOCATION);
           free(FA_LOCATION);

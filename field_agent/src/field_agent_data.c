@@ -33,7 +33,7 @@ void create_info()
 	FA_INFO = malloc(sizeof(fieldagent_info_t)); // must free this later
 
 	FA_INFO->gameId = malloc(141);
-	FA_INFO->pebbleId = malloc(141);
+	FA_INFO->pebbleId = NULL;	
 	FA_INFO->name = malloc(141);
 	FA_INFO->team = malloc(141);
 	FA_INFO->latitude = malloc(141);
