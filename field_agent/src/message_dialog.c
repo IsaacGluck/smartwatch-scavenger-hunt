@@ -5,7 +5,8 @@ static TextLayer *s_text_layer;
 
 static char* message = NULL;
 
-static void window_load(Window *window) {
+static void window_load(Window *window)
+{
 
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
@@ -21,7 +22,8 @@ static void window_load(Window *window) {
 }
 
 
-static void window_unload(Window *window) {
+static void window_unload(Window *window)
+{
   text_layer_destroy(s_text_layer);
   window_destroy(s_window);
   s_window = NULL;
@@ -30,7 +32,8 @@ static void window_unload(Window *window) {
 }
 
 
-void dialog_message_window_push(char* input_message) {
+void dialog_message_window_push(char* input_message)
+{
   if(!s_window) {
     message = input_message;
 
