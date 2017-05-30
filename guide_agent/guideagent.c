@@ -6,6 +6,7 @@
 #include "bag.h"
 #include "hashtable.h"
 #include "../common/shared.h"
+#include "../common/common.h"
 
 #include <stdbool.h>
 #include <unistd.h>	      // read, write, close
