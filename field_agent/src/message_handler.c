@@ -4,11 +4,12 @@
 
 #include "message_handler.h"
 #include "field_agent_data.h"
+#include "../../common/shared.h"
+#include "../../common/common.h"
 
-char* create_fa_location(char* statusReq);
-char* create_fa_claim(char* kragId);
-char* create_fa_log(char* text);
-void incoming_message(char* message);
+static char GAME_STATUS[12] = "GAME_STATUS";
+static char GS_RESPONSE[12] = "GS_RESPONSE";
+static char GAME_OVER[10] = "GAME_OVER";
 
 
 char* create_fa_location(char* statusReq)
@@ -105,14 +106,46 @@ char* create_fa_log(char* text)
 
 void incoming_message(char* message)
 {
-	
+	if (validate_message(message) != 0) { // it was not validated
+		APP_LOG(APP_LOG_LEVEL_INFO, "Message could not be validated: %s\n", message);
+		return; // ignore the message
+	}
+
+	char **opcode_data = getOpCode(message);
+	char *opCode = opcode_data[0];
+
+	if (strcmp(opCode, GAME_OVER) == 0) {
+		APP_LOG(APP_LOG_LEVEL_INFO, "GAME_OVER received, ending game.\n");
+		message_GAME_OVER(message);
+	} else if (strcmp(opCode, GAME_STATUS) == 0){
+		APP_LOG(APP_LOG_LEVEL_INFO, "GAME_STATUS received, updating...\n");
+		message_GAME_STATUS(message);
+	} else if (strcmp(opCode, GS_RESPONSE) == 0) {
+		APP_LOG(APP_LOG_LEVEL_INFO, "GAME_STATUS received, updating...\n");
+		message_GS_RESPONSE(message);
+	} else {
+		APP_LOG(APP_LOG_LEVEL_INFO, "Received message: %s\n", message); // just log don't do anything
+	}
+
+	deleteOpCode(opcode_data);
 }
 
 
 
+void message_GAME_OVER(char* message)
+{
 
+}
 
+void message_GAME_STATUS(char* message)
+{
 
+}
+
+void message_GS_RESPONSE(char* message)
+{
+
+}
 
 
 

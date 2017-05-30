@@ -14,6 +14,7 @@
 
 
 int validate_message(char* message);
+char** tokenize(char* message);
 
 #ifdef NOPEBBLE // we are *not* building for pebble
 int print_log(char* message, char* filename, char* IPport, char* tofrom);
@@ -81,38 +82,17 @@ int validate_message(char* message){
 		return -1;  
 	}
 
-	//counts the total num of spaces there should be in the array 
 	int total = 0; 
 	for(int i = 0; i< (int)strlen(message); i++){
 		if(message[i] == '|' || message[i] == '='){
 			total++; 
 		}
 	}
-	//not enough arguments in general for this to make sense 
-	if (total <=1){
-		return 1; 
+
+	char** array = tokenize(message);
+	if (array == NULL) {
+		return 1;
 	}
-	//array isnt made correctly 
-	char** array = malloc(sizeof(char*) * (total + 1));
-	if(array == NULL){
-		return 1; 
-	}
-
-	char* pointer = message;
-
-	//splits the array 
-	int message_length = strlen(message);
-
-	int count = 1; 
-	array[0] = pointer;
-	for(int i = 0; i < message_length; i++){
-		if(pointer[i] == '|' || pointer[i] == '='){	
-			pointer[i] = '\0';
-			array[count] = &pointer[i + 1];
-			// printf("%s\n", &pointer[i]);
-			count++;  
-		}
-	} 
 
 	//array wasnt set right 
 	for(int i = 0; i <= total; i++){
@@ -121,7 +101,6 @@ int validate_message(char* message){
 		}
 	}
 
-
 	int fn;
 	for (fn = 0; codes[fn].opCodes != NULL; fn++) {
   		if (strcmp(array[1], codes[fn].opCodes) == 0) {
@@ -129,14 +108,10 @@ int validate_message(char* message){
   		}
 	}
 	
-
- 	
-
 	if (codes[fn].opCodes == NULL){
   		// printf("Unknown command: '%s'\n", array[1]);
   		return(1); 
  	 }
-
 
 	//send to right opcode method 
 		//if error about parameters types return 2 
@@ -144,6 +119,43 @@ int validate_message(char* message){
 		//if errors about parameters that there should be return 4 
 	return 0;
 }
+
+
+char** tokenize(char* message)
+{
+	int total = 0; 
+	for(int i = 0; i< (int)strlen(message); i++){
+		if(message[i] == '|' || message[i] == '='){
+			total++; 
+		}
+	}
+	
+	if (total <=1){
+		return NULL; 
+	}
+	
+	char** array = malloc(sizeof(char*) * (total + 1));
+	if(array == NULL){
+		return NULL; 
+	}
+
+	char* pointer = message;
+
+	int message_length = strlen(message);
+
+	int count = 1; 
+	array[0] = pointer;
+	for(int i = 0; i < message_length; i++){
+		if(pointer[i] == '|' || pointer[i] == '='){	
+			pointer[i] = '\0';
+			array[count] = &pointer[i + 1];
+			count++;  
+		}
+	}
+	
+	return array;
+}
+
 
 #ifdef NOPEBBLE // we are *not* building for pebble
 static int gsAgent(char* parameters[], int total){

@@ -87,7 +87,7 @@ char **getOpCode(char *message){
     return tokens;
 }
 
-void deleteopCode(char **token){
+void deleteOpCode(char **token){
     free(token[0]);
     free(token[1]);
     free(token);
