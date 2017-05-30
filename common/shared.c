@@ -717,35 +717,33 @@ static int gameStatus(char* parameters[], int total){
 	if(strcmp(guideid, "guideId")==1){
 		return 4; 
 	}
-	int numclaimed = string_to_int(parameters[6]); 
-	int tot = string_to_int(parameters[8]); 
+	int numclaimed = string_to_int(parameters[7]); 
+	int tot = string_to_int(parameters[9]); 
 
 
 	if(strlen(parameters[3])>0 && strlen(parameters[3])<9){
 		for(int i = 0; i< (int)strlen(parameters[3]); i++){
 			if(!ishex(parameters[3][i])){
-				return 2; 
+				return 21; 
 			}
 		}
 	}
 	else{
-		return 2; 
+		return 22; 
 	}
 	
 	// printf("checking parameter 5\n");
 	if(strlen(parameters[5])>0 && strlen(parameters[5])<9){
 		for(int i = 0; i< (int)strlen(parameters[5]); i++){
 			if(!ishex(parameters[5][i])){
-				return 2; 
-			}
-		}
+				return 23; 
+		}	}
 	}
 	else{
 		return 2; 
 	}
-
 	if(tot <0 || numclaimed > tot || numclaimed<0){
-		return 2;
+		return 25;
 	}
 
 	//check duplicates
