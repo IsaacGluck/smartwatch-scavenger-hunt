@@ -127,7 +127,7 @@ void incoming_message(char* message)
 		APP_LOG(APP_LOG_LEVEL_INFO, "GAME_STATUS received, updating...\n");
 		message_GAME_STATUS(opcode_data);
 	} else if (strcmp(opCode, GS_RESPONSE) == 0) {
-		APP_LOG(APP_LOG_LEVEL_INFO, "GAME_STATUS received, updating...\n");
+		APP_LOG(APP_LOG_LEVEL_INFO, "GS_RESPONSE received with code %s\n", opCode);
 		message_GS_RESPONSE(opcode_data);
 	} else if (strcmp(opCode, GA_HINT) == 0) {
 		APP_LOG(APP_LOG_LEVEL_INFO, "GA_HINT received, updating list of hints.\n");
@@ -283,6 +283,10 @@ void message_GS_RESPONSE(char** tokenized_message)
 		FA_INFO->krag_claimed = true;
 	}
 
+	if (strcmp(respCode, "SH_ERROR_INVALID_ID") == 0) {
+		FA_INFO->invalid_krag_claimed = true;
+	}
+
 
 	// free(tokenized_message);
 }
@@ -335,26 +339,15 @@ void message_GA_HINT(char** tokenized_message)
 		return;
 	}
 
-	if(strcmp(FA_INFO->name, name) != 0) {
-		APP_LOG(APP_LOG_LEVEL_INFO, "Wrong name in: %s\n", tokenized_message[1]);
-		return;
-	}
-
 	if(strcmp(FA_INFO->pebbleId, pebbleId) != 0) {
 		APP_LOG(APP_LOG_LEVEL_INFO, "Wrong pebbleId in: %s\n", tokenized_message[1]);
 		return;
 	}
 
 	for(int i = 9; i > 0; i--) {
-		if (FA_INFO->hints_received[i] != NULL) {
-			free(FA_INFO->hints_received[i]);
-		}
 		strcpy(FA_INFO->hints_received[i], FA_INFO->hints_received[i - 1]); // shift up
 	}
 
-	if (FA_INFO->hints_received[0] != NULL) {
-		free(FA_INFO->hints_received[0]);
-	}	
 	strcpy(FA_INFO->hints_received[0], hint);
 
 }

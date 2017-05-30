@@ -121,15 +121,23 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   // The krag submitted was already claimed, display this to the user
   if (FA_INFO->krag_claimed_already) {
     char buff[51] = "Sorry, the krag you submitted was already claimed.";
-    strcpy(error_message,buff);
+    strcpy(error_message, buff);
     dialog_message_window_push(error_message);
     FA_INFO->krag_claimed_already = false;
+  }
+
+  // The krag submitted was already invalid, display this to the user
+  if (FA_INFO->invalid_krag_claimed) {
+    char buff[51] = "Sorry, the krag you submitted was invalid.";
+    strcpy(error_message, buff);
+    dialog_message_window_push(error_message);
+    FA_INFO->invalid_krag_claimed = false;
   }
 
   // The krag was claimed successfully
   if (FA_INFO->krag_claimed) {
     char buff[51] = "The KRAG you submitted was claimed!";
-    strcpy(error_message,buff);
+    strcpy(error_message, buff);
     dialog_message_window_push(error_message);
     if (FA_INFO->num_left > 0) {
       FA_INFO->num_left = FA_INFO->num_left - 1;
