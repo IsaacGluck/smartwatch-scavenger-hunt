@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 #include "shared.h"
 #include "time.h"
 #include <ctype.h>
@@ -225,12 +226,12 @@ static int gsAgent(char* parameters[], int total){
 	}
 
 	//team
-	if(strlen(parameters[7]) < 0 || strlen(parameters[7]) > 11){
+	if((int)strlen(parameters[7]) < 0 || (int)strlen(parameters[7]) > 11){
 		return 3; 
 	}
 
 	//player
-	if(strlen(parameters[9]) < 0 || strlen(parameters[9]) > 11){
+	if((int)strlen(parameters[9]) < 0 || (int)strlen(parameters[9]) > 11){
 		return 3; 
 	}
 
@@ -566,7 +567,7 @@ static int teamRecord(char* parameters[], int total){
 
 
 	//team
-	if(strlen(parameters[5]) < 0 || strlen(parameters[5]) > 11){
+	if((int)strlen(parameters[5]) < 0 || (int)strlen(parameters[5]) > 11){
 		return 3; 
 	}
 
@@ -640,12 +641,12 @@ static int gaHint(char* parameters[], int total){
 	}
 
 	//team
-	if(strlen(parameters[7]) < 0 || strlen(parameters[7]) > 11){
+	if((int)strlen(parameters[7]) < 0 || (int)strlen(parameters[7]) > 11){
 		return 3; 
 	}
 
 	//player 
-	if(strlen(parameters[9]) < 0 || strlen(parameters[9]) > 11){
+	if((int)strlen(parameters[9]) < 0 || (int)strlen(parameters[9]) > 11){
 		return 3; 
 	}
 
@@ -751,11 +752,11 @@ static int gaStatus(char* parameters[], int total){
 	}
 
 	// printf("checking other parameter lengths\n");
-	if(strlen(parameters[7]) < 0 || strlen(parameters[7]) > 11){
+	if((int)strlen(parameters[7]) < 0 || (int)strlen(parameters[7]) > 11){
 		return 3; 
 	}
 
-	if(strlen(parameters[9]) < 0 || strlen(parameters[9]) > 11){
+	if((int)strlen(parameters[9]) < 0 || (int)strlen(parameters[9]) > 11){
 		return 3; 
 	}
 	if( !(string_to_int(parameters[11]) == 0 || string_to_int(parameters[11]) == 1) ){

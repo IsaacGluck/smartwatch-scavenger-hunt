@@ -1,14 +1,11 @@
-
-
 L = ../libcs50
 
 
 # object files and the target library
 OBJS = shared.o common.o
 LIB = common.a
-FLAGS = -NOPEBBLE
 
-CFLAGS = -Wall -pedantic -std=c11 -ggdb $(FLAGS)
+CFLAGS = -Wall -pedantic -std=c11 -ggdb -DNOPEBBLE
 CC = gcc
 MAKE = make
 
@@ -16,7 +13,7 @@ MAKE = make
 
 # build the library by archiving object files
 $(LIB): $(OBJS)
-	ar cr $(FLAGS) $(LIB) $(OBJS)
+	ar cr $(LIB) $(OBJS)
 
 shared.o: shared.h
 .PHONY: clean sourcelist
