@@ -1047,15 +1047,7 @@ game_info_reveal_krag(game_info_t *gi, team_t *team){
     
     // if all krags are revealed,
     // end the game and return NULL
-// <<<<<<< HEAD
-// <<<<<<< HEAD
-    if (gi->num_krags >= team->num_claimed_krags) {
-// =======
-    // if (gi->num_krags <= team->num_revealed) { WHICH ONE IS IT?????? -ISAAC
-// >>>>>>> kazuma
-// =======
-    // if (gi->num_krags <= team->num_revealed) {
-// >>>>>>> 009d26ebf669804895e094d3467c60631318f554
+    if (gi->num_krags <= team->num_claimed_krags) {
         game_info_change_game_status(gi);
         return NULL;
     }

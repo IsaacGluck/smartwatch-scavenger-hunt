@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <arpa/inet.h>
+#include <sys/select.h>
 #else // we are building for pebble
 #include <pebble.h>
 #endif
@@ -34,6 +36,32 @@ char *decToStringHex(unsigned int dec){
     sprintf(hex, "%x", dec);
     
     return hex;
+}
+
+//This method gets the IP address of the server
+char*
+getIP(int comm_sock, struct sockaddr_in them){
+    //much of this code was taken from examples in class
+    
+    //first half before the @
+    char* firstpart = inet_ntoa(them.sin_addr);
+    
+    //secand half after the @
+    int secondpart = ntohs(them.sin_port);
+    
+    char* ipaddress = malloc(strlen(firstpart) + secondpart + 2);
+    
+    strcpy(ipaddress, firstpart);
+    strcat(ipaddress, "@");
+    //printf("here i am alive and well and happy \n");
+    
+    //cat and stuff to make it all in one string
+    char stringnum[10];
+    sprintf(stringnum, "%d", secondpart);
+    strcat(ipaddress, stringnum);
+    
+    return ipaddress; //return string 
+    
 }
 
 #endif
