@@ -29,6 +29,8 @@ typedef struct fieldagent_info {
 	bool wrong_name;
 	bool krag_claimed;
 	bool krag_claimed_already;
+	bool invalid_krag_claimed;
+	bool invalid_message;
 	bool submit_krag;
 } fieldagent_info_t;
 

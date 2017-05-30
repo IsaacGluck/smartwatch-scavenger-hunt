@@ -59,6 +59,8 @@ void create_info()
 	FA_INFO->krag_claimed = false;
 	FA_INFO->krag_claimed_already = false;
 	FA_INFO->submit_krag = false;
+	FA_INFO->invalid_krag_claimed = false;
+	FA_INFO->invalid_message = false;
 }
 
 // free the memory associated with the FA_INFO struct
