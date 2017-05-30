@@ -55,7 +55,8 @@ static const int MESSAGE_LENGTH = 8192;
 
 /**************** local functions ****************/
 /* not visible outside this file */
-static void parse_command_line_arguments(const int argc, char *argv[], game_info_t *gi, int *comm_sock, struct sockaddr_in *server);
+static void parse_command_line_arguments(const int argc, char *argv[],
+                    game_info_t *gi, int *comm_sock, struct sockaddr_in *server);
 static int set_up_udp(int port, int *comm_sock, struct sockaddr_in *server);
 static void handle_stdin(int comm_sock, struct sockaddr_in *themp, game_info_t *gi);
 static void handle_socket(int comm_sock, struct sockaddr_in them, game_info_t *gi);
@@ -247,14 +248,17 @@ static void handle_socket(int comm_sock, struct sockaddr_in them, game_info_t *g
     else if (nbytes > 0){
         buf[nbytes] = '\0';            // null terminate string
         
+        // validate the message
         int result = validate_message(buf);
+        
+        // if valid message
         if (result == 0){
+            // get the opCode and rest of the line
             char **tokens;
             tokens = getOpCode(buf);
             char *opCode = tokens[0];
             char *rest_of_message = tokens[1];
             printf("opCode: %s\n\trest of message: %s\n\n", opCode, rest_of_message);
-            
             
             
             // dispatch the appropriate function
@@ -269,6 +273,7 @@ static void handle_socket(int comm_sock, struct sockaddr_in them, game_info_t *g
                 printf("\n\nUnknown command\n\n");
             }
             
+            // based on the result, respond correctly
             respond(opCode, result, comm_sock, them, gi, buf);
             
             free(tokens[0]);
