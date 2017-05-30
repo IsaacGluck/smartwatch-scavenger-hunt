@@ -2,7 +2,8 @@
 #include "pin_window.h"
 #include "selection_layer.h"
 
-static char* selection_handle_get_text(int index, void *context) {
+static char* selection_handle_get_text(int index, void *context)
+{
   PinWindow *pin_window = (PinWindow*)context;
   snprintf(
     pin_window->field_buffs[index], 
@@ -12,12 +13,14 @@ static char* selection_handle_get_text(int index, void *context) {
   return pin_window->field_buffs[index];
 }
 
-static void selection_handle_complete(void *context) {
+static void selection_handle_complete(void *context)
+{
   PinWindow *pin_window = (PinWindow*)context;
   pin_window->callbacks.pin_complete(pin_window->pin, pin_window);
 }
 
-static void selection_handle_inc(int index, uint8_t clicks, void *context) {
+static void selection_handle_inc(int index, uint8_t clicks, void *context)
+{
   PinWindow *pin_window = (PinWindow*)context;
 
   char cur = pin_window->pin.digits[index];
@@ -77,7 +80,8 @@ static void selection_handle_inc(int index, uint8_t clicks, void *context) {
   }
 }
 
-static void selection_handle_dec(int index, uint8_t clicks, void *context) {
+static void selection_handle_dec(int index, uint8_t clicks, void *context)
+{
   PinWindow *pin_window = (PinWindow*)context;
   
   char cur = pin_window->pin.digits[index];
@@ -137,7 +141,8 @@ static void selection_handle_dec(int index, uint8_t clicks, void *context) {
   }
 }
 
-PinWindow* pin_window_create(PinWindowCallbacks callbacks) {
+PinWindow* pin_window_create(PinWindowCallbacks callbacks)
+{
   PinWindow *pin_window = (PinWindow*)malloc(sizeof(PinWindow));
   if (pin_window) {
     pin_window->window = window_create();
@@ -201,7 +206,8 @@ PinWindow* pin_window_create(PinWindowCallbacks callbacks) {
   return NULL;
 }
 
-void pin_window_destroy(PinWindow *pin_window) {
+void pin_window_destroy(PinWindow *pin_window)
+{
   if (pin_window) {
     status_bar_layer_destroy(pin_window->status);
     selection_layer_destroy(pin_window->selection);
@@ -213,19 +219,23 @@ void pin_window_destroy(PinWindow *pin_window) {
   }
 }
 
-void pin_window_push(PinWindow *pin_window, bool animated) {
+void pin_window_push(PinWindow *pin_window, bool animated)
+{
   window_stack_push(pin_window->window, animated);
 }
 
-void pin_window_pop(PinWindow *pin_window, bool animated) {
+void pin_window_pop(PinWindow *pin_window, bool animated)
+{
   window_stack_remove(pin_window->window, animated);
 }
 
-bool pin_window_get_topmost_window(PinWindow *pin_window) {
+bool pin_window_get_topmost_window(PinWindow *pin_window)
+{
   return window_stack_get_top_window() == pin_window->window;
 }
 
-void pin_window_set_highlight_color(PinWindow *pin_window, GColor color) {
+void pin_window_set_highlight_color(PinWindow *pin_window, GColor color)
+{
   pin_window->highlight_color = color;
   selection_layer_set_active_bg_color(pin_window->selection, color);
 }

@@ -97,7 +97,8 @@ int validate_message(char* m){
 
 	char** array = tokenize(message);
 	if (array == NULL) {
-        free(message);
+    
+    free(message);
 		return 1;
 	}
 
@@ -116,7 +117,7 @@ int validate_message(char* m){
 
   			return((*codes[fn].func)(array, total+1));
   			free(message);
-            free(array);
+        free(array);
   		}
 	}
 	
@@ -771,6 +772,8 @@ static int gameStatus(char* parameters[], int total){
 }
 
 static int gsResponse(char* parameters[], int total){
+	return 100;
+
 	if(total != 8){
 		return 5;
 	}
