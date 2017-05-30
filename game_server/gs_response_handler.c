@@ -79,6 +79,10 @@ respond(char *opCode, int result, int comm_sock, struct sockaddr_in them, game_i
         return;
     }
     
+#ifdef DEBUG
+    printf("Result value is: %d", result);
+#endif
+    
     if (result < 0){
         handle_result_message(result, comm_sock, them, gi, message_from);
     }

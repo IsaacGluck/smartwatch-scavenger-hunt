@@ -249,6 +249,9 @@ static void handle_socket(int comm_sock, struct sockaddr_in them, game_info_t *g
         buf[nbytes] = '\0';            // null terminate string
         int result;
         
+        // first write to the log file
+        char *ipaddress = getIP(comm_sock, them); //get the IP Adress
+        print_log(buf, "gameserver.log", ipaddress, "FROM"); //print it to the log file
         
         // get the opCode and rest of the line
         char **tokens;
