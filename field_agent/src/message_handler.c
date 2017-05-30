@@ -209,6 +209,8 @@ void message_GAME_STATUS(char* message)
 	free(tokenized_message);
 }
 
+
+// opCode=GS_RESPONSE|gameId=0707|respCode=SH_ERROR_INVALID_OPCODE|text=Unrecognized opCode 'GA_FOO'
 void message_GS_RESPONSE(char* message)
 {
 
