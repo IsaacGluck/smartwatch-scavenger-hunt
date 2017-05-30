@@ -1,5 +1,5 @@
 
-#ifdef NOPEBBLE // we are *not* building for pebble
+
 // Conditional inclusion for platform specific builds
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,16 +8,13 @@
 #include "shared.h"
 #include "time.h"
 #include <ctype.h>
-#else // we are building for pebble
-#include <pebble.h>
-#endif
+#include <stdbool.h>
 
 
 
 int validate_message(char* message);
 char** tokenize(char* message);
 
-#ifdef NOPEBBLE // we are *not* building for pebble
 int print_log(char* message, char* filename, char* IPport, char* tofrom);
 
 static int gsAgent(char* parameters[], int total);
@@ -27,10 +24,6 @@ static int gsSecret(char* parameters[], int total);
 static int teamRecord(char* parameters[], int total);
 static int gaStatus(char* parameters[], int total);
 static int gaHint(char* parameters[], int total);
-
-#endif
-
-
 static int gameStatus(char* parameters[], int total);
 static int gsResponse(char* parameters[], int total);
 static int faLocation(char* parameters[], int total);
@@ -158,7 +151,6 @@ char** tokenize(char* message)
 }
 
 
-#ifdef NOPEBBLE // we are *not* building for pebble
 static int gsAgent(char* parameters[], int total){
 	if(total != 16){
 		return 5;
@@ -803,9 +795,6 @@ int print_log(char* message, char* filename, char* IPport, char* tofrom){
 
 	return 0;
 }
-
-#endif
-
 
 
 

@@ -3,6 +3,8 @@
  *
  * Handles message received from field agent or guide agent
  *
+ * Returning value: Required response (Not performed by this method)
+ *
  * Common Returning value
  * 0: Successfully handled message, and nothing to be done
  * -1: SH_ERROR_INVALID_MESSAGE
@@ -25,6 +27,7 @@
  *
  * GA_STATUS specific returning value
  * 1: Respond with GAME_STATUS and GS_AGENT
+ * 2: Respond with GAME_STATUS, GS_AGENT, and reveal two clue
  *
  * GA_HINT specific returning value
  * 1: Send the message to all FA in the team
@@ -64,6 +67,7 @@ int fn_fa_location(char *rest_of_line, game_info_t *gi, struct sockaddr_in them)
         return -99;
     }
 
+    // allocate memory and return -99 if error
     char *gameId = malloc(MESSAGE_LENGTH);
     char *pebbleId = malloc(MESSAGE_LENGTH);
     char *team_name = malloc(MESSAGE_LENGTH);
@@ -344,7 +348,7 @@ int fn_ga_status(char *rest_of_line, game_info_t *gi, struct sockaddr_in them){
         else{
             free_message_fields(gameId, guideId, team_name, player_name, NULL, NULL, statusReq, NULL, NULL, NULL);
             token_delete(token);
-            return 1;
+            return 2;
         }
     }
     // If gameId != 0
