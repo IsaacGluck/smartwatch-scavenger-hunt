@@ -45,6 +45,7 @@ typedef struct game_info{
 // struct for team information
 typedef struct team {
     char *team_name;        // name of the team
+    int num_agents;         // Number of agents (#FA + #GA)
     struct ga *ga;          // game agent
     set_t *fa;              // field agents
     int num_claimed_krags;  // number of claimed krags
@@ -78,6 +79,7 @@ typedef struct krag {
     float longitude;           // longitude of the krag
     float latitude;            // latitude of the krag
     unsigned int kragID;       // ID of the krag
+    int kragnumber;            // the number that appeared in the krag file
     char *clue;                // clue
     set_t *claimed_team;       // teams that have claimed this krag
     set_t *revealed_team;      // teams that have been revealed this krag
@@ -91,11 +93,11 @@ typedef struct find_id {
     struct sockaddr_in them;
 }find_id_t;
 
-// struct for sending hint
-typedef struct send_hint {
-    char *hint;
+// struct for sending message
+typedef struct send_message {
+    char *message;
     int comm_sock;
-}send_hint_t;
+}send_message_t;
 
 // struct for holding gi, one fa,
 // ga, team and comm_sock in the team
@@ -122,7 +124,7 @@ static void set_kiff_handle_error(char *left, char *right, FILE *fp, char *messa
 static void find_pebbleId(void *arg, const char *key, void *item);
 static void find_fa_with_pebbleId(void *arg, const char *key, void *item);
 static void find_guideId(void *arg, const char *key, void *item);
-static void send_hint_to_everyone(void *arg, const char *key, void *item);
+static void send_message_to_everyone(void *arg, const char *key, void *item);
 static void reveal_krag_helper(void *arg, const char *key, void *item);
 
 static krag_t *krag_new();
@@ -212,38 +214,38 @@ team_print(team_t *team){
     printf("\tSecret: %s\n", team->secret_string);
 }
 
-/**************** team_send_hint_to_everyone ****************/
+/**************** team_send_message_to_everyone ****************/
 /* Send hint to all field agent in the team
  */
 void
-team_send_hint_to_everyone(team_t *team, char *hint, int comm_sock){
-    if (team == NULL || hint == NULL){
+team_send_message_to_everyone(team_t *team, char *message, int comm_sock){
+    if (team == NULL || message == NULL){
         return;
     }
-    send_hint_t *send_hint = malloc(sizeof(send_hint_t));
-    if (send_hint == NULL){
-        fprintf(stderr, "team_send_hint_to_everyone failed due to not being able to malloc memory\n");
+    send_message_t *send_message = malloc(sizeof(send_message_t));
+    if (send_message == NULL){
+        fprintf(stderr, "team_send_message_to_everyone failed due to not being able to malloc memory\n");
         return;
     }
-    send_hint->hint = hint;
-    send_hint->comm_sock = comm_sock;
-    set_iterate(team->fa, send_hint, &send_hint_to_everyone);
-    free(send_hint);
+    send_message->message = message;
+    send_message->comm_sock = comm_sock;
+    set_iterate(team->fa, send_message, &send_message_to_everyone);
+    free(send_message);
 }
 
-/**************** send_hint_to_everyone ****************/
-/* Helper function for team_send_hint_to_everyone
+/**************** send_message_to_everyone ****************/
+/* Helper function for team_send_message_to_everyone
  */
 static void
-send_hint_to_everyone(void *arg, const char *key, void *item){
-    send_hint_t *send_hint = arg;
+send_message_to_everyone(void *arg, const char *key, void *item){
+    send_message_t *send_message = arg;
     fa_t *fa = item;
     
-    if (send_hint == NULL || fa == NULL){
+    if (send_message == NULL || fa == NULL){
         return;
     }
     
-    fa_send_to(fa, send_hint->comm_sock, send_hint->hint);
+    fa_send_to(fa, send_message->comm_sock, send_message->message);
 }
 
 /**************** team_send_gs_agent ****************/
@@ -325,6 +327,22 @@ team_get_name(team_t *team){
     char *team_name = malloc(MESSAGE_LENGTH);
     strcpy(team_name, team->team_name);
     return team_name;
+}
+
+/**************** team_update_string ****************/
+/* Update the secret string for the given team based on
+ * given krag
+ */
+void
+team_update_string(game_info_t *gi, team_t *team, krag_t *krag){
+    if (gi == NULL || team == NULL || krag == NULL) return;
+    int k = gi->num_krags;
+    int i = krag->kragnumber;
+    for (int j = 0; j < strlen(gi->secret_code); j++){
+        if (j%k == i){
+            team->secret_string[j] = gi->secret_code[j];
+        }
+    }
 }
 
 /*********************************************************/
@@ -411,16 +429,6 @@ game_info_get_numKrags(game_info_t *gi){
     return gi->num_krags;
 }
 
-/**************** game_info_change_game_status ****************/
-/* change the status of game to 1 */
-void
-game_info_change_game_status(game_info_t *gi){
-    if (gi == NULL){
-        return;
-    }
-    gi->game_status = 1;
-}
-
 /**************** game_info_set_gameID ****************/
 /* set the gameID 
  * return 0 if success, 1 if error
@@ -432,6 +440,27 @@ game_info_set_gameID(game_info_t *gi, char *gameID_in_hex){
     }
     gi->gameID = stringHexToDec(gameID_in_hex);
     return 0;
+}
+
+/**************** game_info_get_secret ****************/
+/* return secret code of this game*/
+char *
+game_info_get_secret(game_info_t *gi){
+    if (gi == NULL) return NULL;
+    char *secret = malloc(MESSAGE_LENGTH);
+    strcpy(secret, gi->secret_code);
+    return secret;
+}
+
+
+/**************** game_info_change_game_status ****************/
+/* change the status of game to 1 */
+void
+game_info_change_game_status(game_info_t *gi){
+    if (gi == NULL){
+        return;
+    }
+    gi->game_status = 1;
 }
 
 /**************** game_info_set_kiff ****************/
@@ -471,6 +500,7 @@ game_info_set_kiff(game_info_t *gi, char *kiff){
         if (new_krag == NULL){
             return 1;
         }
+        new_krag->kragnumber = num_krags;
         
         // loop over the line
         for (int i = 0; i < strlen(line); i++){
@@ -649,6 +679,7 @@ game_info_register_team(game_info_t *gi, char *team_name){
         buf[strlen(gi->secret_code)] = '\0';
         strcpy(new_team->secret_string, buf);
         free(buf);
+        gi->num_teams += 1;
     }
 }
 
@@ -812,6 +843,8 @@ team_register_ga(game_info_t *gi, team_t *team, char *guideId, char *player_name
         ga->them = them;
         ga->last_contact_time = time(NULL);
         team->ga = ga;
+        team->num_agents += 1;
+        gi->num_agents += 1;
         return 0;
     }
     // if the player with the given pebbleId is found, it will not be registered
@@ -820,7 +853,6 @@ team_register_ga(game_info_t *gi, team_t *team, char *guideId, char *player_name
         return -7;
     }
 }
-
 
 /**************** team_register_fa ****************/
 /* register fa to the team
@@ -848,6 +880,8 @@ team_register_fa(game_info_t *gi, team_t *team, char *pebbleId, char *player_nam
         fa->longitude = atof(longitude);
         fa->last_contact_time = time(NULL);
         set_insert(team->fa, fa->name, fa);
+        team->num_agents += 1;
+        gi->num_agents += 1;
         return 0;
     }
     // if the player with the given pebbleId is found, it will not be registered
@@ -978,7 +1012,7 @@ game_info_reveal_krag(game_info_t *gi, team_t *team){
     
     // if all krags are revealed,
     // end the game and return NULL
-    if (gi->num_krags <= team->num_claimed_krags) {
+    if (gi->num_krags <= team->num_revealed) {
         game_info_change_game_status(gi);
         return NULL;
     }
@@ -1023,6 +1057,30 @@ reveal_krag_helper(void *arg, const char *key, void *item){
         find_krag->current++;
     }
 }
+
+/**************** game_info_send_message_to_everyone ****************/
+/* Send message to all agents in the game
+ */
+void
+game_info_send_message_to_everyone(game_info_t *gi, char *message, int comm_sock, void (*itemfunc)(void *arg, const char *key, void *item)){
+    if (gi == NULL || message == NULL){
+        return;
+    }
+    
+    send_message_t *send_message = malloc(sizeof(send_message_t));
+    if (send_message == NULL){
+        fprintf(stderr, "team_send_message_to_everyone failed due to not being able to malloc memory\n");
+        return;
+    }
+    send_message->message = message;
+    send_message->comm_sock = comm_sock;
+    
+    set_iterate(gi->team, send_message, itemfunc);
+    
+    free(send_message);
+}
+
+
 
 
 
@@ -1105,7 +1163,7 @@ krag_get_clue(krag_t *krag){
     if (krag == NULL) return NULL;
     char *clue = malloc(CLUE_LENGTH);
     strcpy(clue, krag->clue);
-    return krag->clue;
+    return clue;
 }
 
 
@@ -1156,12 +1214,20 @@ krag_has_revealed(krag_t *krag, char *team_name){
  */
 int
 krag_mark_claimed(game_info_t *gi, krag_t *krag, char *team_name){
-    char *team_name_to_be_inserted = malloc(MESSAGE_LENGTH);
-    strcpy(team_name_to_be_inserted,team_name);
     if (krag_has_claimed(krag, team_name) == 1){
-        set_insert(krag->claimed_team, team_name, team_name_to_be_inserted);
         team_t *team = game_info_find_team(gi, team_name);
-        team->num_claimed_krags += 1;
+        if (set_find(krag->claimed_team, team_name) == NULL){
+            char *team_name_to_be_inserted = malloc(MESSAGE_LENGTH);
+            strcpy(team_name_to_be_inserted,team_name);
+            set_insert(krag->claimed_team, team_name, team_name_to_be_inserted);
+            team->num_claimed_krags += 1;
+        }
+        if (set_find(krag->revealed_team, team_name) == NULL){
+            char *team_name_to_be_inserted2 = malloc(MESSAGE_LENGTH);
+            strcpy(team_name_to_be_inserted2,team_name);
+            set_insert(krag->revealed_team, team_name, team_name_to_be_inserted2);
+            team->num_revealed += 1;
+        }
         
         team_print(team);
         printf("%d %d",team->num_claimed_krags ,gi->num_krags);
@@ -1378,6 +1444,26 @@ gifaga_get_comm_sock(gifaga_t *gifaga){
     if (gifaga == NULL) return -1;
     return gifaga->comm_sock;
 }
+
+/*********************************************************/
+/************* functions for send_message ****************/
+/*********************************************************/
+/* return message */
+char *
+send_message_get_message(send_message_t *send_message){
+    if (send_message == NULL) return NULL;
+    char *message = malloc(MESSAGE_LENGTH);
+    strcpy(message, send_message->message);
+    return message;
+}
+
+/* return comm_sock */
+int
+send_message_get_comm_sock(send_message_t *send_message){
+    if (send_message == NULL) return -1;
+    return send_message->comm_sock;
+}
+
 
 
 /*********************************************************/

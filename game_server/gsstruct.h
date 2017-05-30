@@ -25,6 +25,7 @@ typedef struct team team_t;            // struct for team information
 typedef struct fa fa_t;                // struct for field agent information
 typedef struct ga ga_t;                // struct for game agent information
 typedef struct krag krag_t;            // struct for krag information
+typedef struct send_message send_message_t;// struct for sending message
 typedef struct gifaga gifaga_t;        // struct for holding gi, one fa, and ga in the team
 
 /**************** functions ****************/
@@ -48,6 +49,9 @@ char *game_info_get_gameId(game_info_t *gi);
 
 /* return number of krags in this game*/
 int game_info_get_numKrags(game_info_t *gi);
+
+/* return secret code of this game*/
+char *game_info_get_secret(game_info_t *gi);
 
 /* change the status of game to 1 */
 void game_info_change_game_status(game_info_t *gi);
@@ -118,6 +122,10 @@ krag_t * game_info_reveal_krag(game_info_t *gi, team_t *team);
  * Return NULL if it does not exist
  */
 team_t *game_info_find_pebbleId(game_info_t *gi, char *pebbleId);
+
+/* Send message to all agents in the game
+ */
+void game_info_send_message_to_everyone(game_info_t *gi, char *message, int comm_sock, void (*itemfunc)(void *arg, const char *key, void *item));
 
 
 
@@ -231,6 +239,14 @@ char * team_get_secret(team_t *team);
  */
 char *team_get_name(team_t *team);
 
+/* Update the secret string for the given team based on
+ * given krag
+ */
+void team_update_string(game_info_t *gi, team_t *team, krag_t *krag);
+
+/* Send hint to all field agent in the team
+ */
+void team_send_message_to_everyone(team_t *team, char *message, int comm_sock);
 
 
 
@@ -296,4 +312,13 @@ team_t *gifaga_get_team(gifaga_t *gifaga);
 
 /* return comm_sock */
 int gifaga_get_comm_sock(gifaga_t *gifaga);
+
+
+
+/************* functions for send_message ****************/
+/* return message */
+char * send_message_get_message(send_message_t *send_message);
+
+/* return comm_sock */
+int send_message_get_comm_sock(send_message_t *send_message);
 #endif   // __GSSTRUCT_H
