@@ -23,7 +23,7 @@ char *decToStringHex(unsigned int dec);
 /* This method gets the IP address of the server */
 char *getIP(int comm_sock, struct sockaddr_in them);
 
-#endif
+#endif // NOPEBBLE
 
 /* return the array created from the message
  * array[0] contains opCode
@@ -37,4 +37,4 @@ char *getIP(int comm_sock, struct sockaddr_in them);
 char **getOpCode(char *message);
 
 
-#endif
+#endif //__COMMON_H_
