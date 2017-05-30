@@ -4,7 +4,7 @@
 
 C = ../common
 L = ../libcs50
-DEBUG = -DEBUG
+#DEBUG = -DEBUG
 
 PROG = gameserver
 OBJS = gameserver.o gsstruct.o gs_message_handler.o gs_response_handler.o

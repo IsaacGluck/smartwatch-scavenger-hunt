@@ -343,6 +343,7 @@ static void respond_with_gs_claimed(int comm_sock, struct sockaddr_in them, game
     if (ga == NULL){
         free(message);
         free(gameId);
+        free(kragId);
         return;
     }
     else{
@@ -642,7 +643,7 @@ get_team(char *message_from, game_info_t *gi){
     }
     char *pebbleId = get_token(message_from, "pebbleId");
     if (pebbleId != NULL){
-        team_t *team = game_info_find_pebbleId(gi, pebbleId);
+        team_t *team = game_info_find_team_pebbleId(gi, pebbleId);
         free(pebbleId);
         return team;
     }

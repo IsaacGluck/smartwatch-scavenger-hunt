@@ -6,6 +6,7 @@ L = ../libcs50
 # object files and the target library
 OBJS = shared.o common.o
 LIB = common.a
+FLAGS = -DNOPEBBLE
 
 
 # build the library by archiving object files
