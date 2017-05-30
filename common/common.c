@@ -60,8 +60,7 @@ getIP(int comm_sock, struct sockaddr_in them){
     sprintf(stringnum, "%d", secondpart);
     strcat(ipaddress, stringnum);
     
-    return ipaddress; //return string 
-    
+    return ipaddress; //return string
 }
 
 #endif

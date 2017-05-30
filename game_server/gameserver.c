@@ -252,6 +252,11 @@ static void handle_socket(int comm_sock, struct sockaddr_in them, game_info_t *g
         // first write to the log file
         char *ipaddress = getIP(comm_sock, them); //get the IP Adress
         print_log(buf, "gameserver.log", ipaddress, "FROM"); //print it to the log file
+        free(ipaddress);
+        
+        #ifdef DEBUG
+        printf("Recieved message: %s\n", buf);
+        #endif
         
         // validate the message
         result = validate_message(buf);
@@ -263,7 +268,9 @@ static void handle_socket(int comm_sock, struct sockaddr_in them, game_info_t *g
             tokens = getOpCode(buf);
             char *opCode = tokens[0];
             char *rest_of_message = tokens[1];
-            printf("opCode: %s\n\trest of message: %s\n\n", opCode, rest_of_message);
+            #ifdef DEBUG
+            printf("Valid opCode: %s\n\trest of message: %s\n\n", opCode, rest_of_message);
+            #endif
             
             
             // dispatch the appropriate function

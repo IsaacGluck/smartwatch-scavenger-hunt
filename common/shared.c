@@ -84,6 +84,7 @@ int validate_message(char* m){
 	strcpy(message, m); 
 
 	if(strlen(message)> 8191 && strlen(message)>0){
+        free(message);
 		return -1;  
 	}
 
@@ -96,12 +97,15 @@ int validate_message(char* m){
 
 	char** array = tokenize(message);
 	if (array == NULL) {
+        free(message);
 		return 1;
 	}
 
 	//array wasnt set right 
 	for(int i = 0; i <= total; i++){
 		if(array[i] == NULL){
+            free(message);
+            free(array);
 			return 1; 
 		}
 	}
@@ -109,11 +113,15 @@ int validate_message(char* m){
 	int fn;
 	for (fn = 0; codes[fn].opCodes != NULL; fn++) {
   		if (strcmp(array[1], codes[fn].opCodes) == 0) {
+            free(message);
+            free(array);
   			return((*codes[fn].func)(array, total+1));
   		}
 	}
 	
 	if (codes[fn].opCodes == NULL){
+        free(message);
+        free(array);
   		// printf("Unknown command: '%s'\n", array[1]);
   		return 6;
  	 }
@@ -123,6 +131,7 @@ int validate_message(char* m){
 		//if duplicates retrn 3
 		//if errors about parameters that there should be return 4 
 	free(message);
+    free(array);
 	return 0;
 }
 
@@ -717,35 +726,33 @@ static int gameStatus(char* parameters[], int total){
 	if(strcmp(guideid, "guideId")==1){
 		return 4; 
 	}
-	int numclaimed = string_to_int(parameters[6]); 
-	int tot = string_to_int(parameters[8]); 
+	int numclaimed = string_to_int(parameters[7]); 
+	int tot = string_to_int(parameters[9]); 
 
 
 	if(strlen(parameters[3])>0 && strlen(parameters[3])<9){
 		for(int i = 0; i< (int)strlen(parameters[3]); i++){
 			if(!ishex(parameters[3][i])){
-				return 2; 
+				return 21; 
 			}
 		}
 	}
 	else{
-		return 2; 
+		return 22; 
 	}
 	
 	// printf("checking parameter 5\n");
 	if(strlen(parameters[5])>0 && strlen(parameters[5])<9){
 		for(int i = 0; i< (int)strlen(parameters[5]); i++){
 			if(!ishex(parameters[5][i])){
-				return 2; 
-			}
-		}
+				return 23; 
+		}	}
 	}
 	else{
 		return 2; 
 	}
-
 	if(tot <0 || numclaimed > tot || numclaimed<0){
-		return 2;
+		return 25;
 	}
 
 	//check duplicates
