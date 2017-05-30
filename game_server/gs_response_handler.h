@@ -1,4 +1,8 @@
-
+/*
+ * gs_response_handler - header file for handleing response
+ *
+ * Kazuma Honjo, May 2017
+ */
 
 #ifndef __GS_RESPONSE_HANDLER_H
 #define __GS_RESPONSE_HANDLER_H
@@ -36,6 +40,7 @@
  *
  * GA_STATUS specific returning value
  * 1: Respond with GAME_STATUS and GS_AGENT
+ * 2: Respond with GAME_STATUS, GS_AGENT, and reveal two clue
  *
  * GA_HINT specific returning value
  * 1: Send the message to all FA in the team
