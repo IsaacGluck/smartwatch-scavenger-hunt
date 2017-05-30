@@ -10,6 +10,7 @@
 static const int MESSAGE_LENGTH = 8192;
 
 unsigned int stringHexToDec(char* hex){
+    if (hex == NULL) return 0;
     unsigned int decimalNumber;
     sscanf(hex,"%x", &decimalNumber);
 
@@ -18,7 +19,7 @@ unsigned int stringHexToDec(char* hex){
 
 char *decToStringHex(unsigned int dec){
     // initialize
-    char *hex = malloc(5);
+    char *hex = malloc(9);
     
     sprintf(hex, "%x", dec);
     
