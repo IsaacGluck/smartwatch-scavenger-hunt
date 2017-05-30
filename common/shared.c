@@ -114,10 +114,10 @@ int validate_message(char* m){
 	int fn;
 	for (fn = 0; codes[fn].opCodes != NULL; fn++) {
   		if (strcmp(array[1], codes[fn].opCodes) == 0) {
-
-  			return((*codes[fn].func)(array, total+1));
-  			free(message);
-        free(array);
+            int result = (*codes[fn].func)(array, total+1);
+            free(message);
+            free(array);
+  			return result;
   		}
 	}
 	
@@ -907,8 +907,11 @@ static int gaHint(char* parameters[], int total){
 	}
 
 	//pebbleId
+	printf("The size: %f", strlen(parameters[11]));
 	if(strlen(parameters[11])==1){
-		if(strcmp(parameters[11], "*") == 0){
+		printf("THIS IS SUPPOSE TO BE HERE\n");
+		if(strcmp(parameters[11], "*") == 1){
+			printf("THIS IS NOT SUPPOSE TO BE HERE HI STAR\n");
 			return 3; 
 		}
 	}

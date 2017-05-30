@@ -18,6 +18,7 @@
 #include "set.h"
 #include "file.h"
 #include "common.h"
+#include "shared.h"
 #include "gsstruct.h"
 
 #define PI 3.14159265
@@ -602,6 +603,11 @@ game_info_set_kiff(game_info_t *gi, char *kiff){
     
     fclose(fp);
     gi->num_krags = num_krags;
+    
+    #ifdef DEBUG
+    set_print(gi->krags, stdout, &krag_set_print);
+    #endif
+    
     return 0;
 }
 
@@ -672,7 +678,11 @@ game_info_set_secret_code(game_info_t *gi, char *sf){
         fprintf(stderr, "Error: the format of sf is wrong\n");
         return 1;
     }
-    printf("%s\n\n", line);
+    
+    #ifdef DEBUG
+    printf("\nSecret string is: %s\n\n", line);
+    #endif
+    
     strcpy(gi->secret_code, line);
     free(line);
     fclose(fp);
@@ -1350,6 +1360,10 @@ fa_send_to(fa_t *fa, int comm_sock, char *message){
         perror("sending in datagram socket");
         exit(6);
     }
+    // write to log file
+    char *ipaddress = getIP(comm_sock, fa->them); //get the IP Adress
+    print_log(message, "gameserver.log", ipaddress, "TO"); //print it to the log file
+    free(ipaddress);
 }
 
 /**************** fa_get_pebbleId ****************/
@@ -1462,6 +1476,10 @@ ga_send_to(ga_t *ga, int comm_sock, char *message){
         perror("sending in datagram socket");
         exit(6);
     }
+    // write to log file
+    char *ipaddress = getIP(comm_sock, ga->them); //get the IP Adress
+    print_log(message, "gameserver.log", ipaddress, "TO"); //print it to the log file
+    free(ipaddress);
     
     #ifdef DEBUG
     printf("sent message to: %s\nMessage: \t%s\n", ga->name, message);
