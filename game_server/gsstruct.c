@@ -124,11 +124,8 @@ static void set_kiff_handle_error(char *left, char *right, FILE *fp, char *messa
 static void find_pebbleId(void *arg, const char *key, void *item);
 static void find_fa_with_pebbleId(void *arg, const char *key, void *item);
 static void find_guideId(void *arg, const char *key, void *item);
-<<<<<<< HEAD
 static void send_hint_to_everyone(void *arg, const char *key, void *item);
-=======
 static void send_message_to_everyone(void *arg, const char *key, void *item);
->>>>>>> kazuma
 static void reveal_krag_helper(void *arg, const char *key, void *item);
 
 static krag_t *krag_new();
@@ -1016,11 +1013,11 @@ game_info_reveal_krag(game_info_t *gi, team_t *team){
     
     // if all krags are revealed,
     // end the game and return NULL
-<<<<<<< HEAD
+// <<<<<<< HEAD
     if (gi->num_krags >= team->num_claimed_krags) {
-=======
-    if (gi->num_krags <= team->num_revealed) {
->>>>>>> kazuma
+// =======
+    // if (gi->num_krags <= team->num_revealed) { WHICH ONE IS IT?????? -ISAAC
+// >>>>>>> kazuma
         game_info_change_game_status(gi);
         return NULL;
     }
@@ -1066,8 +1063,8 @@ reveal_krag_helper(void *arg, const char *key, void *item){
     }
 }
 
-<<<<<<< HEAD
-=======
+// <<<<<<< HEAD
+// =======
 /**************** game_info_send_message_to_everyone ****************/
 /* Send message to all agents in the game
  */
@@ -1092,7 +1089,7 @@ game_info_send_message_to_everyone(game_info_t *gi, char *message, int comm_sock
 
 
 
->>>>>>> kazuma
+// >>>>>>> kazuma
 
 
 /*********************************************************/
@@ -1157,7 +1154,6 @@ krag_get_latitude(krag_t *krag){
 
 /**************** krag_get_kragId ****************/
 /* Return the kragId of the krag
-<<<<<<< HEAD
  * return NULL if it does not exist
  */
 char *
@@ -1165,15 +1161,15 @@ krag_get_kragId(krag_t *krag){
     if (krag == NULL) return NULL;
     char *kragId = decToStringHex(krag->kragID);
     return kragId;
-=======
- * return 0 if it does not exist
- */
-unsigned int
-krag_get_kragId(krag_t *krag){
-    if (krag == NULL) return 0;
-    return krag->kragID;
->>>>>>> kazuma
-}
+
+// /*
+//  * return 0 if it does not exist
+//  */
+// unsigned int
+// krag_get_kragId(krag_t *krag){
+//     if (krag == NULL) return 0;
+//     return krag->kragID;
+// }
 
 /**************** krag_get_clue ****************/
 /* Return the clue of the krag
