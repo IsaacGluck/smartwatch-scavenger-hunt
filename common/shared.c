@@ -135,7 +135,7 @@ int validate_message(char* message){
 
 	if (codes[fn].opCodes == NULL){
   		// printf("Unknown command: '%s'\n", array[1]);
-  		return(1); 
+  		return 6;
  	 }
 
 

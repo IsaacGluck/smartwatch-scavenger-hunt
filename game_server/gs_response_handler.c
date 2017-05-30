@@ -246,21 +246,6 @@ static void respond_with_gs_clue(int comm_sock, struct sockaddr_in them, game_in
     team_t *team = get_team(message_from, gi);
     // reveal two and send both clues
     // First time is if number of reveled krags is less than number of total krags
-<<<<<<< HEAD
-    if (team_get_numRevealed(team) < game_info_get_numKrags(gi)){
-        krag_t *krag = game_info_reveal_krag(gi, team);
-        send_gs_clue(comm_sock, gi, message_from, krag);
-    }
-    
-    // Second time is if number of revealed krags is less than number of total krags
-    if (team_get_numRevealed(team) < game_info_get_numKrags(gi)){
-        krag_t *krag = game_info_reveal_krag(gi, get_team(message_from, gi));
-        send_gs_clue(comm_sock, gi, message_from, krag);
-    }
-}
-
-/**************** respond_with_gs_clue ****************/
-=======
     printf("num_krags: %d\tnum_revealed: %d\n",game_info_get_numKrags(gi),team_get_numRevealed(team));
     if (team_get_numRevealed(team) < game_info_get_numKrags(gi)){
         krag_t *krag = game_info_reveal_krag(gi, team);
@@ -276,18 +261,13 @@ static void respond_with_gs_clue(int comm_sock, struct sockaddr_in them, game_in
 }
 
 /**************** send_gs_clue ****************/
->>>>>>> kazuma
 /* Send with gs clue to the guide agent
  * opCode=GS_CLUE|gameId=|guideId=|kragId=|clue=
  */
 static void
 send_gs_clue(int comm_sock, game_info_t *gi, char *message_from, krag_t *krag){
-<<<<<<< HEAD
-=======
-
     krag_print(krag);
     
->>>>>>> kazuma
     char *message = malloc(MESSAGE_LENGTH);
     strcpy(message,"opCode=GS_CLUE|gameId=");
     int i = strlen(message);
@@ -309,12 +289,9 @@ send_gs_clue(int comm_sock, game_info_t *gi, char *message_from, krag_t *krag){
     
     strcpy(&(message[i]), "|kragId=");
     i = strlen(message);
-<<<<<<< HEAD
-    char *kragId = krag_get_kragId(krag);
-=======
     unsigned int kragid = krag_get_kragId(krag);
     char *kragId = decToStringHex(kragid);
->>>>>>> kazuma
+
     strcpy(&(message[i]), kragId);
     i = strlen(message);
     strcpy(&(message[i]), "|clue=");
