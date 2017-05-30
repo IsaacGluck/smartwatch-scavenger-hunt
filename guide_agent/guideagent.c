@@ -89,7 +89,7 @@ static int checkArgs(const int argc, char *argv[], char* variables[], struct soc
 static void createGameStruct(void* g, char* variables[]); //initialize all of the things in game struct 
 static void dealWithInfo(void* g, char* m, char* firstpart, int secondpart); //deal with the messages that surver sends 
 static char* GA_STATUSReturn(void* g); //sends a status to server 
-static char* GA_HINTReturn(void* g, char* h); //sends hint to server 
+static char* GA_HINTReturn(void* g, char* h); //sends hint to server
 static void freememory(void* g); //frees the memory in the game 
 
 //print methods 
