@@ -125,8 +125,8 @@ main(const int argc, char *argv[]){
     }
     
     printf("game ended\n\n");
-    send_game_over(comm_sock, gi);
     send_team_record(comm_sock, gi);
+    send_game_over(comm_sock, gi);
     
     close(comm_sock);
     game_info_delete(gi);
@@ -256,7 +256,7 @@ static void handle_socket(int comm_sock, struct sockaddr_in them, game_info_t *g
         free(ipaddress);
         
         #ifdef DEBUG
-        printf("Recieved message: %s\n", buf);
+        printf("\n\nRecieved message: %s\n", buf);
         #endif
         
         // validate the message

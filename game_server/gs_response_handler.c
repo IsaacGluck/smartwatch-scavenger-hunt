@@ -48,6 +48,7 @@
 #include "file.h"
 #include "set.h"
 #include "common.h"
+#include "shared.h"
 #include "gsstruct.h"
 #include "gs_response_handler.h"
 
@@ -134,6 +135,14 @@ respond(char *opCode, int result, int comm_sock, struct sockaddr_in them,
         }
         else if (result == 2){
             respond_with_ga_hint(comm_sock, them, message_from, gi);
+        }
+    }
+    else if (strcmp(opCode, "FA_LOG") == 0){
+        if (result == 0){
+            // write to log file
+            char *ipaddress = getIP(comm_sock, them); //get the IP Adress
+            print_log(message_from, "fieldagents.log", ipaddress, "FA"); //print it to the log file
+            free(ipaddress);
         }
     }
 }
@@ -238,6 +247,10 @@ handle_result_message(int result, int comm_sock, struct sockaddr_in them,
         perror("sending in datagram socket");
         exit(6);
     }
+    // write to log file
+    char *ipaddress = getIP(comm_sock, them); //get the IP Adress
+    print_log(message, "gameserver.log", ipaddress, "TO"); //print it to the log file
+    free(ipaddress);
     
     #ifdef DEBUG
     printf("Out message: %s\n", message);
@@ -301,6 +314,10 @@ respond_with_game_status(int comm_sock, struct sockaddr_in them, game_info_t *gi
         perror("sending in datagram socket");
         exit(6);
     }
+    // write to log file
+    char *ipaddress = getIP(comm_sock, them); //get the IP Adress
+    print_log(message, "gameserver.log", ipaddress, "FROM"); //print it to the log file
+    free(ipaddress);
     
     #ifdef DEBUG
     printf("Out message: %s\n", message);

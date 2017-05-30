@@ -107,8 +107,9 @@ char* create_fa_log(char* text)
 
 void incoming_message(char* message)
 {
-	if (validate_message(message) != 0) { // it was not validated
-		APP_LOG(APP_LOG_LEVEL_INFO, "Message could not be validated: %s\n", message);
+	int validated = validate_message(message);
+	if (validated != 0) { // it was not validated
+		APP_LOG(APP_LOG_LEVEL_INFO, "Message could not be validated with code %d: %s\n", validated, message);
 		return; // ignore the message
 	}
 

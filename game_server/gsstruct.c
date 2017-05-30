@@ -18,6 +18,7 @@
 #include "set.h"
 #include "file.h"
 #include "common.h"
+#include "shared.h"
 #include "gsstruct.h"
 
 #define PI 3.14159265
@@ -1359,6 +1360,10 @@ fa_send_to(fa_t *fa, int comm_sock, char *message){
         perror("sending in datagram socket");
         exit(6);
     }
+    // write to log file
+    char *ipaddress = getIP(comm_sock, fa->them); //get the IP Adress
+    print_log(message, "gameserver.log", ipaddress, "TO"); //print it to the log file
+    free(ipaddress);
 }
 
 /**************** fa_get_pebbleId ****************/
@@ -1471,6 +1476,10 @@ ga_send_to(ga_t *ga, int comm_sock, char *message){
         perror("sending in datagram socket");
         exit(6);
     }
+    // write to log file
+    char *ipaddress = getIP(comm_sock, ga->them); //get the IP Adress
+    print_log(message, "gameserver.log", ipaddress, "TO"); //print it to the log file
+    free(ipaddress);
     
     #ifdef DEBUG
     printf("sent message to: %s\nMessage: \t%s\n", ga->name, message);

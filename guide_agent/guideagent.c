@@ -174,7 +174,7 @@ int main(const int argc, char *argv[]){
     	char* statustosend = GA_STATUSReturn(game);  //get the game status from game status method 
 
     	if(statustosend != NULL){
-    		game->ipaddress = getIP(comm_sock, &them); //get the IP Adress and set it forever 
+    		game->ipaddress = getIP(comm_sock, them); //get the IP Adress and set it forever 
     		print_log(statustosend, "guideagent.log", game->ipaddress, "TO"); //print it to the log file
     		if (sendto(comm_sock, statustosend, strlen(statustosend), 0,  //Code from class to send to server
 		    	(struct sockaddr *) &them, sizeof(* &them)) < 0) {
@@ -203,7 +203,6 @@ int main(const int argc, char *argv[]){
       		}
 
       	if (FD_ISSET(comm_sock, &rfds)) {
-      		printf("RECIEVING METHODS\n");
 			handle_socket(comm_sock, &them, game);
      	 }
 
@@ -594,7 +593,7 @@ static int checkArgs(const int argc, char *argv[], char* variables[], struct soc
 	struct hostent *hostp = gethostbyname(host);
 	if (hostp == NULL) {
     	fprintf(stderr, "%s: unknown host '%s'\n", argv[0], host);
-    	exit(3);
+    	exit(5);
   	}
 
   // Initialize fields of the server address
@@ -606,7 +605,7 @@ static int checkArgs(const int argc, char *argv[], char* variables[], struct soc
   	int comm_sock = socket(AF_INET, SOCK_DGRAM, 0);
   	if (comm_sock < 0) {
    	 perror("opening datagram socket");
-    	exit(2);
+    	exit(5);
  	}
 
   	return comm_sock; //return socket
@@ -621,7 +620,10 @@ static void gameStatus(char* parameters[], void* g){
 
 	//if this is the first game status, must set the game ID and the krag information 
 	if(game->firstGameStatus==0 && strcmp(parameters[2], game->guideID)== 0){
-		game->gameID = parameters[1]; //set game id 
+		printf("This is the game ID why isnt it working: %s \n", parameters[1]);
+		char* gid = malloc(strlen(parameters[1])+1); 
+		strcpy(gid, parameters[1]);
+		game->gameID = gid; //set game id 
 		game->totalKrags = atoi(parameters[4]); //set krag info
 		game->claimedKrags = atoi(parameters[3]); //set krag info
 		game->firstGameStatus = 1;  //wnat a status request 
@@ -657,13 +659,19 @@ static void gsAgent(char* parameters[], void* g){
 		else{ //the agent does not exist yet 
 			//create a new agent and set its parameters with the info we have 
 			struct agent *curragent = malloc(sizeof(struct agent));
-			curragent->name = parameters[4];
-			curragent->pebbleID = parameters[2];
-			curragent->team = parameters[3];
+			char* n = malloc(strlen(parameters[4])+1);
+			strcpy(n, parameters[4]);
+			curragent->name = n;
+			char* pid = malloc(strlen(parameters[2])+1);
+			strcpy(pid, parameters[2]);
+			curragent->pebbleID = pid;
+			char* t = malloc(strlen(parameters[3])+1);
+			strcpy(t, parameters[3]);
+			curragent->team = t;
 			curragent->lat = atof(parameters[5]);
 			curragent->lon = atof(parameters[6]);
 			curragent->lastContact = atoi(parameters[7]);
-			hashtable_insert(game->agents, parameters[4], curragent); //insert ths into a hashtable 
+			hashtable_insert(game->agents, n, curragent); //insert ths into a hashtable 
 			printf("agent %s has been added and is at Latitude: %f Longitude: %f Last Contact: %d", parameters[4], curragent->lat, curragent->lon, curragent->lastContact);
 		}
 	}
@@ -680,13 +688,18 @@ static void gsClue(char* parameters[], void* g){
 		if(hashtable_find(krags, parameters[3])== NULL){ //if the krag is not there 
 			//create a new krag and fill in its information 
 			struct krag *currkrag = malloc(sizeof(struct krag));
-			currkrag->kragID = parameters[3];
-			currkrag->clue= parameters[4];
+			char* kid = malloc(strlen(parameters[3])+1);
+			strcpy(kid, parameters[3]);
+			currkrag->kragID = kid;
+
+			char* c = malloc(strlen(parameters[4])+1);
+			strcpy(c, parameters[4]);
+			currkrag->clue= c;
 			currkrag->idOfClaimer = "";
 			currkrag->lat = 0;
 			currkrag->lon = 0;
 			hashtable_insert(game->krags, parameters[3], currkrag); //insert it into the table 
-			printf("The new clue is: '%s' ", currkrag->clue);
+			printf("The new clue is: '%s' \n", currkrag->clue);
 
 		}
 	}
@@ -702,7 +715,9 @@ static void gsClaimed(char* parameters[], void* g){
 		if(hashtable_find(krags, parameters[4])!=NULL){ //if the krag exists 
 			struct krag* currkrag = hashtable_find(krags, parameters[4]); //get the current krag 
 			//update parameters 
-			currkrag->idOfClaimer = parameters[3];
+			char* idoc = malloc(strlen(parameters[3])+1);
+			strcpy(idoc, parameters[3]);
+			currkrag->idOfClaimer = idoc;
 			currkrag->lat = atof(parameters[5]);
 			currkrag->lon = atof(parameters[6]);
 			printf("The krag coorsponding to this clue: %s was claimed at Lat: %f Long: %f\n", currkrag->clue, currkrag->lat, currkrag->lon); 
@@ -719,7 +734,9 @@ static void gsSecret(char* parameters[], void* g){
 
 	//if all the parameters are correct 
 	if(strcmp(game->gameID, parameters[1])==0 && strcmp(game->guideID, parameters[2])==0){
-		game->secret= parameters[3]; //update the secret 
+		char* s = malloc(strlen(parameters[3])+1);
+		strcpy(s, parameters[3]);
+		game->secret= s; //update the secret 
 	}
 	printf("The updated secret is now: %s", game->secret);
 }
@@ -844,6 +861,9 @@ handle_stdin(int comm_sock, struct sockaddr_in *themp, void* g)
 		gameStructPrint(g); //send this to the print method 
 		fullLine = NULL;
 	}
+	else if(strcmp(response, "update")==0){
+		fullLine = GA_STATUSReturn(game); 
+	}
 	else{
 		fullLine= response; //just send whatever irrelevant thing came 
 	}
@@ -899,7 +919,11 @@ handle_socket(int comm_sock, struct sockaddr_in *themp, void* g)
       if (sender.sin_addr.s_addr == themp->sin_addr.s_addr && 
 	  sender.sin_port == themp->sin_port) {
 	// print the message
-		dealWithInfo(g, buf, inet_ntoa(sender.sin_addr), ntohs(sender.sin_port));
+      	printf("got this message: %s, validate gives: %d\n", buf, validate_message(buf));
+      	if(validate_message(buf)==0){
+
+			dealWithInfo(g, buf, inet_ntoa(sender.sin_addr), ntohs(sender.sin_port));
+      	}
       } else {
 	printf("[%s@%05d]: %s\n",
 	       inet_ntoa(sender.sin_addr),
