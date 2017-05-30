@@ -39,6 +39,7 @@
 #include "file.h"
 #include "set.h"
 #include "common.h"
+#include "shared.h"
 #include "gsstruct.h"
 #include "gs_message_handler.h"
 #include "gs_response_handler.h"
@@ -54,7 +55,8 @@ static const int MESSAGE_LENGTH = 8192;
 
 /**************** local functions ****************/
 /* not visible outside this file */
-static void parse_command_line_arguments(const int argc, char *argv[], game_info_t *gi, int *comm_sock, struct sockaddr_in *server);
+static void parse_command_line_arguments(const int argc, char *argv[],
+                    game_info_t *gi, int *comm_sock, struct sockaddr_in *server);
 static int set_up_udp(int port, int *comm_sock, struct sockaddr_in *server);
 static void handle_stdin(int comm_sock, struct sockaddr_in *themp, game_info_t *gi);
 static void handle_socket(int comm_sock, struct sockaddr_in them, game_info_t *gi);
@@ -245,7 +247,10 @@ static void handle_socket(int comm_sock, struct sockaddr_in them, game_info_t *g
     }
     else if (nbytes > 0){
         buf[nbytes] = '\0';            // null terminate string
+        int result;
         
+        
+        // get the opCode and rest of the line
         char **tokens;
         tokens = getOpCode(buf);
         char *opCode = tokens[0];
@@ -253,10 +258,8 @@ static void handle_socket(int comm_sock, struct sockaddr_in them, game_info_t *g
         printf("opCode: %s\n\trest of message: %s\n\n", opCode, rest_of_message);
         
         
-        
         // dispatch the appropriate function
         int fn;
-        int result;
         for (fn = 0; dispatch[fn].opCode != NULL; fn++){
             if (strcmp(opCode, dispatch[fn].opCode) == 0){
                 result = (*dispatch[fn].func)(rest_of_message, gi, them);
@@ -267,6 +270,7 @@ static void handle_socket(int comm_sock, struct sockaddr_in them, game_info_t *g
             printf("\n\nUnknown command\n\n");
         }
         
+        // based on the result, respond correctly
         respond(opCode, result, comm_sock, them, gi, buf);
         
         free(tokens[0]);

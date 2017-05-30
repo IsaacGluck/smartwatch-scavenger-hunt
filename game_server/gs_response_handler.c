@@ -3,6 +3,8 @@
  *
  * Functions for response based on received message from agent or guide agent
  *
+ * If result = integer: Command
+ *
  * Common Returning value
  * 0: Successfully handled message, and nothing to be done
  * -1: SH_ERROR_INVALID_MESSAGE
@@ -26,6 +28,7 @@
  *
  * GA_STATUS specific returning value
  * 1: Respond with GAME_STATUS and GS_AGENT
+ * 2: Respond with GAME_STATUS, GS_AGENT, and reveal two clue
  *
  * GA_HINT specific returning value
  * 1: Send the message to all FA in the team
@@ -105,6 +108,11 @@ respond(char *opCode, int result, int comm_sock, struct sockaddr_in them, game_i
         if (result == 1){
             respond_with_game_status(comm_sock, them, gi, message_from);
             respond_with_gs_agent(comm_sock, them, gi, message_from);
+        }
+        else if (result == 2){
+            respond_with_game_status(comm_sock, them, gi, message_from);
+            respond_with_gs_agent(comm_sock, them, gi, message_from);
+            respond_with_gs_clue(comm_sock, them, gi, message_from);
         }
     }
     else if (strcmp(opCode, "GA_HINT") == 0){
@@ -246,28 +254,13 @@ static void respond_with_gs_clue(int comm_sock, struct sockaddr_in them, game_in
     team_t *team = get_team(message_from, gi);
     // reveal two and send both clues
     // First time is if number of reveled krags is less than number of total krags
-<<<<<<< HEAD
-    if (team_get_numRevealed(team) < game_info_get_numKrags(gi)){
-        krag_t *krag = game_info_reveal_krag(gi, team);
-        send_gs_clue(comm_sock, gi, message_from, krag);
-    }
-    
-    // Second time is if number of revealed krags is less than number of total krags
-    if (team_get_numRevealed(team) < game_info_get_numKrags(gi)){
-        krag_t *krag = game_info_reveal_krag(gi, get_team(message_from, gi));
-        send_gs_clue(comm_sock, gi, message_from, krag);
-    }
-}
-
-/**************** respond_with_gs_clue ****************/
-=======
     printf("num_krags: %d\tnum_revealed: %d\n",game_info_get_numKrags(gi),team_get_numRevealed(team));
     if (team_get_numRevealed(team) < game_info_get_numKrags(gi)){
         krag_t *krag = game_info_reveal_krag(gi, team);
         if (krag != NULL) send_gs_clue(comm_sock, gi, message_from, krag);
     }
     printf("num_krags: %d\tnum_revealed: %d\n",game_info_get_numKrags(gi),team_get_numRevealed(team));
-
+    
     // Second time is if number of revealed krags is less than number of total krags
     if (team_get_numRevealed(team) < game_info_get_numKrags(gi)){
         krag_t *krag = game_info_reveal_krag(gi, get_team(message_from, gi));
@@ -276,18 +269,15 @@ static void respond_with_gs_clue(int comm_sock, struct sockaddr_in them, game_in
 }
 
 /**************** send_gs_clue ****************/
->>>>>>> kazuma
 /* Send with gs clue to the guide agent
  * opCode=GS_CLUE|gameId=|guideId=|kragId=|clue=
  */
 static void
 send_gs_clue(int comm_sock, game_info_t *gi, char *message_from, krag_t *krag){
-<<<<<<< HEAD
-=======
-
+#ifdef DEBUG
     krag_print(krag);
+#endif
     
->>>>>>> kazuma
     char *message = malloc(MESSAGE_LENGTH);
     strcpy(message,"opCode=GS_CLUE|gameId=");
     int i = strlen(message);
@@ -309,12 +299,9 @@ send_gs_clue(int comm_sock, game_info_t *gi, char *message_from, krag_t *krag){
     
     strcpy(&(message[i]), "|kragId=");
     i = strlen(message);
-<<<<<<< HEAD
-    char *kragId = krag_get_kragId(krag);
-=======
     unsigned int kragid = krag_get_kragId(krag);
     char *kragId = decToStringHex(kragid);
->>>>>>> kazuma
+    
     strcpy(&(message[i]), kragId);
     i = strlen(message);
     strcpy(&(message[i]), "|clue=");
@@ -356,6 +343,7 @@ static void respond_with_gs_claimed(int comm_sock, struct sockaddr_in them, game
     if (ga == NULL){
         free(message);
         free(gameId);
+        free(kragId);
         return;
     }
     else{
@@ -561,7 +549,7 @@ send_game_over(int comm_sock, game_info_t *gi){
     strcpy(&(message[i]), secret);
     
     game_info_send_message_to_everyone(gi, message, comm_sock, &send_game_over_to_everyone);
-
+    
     free(secret);
     free(message);
     free(gameId);
@@ -655,7 +643,7 @@ get_team(char *message_from, game_info_t *gi){
     }
     char *pebbleId = get_token(message_from, "pebbleId");
     if (pebbleId != NULL){
-        team_t *team = game_info_find_pebbleId(gi, pebbleId);
+        team_t *team = game_info_find_team_pebbleId(gi, pebbleId);
         free(pebbleId);
         return team;
     }
@@ -704,4 +692,3 @@ get_token(char *message, char *left_hand_side){
         return NULL;
     }
 }
-

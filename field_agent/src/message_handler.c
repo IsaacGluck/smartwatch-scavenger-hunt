@@ -4,8 +4,12 @@
 
 #include "message_handler.h"
 #include "field_agent_data.h"
+#include "../../common/shared.h"
+#include "../../common/common.h"
 
-
+static char GAME_STATUS[12] = "GAME_STATUS";
+static char GS_RESPONSE[12] = "GS_RESPONSE";
+static char GAME_OVER[10] = "GAME_OVER";
 
 
 char* create_fa_location(char* statusReq)
@@ -16,13 +20,6 @@ char* create_fa_location(char* statusReq)
 	}
 	
 	char buff[500] = "";
-	// snprintf(buff, sizeof(buff),
-	// 	"opCode=FA_LOCATION|gameId=%s|pebbleId=%s|team=%s|player=%s|latitude=%s|longitude=%s|statusReq=%s",
-	// 	FA_INFO->gameID, FA_INFO->pebbleID, FA_INFO->team, FA_INFO->name, FA_INFO->latitude, FA_INFO->longitude, statusReq);
-
-	// APP_LOG(APP_LOG_LEVEL_INFO, "\nCREATED: %s\n\n", buff);
-
-	// strcpy(FA_LOCATION, buff);
 
 	strncat(buff, "opCode=FA_LOCATION|gameId=", sizeof(buff));
 	strncat(buff, FA_INFO->gameID, sizeof(buff) - strlen(buff));
@@ -42,9 +39,6 @@ char* create_fa_location(char* statusReq)
 	memcpy(FA_LOCATION, buff, 500);
 
 
-
-	// APP_LOG(APP_LOG_LEVEL_INFO, "\nCREATED: %s\n\n", FA_LOCATION);
-
 	return FA_LOCATION;
 }
 
@@ -58,13 +52,6 @@ char* create_fa_claim(char* kragId)
 
 
 	char buff[500] = "";
-	// snprintf(buff, sizeof(buff),
-	// 	"opCode=FA_LOCATION|gameId=%s|pebbleId=%s|team=%s|player=%s|latitude=%s|longitude=%s|statusReq=%s",
-	// 	FA_INFO->gameID, FA_INFO->pebbleID, FA_INFO->team, FA_INFO->name, FA_INFO->latitude, FA_INFO->longitude, statusReq);
-
-	// APP_LOG(APP_LOG_LEVEL_INFO, "\nCREATED: %s\n\n", buff);
-
-	// strcpy(FA_LOCATION, buff);
 
 	strncat(buff, "opCode=FA_CLAIM|gameId=", sizeof(buff));
 	strncat(buff, FA_INFO->gameID, sizeof(buff) - strlen(buff));
@@ -84,23 +71,150 @@ char* create_fa_claim(char* kragId)
 	memcpy(FA_CLAIM, buff, 500);
 
 
-
-
-
-	// char temp[500];
-	// snprintf(temp, sizeof(temp),
-	// 	"opCode=FA_CLAIM|gameId=%s|pebbleId=%s|team=%s|player=%s|latitude=%s|longitude=%s|kragId=%s",
-	// 	FA_INFO->gameID, FA_INFO->pebbleID, FA_INFO->team, FA_INFO->name, FA_INFO->latitude, FA_INFO->longitude, kragId);
-
 	return FA_CLAIM;
+}
+
+
+char* create_fa_log(char* text)
+{
+	char* FA_LOG = malloc(500);
+	if (FA_LOG == NULL) {
+		return NULL;
+	}
+
+	// text can be max 141 characters
+	if ((int)strlen(text) > 141) {
+		text[141] = '\0';
+	}
+
+	char buff[500] = "";
+
+	strncat(buff, "opCode=FA_LOG|pebbleId=", sizeof(buff));
+	strncat(buff, FA_INFO->pebbleID, sizeof(buff) - strlen(buff));
+	strncat(buff, "|text=", sizeof(buff));
+	strncat(buff, text, sizeof(buff) - strlen(buff));
+
+	memcpy(FA_LOG, buff, 500);
+
+
+	return FA_LOG;
 }
 
 
 
 
 
+void incoming_message(char* message)
+{
+	if (validate_message(message) != 0) { // it was not validated
+		APP_LOG(APP_LOG_LEVEL_INFO, "Message could not be validated: %s\n", message);
+		return; // ignore the message
+	}
+
+	char **opcode_data = getOpCode(message);
+	char *opCode = opcode_data[0];
+
+	if (strcmp(opCode, GAME_OVER) == 0) {
+		APP_LOG(APP_LOG_LEVEL_INFO, "GAME_OVER received, ending game.\n");
+		message_GAME_OVER(message);
+	} else if (strcmp(opCode, GAME_STATUS) == 0){
+		APP_LOG(APP_LOG_LEVEL_INFO, "GAME_STATUS received, updating...\n");
+		message_GAME_STATUS(message);
+	} else if (strcmp(opCode, GS_RESPONSE) == 0) {
+		APP_LOG(APP_LOG_LEVEL_INFO, "GAME_STATUS received, updating...\n");
+		message_GS_RESPONSE(message);
+	} else {
+		APP_LOG(APP_LOG_LEVEL_INFO, "Received message: %s\n", message); // just log don't do anything
+	}
+
+	deleteOpCode(opcode_data);
+}
 
 
+// opCode=GAME_OVER|gameId=FEED|secret=computer science 50 rocks!
+void message_GAME_OVER(char* message)
+{
+	char** tokenized_message = tokenize(message);
+
+	char* message_gameID = NULL;
+	char* secret = NULL;
+
+	for (int i = 0; i < 3; i++) {
+		if (strcmp(tokenized_message[i], "gameID") == 0) {
+			message_gameID = tokenized_message[i+1];
+		}
+
+		if (strcmp(tokenized_message[i], "secret") == 0) {
+			secret = tokenized_message[i+1];
+		}
+	}
+
+	if (message_gameID == NULL || secret == NULL) {
+		return;
+	}
+
+	if (strcmp(message_gameID, FA_INFO->gameID) != 0) { // wrong gameID
+		APP_LOG(APP_LOG_LEVEL_INFO, "Wrong gameID in: %s\n", message); // just log don't do anything
+		return;
+	}
+
+	char secret_buff[200];
+	snprintf(secret_buff, sizeof(secret_buff), "Game over!\n The secret was: %s", secret);
+
+	strcpy(FA_INFO->known_chars, secret_buff);
+	FA_INFO->game_over_received = true;
+
+
+	free(tokenized_message);
+}
+
+// opCode=GAME_STATUS|gameId=FEED|guideId=0707|numClaimed=5|numKrags=8
+void message_GAME_STATUS(char* message)
+{
+	char** tokenized_message = tokenize(message);
+
+	char* message_gameID = NULL;
+	char* numClaimed_s = NULL;
+	char* numKrags_s = NULL;
+
+	for (int i = 0; i < 3; i++) {
+		if (strcmp(tokenized_message[i], "gameID") == 0) {
+			message_gameID = tokenized_message[i+1];
+		}
+
+		if (strcmp(tokenized_message[i], "numClaimed") == 0) {
+			numClaimed_s = tokenized_message[i+1];
+		}
+
+		if (strcmp(tokenized_message[i], "numKrags") == 0) {
+			numKrags_s = tokenized_message[i+1];
+		}
+	}
+
+	if (message_gameID == NULL || numClaimed_s == NULL || numKrags_s == NULL) {
+		return;
+	}
+
+	if (strcmp(message_gameID, FA_INFO->gameID) != 0) { // wrong gameID
+		APP_LOG(APP_LOG_LEVEL_INFO, "Wrong gameID in: %s\n", message); // just log don't do anything
+		return;
+	}
+
+	int numClaimed = string_to_int(numClaimed_s);
+	int numKrags = string_to_int(numKrags_s);
+
+	FA_INFO->num_claimed = numClaimed;
+	FA_INFO->num_left = numKrags - numClaimed;
+
+	free(tokenized_message);
+}
+
+
+// opCode=GS_RESPONSE|gameId=0707|respCode=SH_ERROR_INVALID_OPCODE|text=Unrecognized opCode 'GA_FOO'
+void message_GS_RESPONSE(char* message)
+{
+
+}
 
 
 
