@@ -3,32 +3,50 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-
+#else // we are building for pebble
+#include <pebble.h>
+#endif
 
 
 /**************** file-local global variables ****************/
 static const int MESSAGE_LENGTH = 8192;
 
+
+#ifdef NOPEBBLE // we are *not* building for pebble
+
+/* return the integer value of the given hex */
 unsigned int stringHexToDec(char* hex){
+    if (hex == NULL) return 0;
     unsigned int decimalNumber;
     sscanf(hex,"%x", &decimalNumber);
 
     return decimalNumber;
 }
 
+/* return the char * of the given unsigned decimal number
+ * has to be freed by caller
+ */
 char *decToStringHex(unsigned int dec){
     // initialize
-    char *hex = malloc(5);
+    char *hex = malloc(9);
     
     sprintf(hex, "%x", dec);
     
     return hex;
 }
 
+#endif
 
 
-// not robust
-// no error check and handling
+/* return the array created from the message
+ * array[0] contains opCode
+ * array[1] contains rest of the line (opCode excluded)
+ *
+ * the message must be valid, required to use validate function
+ * beforehand.
+ *
+ * has to be freed by caller
+ */
 char **getOpCode(char *message){
     char **tokens = malloc(2 * sizeof(char *));
     for (int i = 0; i < 2; i ++){
@@ -42,7 +60,7 @@ char **getOpCode(char *message){
     int state = 0;     // currently reading the opCode?
                        // 0: no     1: yes
     
-    for(int i = 0; i < strlen(message); i++){
+    for(int i = 0; i < (int)strlen(message); i++){
         if (state == 0){
             tokens[1][k] = message[i];
             k++;
@@ -73,21 +91,10 @@ char **getOpCode(char *message){
             j++;
         }
         
-        if (i == strlen(message)-1){
+        if (i == (int)strlen(message)-1){
             tokens[1][k] = '\0';
         }
     }
     free(buf);
     return tokens;
 }
-
-void deleteopCode(char **token){
-    free(token[0]);
-    free(token[1]);
-    free(token);
-}
-
-
-#else // we are building for pebble
-#include <pebble.h>
-#endif

@@ -25,4 +25,4 @@ echo "usage: crawlertest.sh"
 exit 1
 fi
 
-valgrind --leak-check=full ./gameserver FEED ./kiff ./secret 2872 < inputs.txt
+valgrind --leak-check=full ./gameserver FEED ./kiff ./secret 2872

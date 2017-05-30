@@ -22,6 +22,7 @@ typedef struct fieldagent_info {
 	char** hints_received;
 
 	bool game_started;
+	bool game_over_received;
 
 	char* krag_to_submit;
 	bool submit_krag;

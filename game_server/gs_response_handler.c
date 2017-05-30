@@ -59,7 +59,10 @@ static void respond_with_gs_agent(int comm_sock, struct sockaddr_in them, game_i
 static void respond_with_gs_claimed(int comm_sock, struct sockaddr_in them, game_info_t *gi, char *message_from);
 static void send_gs_agent(void *arg, const char *key, void *item);
 static void send_hint_to_everyone_in_team(int comm_sock, struct sockaddr_in them, game_info_t *gi, char *message_from);
+static void send_gs_clue(int comm_sock, game_info_t *gi, char *message_from, krag_t *krag);
 static void respond_with_ga_hint(int comm_sock, struct sockaddr_in them, char *message_from, game_info_t *gi);
+static void send_game_over_to_everyone(void *arg, const char *key, void *item);
+static void send_team_record_to_everyone(void *arg, const char *key, void *item);
 static team_t *get_team(char *message_from, game_info_t *gi);
 static char *get_token(char *message, char *left_hand_side);
 
@@ -86,8 +89,8 @@ respond(char *opCode, int result, int comm_sock, struct sockaddr_in them, game_i
         if (result == 1){
             handle_result_message(-10, comm_sock, them, gi, message_from);
             respond_with_gs_clue(comm_sock, them, gi, message_from);
-            respond_with_gs_secret(comm_sock, them, gi, message_from);
             respond_with_gs_claimed(comm_sock, them, gi, message_from);
+            respond_with_gs_secret(comm_sock, them, gi, message_from);
         }
         else if (result == 2){
             handle_result_message(-10, comm_sock, them, gi, message_from);
@@ -240,8 +243,70 @@ respond_with_game_status(int comm_sock, struct sockaddr_in them, game_info_t *gi
  * opCode=GS_CLUE|gameId=|guideId=|kragId=|clue=
  */
 static void respond_with_gs_clue(int comm_sock, struct sockaddr_in them, game_info_t *gi, char *message_from){
-    return;
+    team_t *team = get_team(message_from, gi);
     // reveal two and send both clues
+    // First time is if number of reveled krags is less than number of total krags
+    printf("num_krags: %d\tnum_revealed: %d\n",game_info_get_numKrags(gi),team_get_numRevealed(team));
+    if (team_get_numRevealed(team) < game_info_get_numKrags(gi)){
+        krag_t *krag = game_info_reveal_krag(gi, team);
+        if (krag != NULL) send_gs_clue(comm_sock, gi, message_from, krag);
+    }
+    printf("num_krags: %d\tnum_revealed: %d\n",game_info_get_numKrags(gi),team_get_numRevealed(team));
+
+    // Second time is if number of revealed krags is less than number of total krags
+    if (team_get_numRevealed(team) < game_info_get_numKrags(gi)){
+        krag_t *krag = game_info_reveal_krag(gi, get_team(message_from, gi));
+        if (krag != NULL) send_gs_clue(comm_sock, gi, message_from, krag);
+    }
+}
+
+/**************** send_gs_clue ****************/
+/* Send with gs clue to the guide agent
+ * opCode=GS_CLUE|gameId=|guideId=|kragId=|clue=
+ */
+static void
+send_gs_clue(int comm_sock, game_info_t *gi, char *message_from, krag_t *krag){
+    krag_print(krag);
+    
+    char *message = malloc(MESSAGE_LENGTH);
+    strcpy(message,"opCode=GS_CLUE|gameId=");
+    int i = strlen(message);
+    char *gameId = game_info_get_gameId(gi);
+    strcpy(&(message[i]), gameId);
+    i = strlen(message);
+    
+    strcpy(&(message[i]), "|guideId=");
+    i = strlen(message);
+    team_t *team = get_team(message_from, gi);
+    char *guideId = team_get_guideId(team);
+    if (guideId == NULL){
+        strcpy(&(message[i]), "none");
+    }
+    else{
+        strcpy(&(message[i]), guideId);
+    }
+    i = strlen(message);
+    
+    strcpy(&(message[i]), "|kragId=");
+    i = strlen(message);
+    unsigned int kragid = krag_get_kragId(krag);
+    char *kragId = decToStringHex(kragid);
+
+    strcpy(&(message[i]), kragId);
+    i = strlen(message);
+    strcpy(&(message[i]), "|clue=");
+    i = strlen(message);
+    char *clue = krag_get_clue(krag);
+    strcpy(&(message[i]), clue);
+    
+    ga_send_to(team_get_guide(team), comm_sock, message);
+    
+    printf("Out message: %s\n", message);
+    free(gameId);
+    if (guideId!= NULL) free(guideId);
+    free(kragId);
+    free(clue);
+    free(message);
 }
 
 /**************** respond_with_gs_claimed ****************/
@@ -249,6 +314,13 @@ static void respond_with_gs_clue(int comm_sock, struct sockaddr_in them, game_in
  * opCode=GS_CLAIMED|gameId=|guideId=|pebbleId=|kragId=|latitude=|longitude=
  */
 static void respond_with_gs_claimed(int comm_sock, struct sockaddr_in them, game_info_t *gi, char *message_from){
+    printf("hello\n\n");
+    team_t *team = get_team(message_from, gi);
+    char *kragId = get_token(message_from, "kragId");
+    krag_t *krag = game_info_find_krag(gi, kragId);
+    team_update_string(gi, team, krag);
+    
+    
     char *message = malloc(MESSAGE_LENGTH);
     strcpy(message,"opCode=GS_CLAIMED|gameId=");
     int i = strlen(message);
@@ -257,7 +329,6 @@ static void respond_with_gs_claimed(int comm_sock, struct sockaddr_in them, game
     i = strlen(message);
     strcpy(&(message[i]), "|guideId=");
     i = strlen(message);
-    team_t *team = get_team(message_from, gi);
     ga_t *ga = team_get_guide(team);
     if (ga == NULL){
         free(message);
@@ -275,11 +346,9 @@ static void respond_with_gs_claimed(int comm_sock, struct sockaddr_in them, game
     i = strlen(message);
     strcpy(&(message[i]), "|kragId=");
     i = strlen(message);
-    char *kragId = get_token(message_from, "kragId");
     strcpy(&(message[i]), kragId);
     i = strlen(message);
     
-    krag_t *krag = game_info_find_krag(gi, kragId);
     strcpy(&(message[i]), "|latitude=");
     i = strlen(message);
     char *latitude = malloc(15);
@@ -337,7 +406,9 @@ static void respond_with_gs_secret(int comm_sock, struct sockaddr_in them, game_
     strcpy(&(message[i]), secret);
     
     ga_t *ga = team_get_guide(team);
-    ga_send_to(ga, comm_sock, message);
+    if (ga != NULL){
+        ga_send_to(ga, comm_sock, message);
+    }
     printf("Out message: %s\n", message);
     
     free(gameId);
@@ -381,8 +452,9 @@ send_gs_agent(void *arg, const char *key, void *item){
     i = strlen(message);
     strcpy(&(message[i]), "|team=");
     i = strlen(message);
-    char *team = team_get_name(gifaga_get_team(gifaga));
-    strcpy(&(message[i]), team);
+    team_t *team = gifaga_get_team(gifaga);
+    char *team_name = team_get_name(team);
+    strcpy(&(message[i]), team_name);
     i = strlen(message);
     strcpy(&(message[i]), "|player=");
     i = strlen(message);
@@ -412,7 +484,8 @@ send_gs_agent(void *arg, const char *key, void *item){
     
     free(gameId);
     free(pebbleId);
-    free(team);
+    free(team_name);
+    free(player);
     free(latitude);
     free(longitude);
     free(lastContact);
@@ -429,7 +502,7 @@ send_hint_to_everyone_in_team(int comm_sock, struct sockaddr_in them, game_info_
     if (team == NULL){
         return;
     }
-    team_send_hint_to_everyone(team, message_from, comm_sock);
+    team_send_message_to_everyone(team, message_from, comm_sock);
     printf("Out message to everyone: %s\n", message_from);
 }
 
@@ -444,6 +517,106 @@ respond_with_ga_hint(int comm_sock, struct sockaddr_in them, char *message_from,
     fa_send_to(fa, comm_sock, message_from);
     printf("Out message: %s\n", message_from);
     free(pebbleId);
+}
+
+
+/**************** send_game_over ****************/
+/* Send GAME OVER to all agents
+ * opCode=GAME_OVER|gameId=|secret=
+ */
+void
+send_game_over(int comm_sock, game_info_t *gi){
+    char *message = malloc(MESSAGE_LENGTH);
+    strcpy(message,"opCode=GS_AGENT|gameId=");
+    int i = strlen(message);
+    char *gameId = game_info_get_gameId(gi);
+    strcpy(&(message[i]), gameId);
+    i = strlen(message);
+    strcpy(&(message[i]), "|secret=");
+    i = strlen(message);
+    char *secret = game_info_get_secret(gi);
+    strcpy(&(message[i]), secret);
+    
+    game_info_send_message_to_everyone(gi, message, comm_sock, &send_game_over_to_everyone);
+
+    free(secret);
+    free(message);
+    free(gameId);
+}
+
+/**************** send_game_over_to_everyone ****************/
+/* Helper function for game_info_send_message_to_everyone
+ */
+static void
+send_game_over_to_everyone(void *arg, const char *key, void *item){
+    send_message_t *send_message = arg;
+    team_t *team = item;
+    if (send_message == NULL || team == NULL) return;
+    
+    char *message = send_message_get_message(send_message);
+    int comm_sock = send_message_get_comm_sock(send_message);
+    ga_send_to(team_get_guide(team), comm_sock, message);
+    team_send_message_to_everyone(team, message, comm_sock);
+    
+    printf("Out message: %s\n", message);
+    free(message);
+}
+
+/**************** send_team_record ****************/
+/* Send TEAM RECORD to all agents
+ * opCode=TEAM_RECORD|gameId=|team=|numClaimed=|numPlayers=
+ */
+void
+send_team_record(int comm_sock, game_info_t *gi){
+    char *message = malloc(MESSAGE_LENGTH);
+    strcpy(message,"opCode=GS_AGENT|gameId=");
+    int i = strlen(message);
+    char *gameId = game_info_get_gameId(gi);
+    strcpy(&(message[i]), gameId);
+    i = strlen(message);
+    strcpy(&(message[i]), "|numKrags=");
+    i = strlen(message);
+    char *numKrags = malloc(15);
+    sprintf(numKrags, "%d", game_info_get_numKrags(gi));
+    strcpy(&(message[i]), numKrags);
+    i = strlen(message);
+    strcpy(&(message[i]), "|team=");
+    
+    game_info_send_message_to_everyone(gi, message, comm_sock, &send_team_record_to_everyone);
+    
+    free(numKrags);
+    free(message);
+    free(gameId);
+}
+/**************** send_team_record_to_everyone ****************/
+/* Helper function for game_info_send_message_to_everyone
+ */
+static void
+send_team_record_to_everyone(void *arg, const char *key, void *item){
+    send_message_t *send_message = arg;
+    team_t *team = item;
+    if (send_message == NULL || team == NULL) return;
+    
+    char *message = send_message_get_message(send_message);
+    int i = strlen(message);
+    char *team_name = team_get_name(team);
+    strcpy(&(message[i]), team_name);
+    i = strlen(message);
+    strcpy(&(message[i]), "|numClaimed=");
+    i = strlen(message);
+    char *numClaimed = malloc(15);
+    sprintf(numClaimed, "%d", team_get_numClaimed(team));
+    strcpy(&(message[i]), numClaimed);
+    
+    int comm_sock = send_message_get_comm_sock(send_message);
+    ga_send_to(team_get_guide(team), comm_sock, message);
+    team_send_message_to_everyone(team, message, comm_sock);
+    
+    printf("Out message: %s\n", message);
+    
+    free(numClaimed);
+    free(team_name);
+    free(message);
 }
 
 /**************** get_team ****************/

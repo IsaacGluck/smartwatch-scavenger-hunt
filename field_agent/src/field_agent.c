@@ -6,6 +6,7 @@
 #include "field_agent_data.h"
 #include "location.h"
 #include "choose_name.h"
+#include "message_dialog.h"
 #include "message_handler.h"
 
 
@@ -76,8 +77,8 @@ int main(void) {
 
 // deinit
 static void deinit() {
-    /* 1. Destroy the window. */
-    // window_destroy(s_main_window);
+    /* 1. Remove all windows from the stack */
+    window_stack_pop_all(false); 
 
     /* 2. Unsubscribe from sensors. */
     tick_timer_service_unsubscribe();
@@ -100,6 +101,11 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
     FA_INFO->submit_krag = false; 
   }
 
+  if (FA_INFO->game_over_received) {
+    window_stack_pop_all(false); // pop all windows
+    dialog_message_window_push(FA_INFO->known_chars);
+    return; // do no more
+  }
 
   /* 1. Only send a request/message every 5 seconds. */
   if(seconds == 0) {
@@ -124,6 +130,14 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
         request_location();
         main_menu_reload_pass_up();
         reqOption = 0;
+
+        // Test Game Over
+        // char secret_buff[200];
+        // snprintf(secret_buff, sizeof(secret_buff), "Game over!\n The secret was: qwertyuiop");
+
+        // strcpy(FA_INFO->known_chars, secret_buff);
+        // FA_INFO->game_over_received = true;
+
         break;
       default:
         reqOption = 0;
@@ -176,6 +190,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         // Log the value sent as part of the received message.
         char *msg = msg_tuple->value->cstring;
         APP_LOG(APP_LOG_LEVEL_INFO, "Got AppKeyrecvMsg: %s\n", msg);
+        incoming_message(msg);
     }
 
     /* 3. Check to see if a location message received. */
@@ -193,13 +208,8 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
 	        	// add the location to the FA_INFO
             strcpy(FA_INFO->latitude, location_parsed->latitude);
             strcpy(FA_INFO->longitude, location_parsed->longitude);
-		        // FA_INFO->latitude = location_parsed->latitude;
-		        // FA_INFO->longitude = location_parsed->longitude;
 		        free(location_parsed);
 	        }
-
-	        //TEST
-        	// print_FA();
         }
     }
 
@@ -210,11 +220,10 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         char *pebbleID = id_tuple->value->cstring;
         APP_LOG(APP_LOG_LEVEL_INFO, "Got AppKeyPebbleId: %s\n", pebbleID);
         strcpy(FA_INFO->pebbleID, pebbleID);
-        // FA_INFO->pebbleID = pebbleID;
     }
 
     /* 5. Check to see if an error message was received. */
-    Tuple *error_tuple = dict_find(iterator, AppKeyLocation);
+    Tuple *error_tuple = dict_find(iterator, AppKeySendError);
     if(error_tuple) {
         // Log the value sent as part of the received message.
         char *error = error_tuple->value->cstring;

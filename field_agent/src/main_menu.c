@@ -4,6 +4,7 @@
 #include "main_menu.h"
 #include "field_agent_data.h"
 #include "pin_window.h"
+#include "hints_window.h"
 
 static Window *s_main_window_main_menu = NULL;
 static MenuLayer *s_menu_layer_main_menu = NULL;
@@ -14,10 +15,9 @@ static int s_current_selection_main_menu = 0;
 
 void pin_window_complete_callback(PIN pin, void *context)
 {
-  pin.digits[4] = '\0';
+  // pin.digits[4] = '\0';
   APP_LOG(APP_LOG_LEVEL_INFO, "Submitted pin: %s\n", &pin.digits);
   strcpy(FA_INFO->krag_to_submit, pin.digits);
-  // FA_INFO->krag_to_submit = pin.digits;
   FA_INFO->submit_krag = true;
   pin_window_pop(pin_window, true);
 }
@@ -86,12 +86,16 @@ static int16_t get_cell_height_callback_main_menu(struct MenuLayer *menu_layer, 
 
 static void select_callback_main_menu(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context)
 {
-  if(cell_index->row == MAIN_MENU_WINDOW_NUM_ROWS - 1) {
+  if(cell_index->row == MAIN_MENU_WINDOW_NUM_ROWS - 1) { // input KRAG
     // Do something with user choice
     APP_LOG(APP_LOG_LEVEL_INFO, "Entering KRAG Input\n");
 
     // put the pin window on top
     pin_window_push(pin_window, true);
+  } else if (cell_index->row == MAIN_MENU_WINDOW_NUM_ROWS - 2) { // see hints
+    APP_LOG(APP_LOG_LEVEL_INFO, "Entering See hints\n");
+
+    hints_window_window_push();
   } else {
     // Change selection
     s_current_selection_main_menu = cell_index->row;
@@ -116,14 +120,16 @@ static void window_load_main_menu(Window *window)
 
   // Set up the pin window
   PinWindowCallbacks pin_window_callback = {.pin_complete = pin_window_complete_callback};
-  pin_window = pin_window_create(pin_window_callback); // must destroy this at some point
+  pin_window = pin_window_create(pin_window_callback);
 }
 
 static void window_unload_main_menu(Window *window)
 {
   pin_window_destroy(pin_window);
+  pin_window = NULL;
 
   menu_layer_destroy(s_menu_layer_main_menu);
+  s_menu_layer_main_menu = NULL;
 
   window_destroy(window);
   s_main_window_main_menu = NULL;
