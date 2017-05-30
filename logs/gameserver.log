@@ -31,3 +31,10 @@
 (Tue May 30 13:07:47 2017) FROM 129.170.214.115@36042: start
 (Tue May 30 13:07:56 2017) FROM 129.170.214.115@37906: opCode=FA_LOCATION|gameId=0|pebbleId=12345678|team=views6|player=Isaac|latitude=43.7226|longitude=-72.1342|statusReq=1
 (Tue May 30 13:08:00 2017) FROM 129.170.214.115@36042: opCode=GA_STATUS|gameId=|guideId=0707|team=aqua|player=morgan|statusReq=1
+(Tue May 30 13:23:16 2017) FROM 129.170.214.115@55702: opCode=GA_STATUS|gameId=0|guideId=0707|team=aqua|player=morgan|statusReq=1
+(Tue May 30 13:23:16 2017) FROM 129.170.214.115@55702: start
+(Tue May 30 13:23:41 2017) FROM 129.170.214.115@55702: opCode=GA_STATUS|gameId=feed|guideId=0707|team=aqua|player=morgan|statusReq=1
+(Tue May 30 13:24:28 2017) FROM 129.170.213.207@41232: opCode=FA_LOCATION|gameId=0|pebbleId=8080477D|team=aqua|player=Alice|latitude=43.706552|longitude=-72.287418|statusReq=1
+(Tue May 30 13:24:31 2017) FROM 129.170.214.115@55702: opCode=GA_STATUS|gameId=feed|guideId=0707|team=aqua|player=morgan|statusReq=1
+(Tue May 30 13:24:45 2017) FROM 129.170.214.115@55702: opCode=GA_STATUS|gameId=feed|guideId=0707|team=aqua|player=morgan|statusReq=1
+(Tue May 30 13:25:04 2017) FROM 129.170.214.115@55702: opCode=GA_HINT|gameId=feed|guideId=0707|team=aqua|player=|pebbleId=|hint=Alice go left!!
