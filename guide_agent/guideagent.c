@@ -179,7 +179,7 @@ int main(const int argc, char *argv[]){
     		if (sendto(comm_sock, statustosend, strlen(statustosend), 0,  //Code from class to send to server
 		    	(struct sockaddr *) &them, sizeof(* &them)) < 0) {
 	    		perror("sending in datagram socket");
-	   			 exit(6);
+	   			 exit(8);
 	  		}
 
     	}
@@ -252,15 +252,27 @@ static char* GA_HINTReturn(void* g, char* h){
 	//get the agents hashtable 
 	hashtable_t * agents = game->agents; 
 
+
 	//make sure the person exists in the hashtable 
-	if(hashtable_find(agents, personToSendHint)!= NULL){ 
+	if(hashtable_find(agents, personToSendHint)!= NULL || strcmp(personToSendHint, "*")==0){ 
 		char* hint = array[2]; 
 		char* returnstr = ""; 
 		if(hint!=NULL){ //if the hint exists 
-			struct agent* curragent = hashtable_find(agents, personToSendHint);  //gets the agent form the table 
+
+			 //gets the agent form the table 
 			char* begin = "opCode=GA_HINT|gameId=|guideId=|team=|player=|pebbleId=|hint="; 
 			//malloc math 
-			int math = strlen(begin) + strlen(game->gameID) + strlen(game->guideID) + strlen(game->teamName) + strlen(curragent->name) + strlen(curragent->pebbleID) +strlen(hint) +1; 
+
+			int math;
+			if(strcmp(personToSendHint, "*")==0){
+				math = strlen(begin) + strlen(game->gameID) + strlen(game->guideID) + strlen(game->teamName) + strlen(game->playerName) +strlen(hint) +2; 
+
+			}
+			else{
+				struct agent* curragent = hashtable_find(agents, personToSendHint); 
+				math = strlen(begin) + strlen(game->gameID) + strlen(game->guideID) + strlen(game->teamName) + strlen(game->playerName) + strlen(curragent->pebbleID) +strlen(hint) +1; 
+
+			}
 			//string to return at the end of all this 
 			returnstr = malloc(math); 
 			//much cating to make the string in the right formal 
@@ -271,9 +283,16 @@ static char* GA_HINTReturn(void* g, char* h){
 			strcat(returnstr, "|team="); 
 			strcat(returnstr, game->teamName);
 			strcat(returnstr, "|player="); 
-			strcat(returnstr, curragent->name);  
+			strcat(returnstr, game->playerName);  
 			strcat(returnstr, "|pebbleId="); 
-			strcat(returnstr, curragent->pebbleID);
+			if(strcmp(personToSendHint, "*")==0){
+				strcat(returnstr, personToSendHint);
+			}
+			else{
+				struct agent* curragent = hashtable_find(agents, personToSendHint); 
+				strcat(returnstr, curragent->pebbleID);
+			}
+		
 			strcat(returnstr, "|hint="); 
 			strcat(returnstr, hint);  
 			//insert the hint into the bag of hints 
@@ -282,7 +301,7 @@ static char* GA_HINTReturn(void* g, char* h){
 
 		}
 		print_log(returnstr, "guideagent.log", game->ipaddress, "TO"); //add to log 
-
+		printf("hint: %s\n", returnstr);
 		return returnstr; 
 
 	}
@@ -765,6 +784,7 @@ static void gameOver(char* parameters[], void* g){
 //This is the method that update the game struct wehn the teamRecord op code is here 
 static void teamRecord(char* parameters[], void* g){
 	//create a new node for the end bag 
+	printf("here ending stuff\n");
 	struct gameOver* end = malloc(sizeof(struct gameOver)); 
 	//set the parameters for all the new end node 
 	end->gameID= parameters[1];
@@ -879,7 +899,7 @@ handle_stdin(int comm_sock, struct sockaddr_in *themp, void* g)
 	  if (sendto(comm_sock, fullLine, strlen(fullLine), 0, 
 		     (struct sockaddr *) themp, sizeof(*themp)) < 0) {
 	    perror("sending in datagram socket");
-	    exit(6);
+	    exit(10);
 	  }
 	}
 	
