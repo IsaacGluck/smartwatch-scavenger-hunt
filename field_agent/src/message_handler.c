@@ -266,7 +266,7 @@ void message_GS_RESPONSE(char** tokenized_message)
 		return;
 	}
 
-	if (strcmp(message_gameId, FA_INFO->gameId) != 0) { // wrong gameId
+	if (strcmp(message_gameId, FA_INFO->gameId) != 0 && strcmp(FA_INFO->gameId, start_gameID) != 0) { // wrong gameId
 		APP_LOG(APP_LOG_LEVEL_INFO, "Wrong gameId in: %s\n", tokenized_message[1]); // just log don't do anything
 		return;
 	}
