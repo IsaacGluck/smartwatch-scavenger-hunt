@@ -1,3 +1,5 @@
+//import statements 
+
 #ifdef NOPEBBLE // we are *not* building for pebble
 // Conditional inclusion for platform specific builds
 #include <stdio.h>
@@ -14,7 +16,7 @@
 
 
 
-
+/************************METHODS*************************/
 int validate_message(char* m);
 char** tokenize(char* message);
 
@@ -557,16 +559,16 @@ static int teamRecord(char* parameters[], int total){
 	if(strcmp(gameid, "gameId")!=0){
 		return 4; 
 	}
-	char* team = parameters[4]; 
+	char* numKrags = parameters[4]; 
+	if(strcmp(numKrags, "numKrags")!=0){
+		return 4; 
+	}
+	char* team = parameters[6];
 	if(strcmp(team, "team")!=0){
 		return 4; 
 	}
-	char* numClaimed = parameters[6];
+	char* numClaimed = parameters[8]; 
 	if(strcmp(numClaimed, "numClaimed")!=0){
-		return 4; 
-	}
-	char* numPlayers = parameters[8]; 
-	if(strcmp(numPlayers, "numPlayers")!=0){
 		return 4; 
 	}
 
