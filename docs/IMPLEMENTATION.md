@@ -1,23 +1,126 @@
 ## COMMON 
-In the common file we will have the following methods that are useful to everything 
-* `int ValidateMessage(char* message)`  
-    * *Use:* Make sure the messages are in the right format 
-    * check to make sure no punctuation besides | or =
-    * check to make sure no spaces
-    * If everything is right, return 1 
-    * If something is wrong, return 0 
-* `int hexStringToDecimal(char* hex)`
-    *  *Use*: returns the decimal value of the hex string 
-    *  create a place in memory for the int 
-    *  use sscanf to convert into decimal 
-    *  return decimal
-* `char[] messagesToArray(char*  line)`
+#### In the common direcotry we have the following methods that are useful to everything in shared
+##### shared.c
+* `char** tokenize(char*  message)`
     *  *Use*: split the message into an array with all the inputs after the = sign 
     *  determine size of arrray by size of = signs 
     *  Locate the | and the = sign 
     *  split the string between these places and put the value in the array 
     *  do this for all portential values
     *  return array 
+* int print_log(char* message, char* filename, char* IPport, char* tofrom);
+    * *Use:* prints the message to the speceified log file 
+    * Calculates the time stamp 
+    * Does string manipulation to get file and path 
+    * Opens the file with append 
+    * Does string manipulation to print everything in the proper order onto the file 
+
+#### Methods for validate messages and the op codes function table 
+* `int ValidateMessage(char* message)`  
+    * *Use:* Make sure the messages are in the right format 
+    * check to make sure no punctuation besides | or =
+    * split the string into an array
+    * validate all the parameters in the array via specific op code
+    * If issues splitting, return 1
+    * go to the op code's specific validation function and check all parts 
+    * returns value recieved from the op code 
+* `static int gsAgent(char* parameters[], int total);`
+    * *Use:* checks the parameters in gsAgent  
+    * Check all parameters are of the right type for this op code, if not, return 3
+    * Check all parameters are present and only the right ones are present, if not, return 3
+    * Check there are the right amount of parameters, if not, return 5
+* `static int gsClue(char* parameters[], int total)`
+    * *Use:* checks the parameters in gsAgent  
+    * Check all parameters are of the right type for this op code, if not, return 3
+    * Check all parameters are present and only the right ones are present, if not, return 3
+    * Check there are the right amount of parameters, if not, return 5
+* `static int gsClaimed(char* parameters[], int total);`
+    * *Use:* checks the parameters in gsAgent  
+    * Check all parameters are of the right type for this op code, if not, return 3
+    * Check all parameters are present and only the right ones are present, if not, return 3
+    * Check there are the right amount of parameters, if not, return 5
+* `static int gsSecret(char* parameters[], int total);`
+    * *Use:* checks the parameters in gsAgent  
+    * Check all parameters are of the right type for this op code, if not, return 3
+    * Check all parameters are present and only the right ones are present, if not, return 3
+    * Check there are the right amount of parameters, if not, return 5
+* `static int teamRecord(char* parameters[], int total);`
+    * *Use:* checks the parameters in gsAgent  
+    * Check all parameters are of the right type for this op code, if not, return 3
+    * Check all parameters are present and only the right ones are present, if not, return 3
+    * Check there are the right amount of parameters, if not, return 5
+* `static int gaStatus(char* parameters[], int total);`
+    * *Use:* checks the parameters in gsAgent  
+    * Check all parameters are of the right type for this op code, if not, return 3
+    * Check all parameters are present and only the right ones are present, if not, return 3
+    * Check there are the right amount of parameters, if not, return 5
+* `static int gameStatus(char* parameters[], int total);`
+    * *Use:* checks the parameters in gsAgent  
+    * Check all parameters are of the right type for this op code, if not, return 3
+    * Check all parameters are present and only the right ones are present, if not, return 3
+    * Check there are the right amount of parameters, if not, return 5
+* `static int gsResponse(char* parameters[], int total);`
+    * *Use:* checks the parameters in gsAgent  
+    * Check all parameters are of the right type for this op code, if not, return 3
+    * Check all parameters are present and only the right ones are present, if not, return 3
+    * Check there are the right amount of parameters, if not, return 5
+* `static int gaHint(char* parameters[], int total);`
+    * *Use:* checks the parameters in gsAgent  
+    * Check all parameters are of the right type for this op code, if not, return 3
+    * Check all parameters are present and only the right ones are present, if not, return 3
+    * Check there are the right amount of parameters, if not, return 5
+* `static int faLocation(char* parameters[], int total);`
+    * *Use:* checks the parameters in gsAgent  
+    * Check all parameters are of the right type for this op code, if not, return 3
+    * Check all parameters are present and only the right ones are present, if not, return 3
+    * Check there are the right amount of parameters, if not, return 5
+* `static int faClaim(char* parameters[], int total);`
+    * *Use:* checks the parameters in gsAgent  
+    * Check all parameters are of the right type for this op code, if not, return 3
+    * Check all parameters are present and only the right ones are present, if not, return 3
+    * Check there are the right amount of parameters, if not, return 5
+* `static int faLog(char* parameters[], int total);`
+    * *Use:* checks the parameters in gsAgent  
+    * Check all parameters are of the right type for this op code, if not, return 3
+    * Check all parameters are present and only the right ones are present, if not, return 3
+    * Check there are the right amount of parameters, if not, return 5
+* `static int gameOver(char* parameters[], int total);`
+    * *Use:* checks the parameters in gsAgent  
+    * Check all parameters are of the right type for this op code, if not, return 3
+    * Check all parameters are present and only the right ones are present, if not, return 3
+    * Check there are the right amount of parameters, if not, return 5
+
+#### Helper Methods for the pebble
+* `char ishex (unsigned char c);`
+    * *Use*: determines if the char is a hex char 
+    * Makes sure the char is the right character to be hex and the right number    
+* `double string_to_double(char* num);`
+    * *Use*: Converts the given char* to a double and returns that 
+    * uses number manipulation ad string manipulation 
+    * returns the double 
+* `int string_to_int(char *str);`
+    * *Use*: Converts the given char* to a int and returns that 
+    * uses number manipulation ad string manipulation 
+    * returns the int 
+
+##### common.c
+* `unsigned int stringHexToDec(char* hex)`
+    * *Use*: Converts a string hexidemical to a decimal int 
+    * uses scanf to get the decimal 
+    * returns the decima; 
+* `char *decToStringHex(unsigned int dec)`
+    * *Use:* Converts a number to the string hex counter 
+    * uses sprintf to convert to string
+    * returns the string 
+* `char* getIP(int comm_sock, struct sockaddr_in them)`
+    * *Use*: gets the IP adress of the server 
+    * Finds the IP address and mallocs it into a string 
+    * adds the numbers at the end as well
+    * returns the IP adress 
+* `char **getOpCode(char *message)`
+    * *Use*: gets the opCode from a message 
+    * finds the op code and places that into array 0
+    * puts everything else itno array 1 
 
 ## GUIDE AGENT 
 
