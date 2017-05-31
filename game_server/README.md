@@ -24,6 +24,8 @@ The Game Server application coordinates one and only one game each time it runs.
 - stdout: 
     - prints message when 
 
+To terminate the game before all krags are claimed, type in `GAME OVER`
+
 To turn on the debugging mode, take away the '#' from Makefile, DEBUG = -DDEBUG
 
 ##### Example command line:

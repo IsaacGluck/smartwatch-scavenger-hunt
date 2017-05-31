@@ -220,7 +220,7 @@ handle_result_message(int result, int comm_sock, struct sockaddr_in them,
         strcpy(&(message[i]), "Text has invalid id");
     }
     else if (result == -8){
-        strcpy(&(message[i]), "SH_DUPLICATE_PLAYERNAME|text=player name: ");
+        strcpy(&(message[i]), "SH_ERROR_DUPLICATE_PLAYERNAME|text=player name: ");
         i = strlen(message);
         char *token = get_token(message_from, "player");
         strcpy(&(message[i]), token);
