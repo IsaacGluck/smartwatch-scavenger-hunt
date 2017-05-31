@@ -281,6 +281,7 @@ int fn_fa_claim(char *rest_of_line, game_info_t *gi, struct sockaddr_in them){
     if ( (krag = game_info_find_krag(gi, kragId)) == NULL){
         free_message_fields(gameId, pebbleId, team_name,
             player_name, latitude, longitude, NULL, kragId, NULL, NULL);
+        token_delete(token);
         return -7;
     }
     
