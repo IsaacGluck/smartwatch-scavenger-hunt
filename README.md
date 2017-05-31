@@ -13,7 +13,7 @@ Views
 - Kazuma Honjo
 
 
-###To Run: type make 
+### To Run: type make 
 
 #### Game_Agent Subdirectory: 
 ##### Usage: 
