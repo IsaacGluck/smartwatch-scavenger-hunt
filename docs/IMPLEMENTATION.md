@@ -313,7 +313,13 @@ In the common file we will have the following methods that are useful to everyth
     6. If game over (All krags revieled or by input "GAME OVER"), get out of the loop 
     7. Otherwise continue loop
 3. Send a game summary (TEAM_RECORD) to all players
-4.Send a message indicating the end-of-game (GAME_OVER) to 
+    1. Iterate the set of team in game_info
+        1. Iterate the set of FA in team, and send the record to each agent
+        2. Send record to the GA
+4. Send a message indicating the end-of-game (GAME_OVER) to all players
+    1. Iterate the set of team in game_info
+        1. Iterate the set of FA in team, and send the record to each agent
+        2. Send record to the GA
 5. Free all memory
 6. Exit with 0 status
 
@@ -457,6 +463,7 @@ game_info_t *gi, char *message_from)`**
     4. GA_HINT
         1. If result = 1
             1. Send GA_HINT to all field agent in the same team
+                1. Iterate the set of FA in team, and send the hint to each agent
         2. If result = 2
             1. Send GA_HINT to the specified field agent
     5. FA_LOG
@@ -482,44 +489,9 @@ game_info_t *gi, char *message_from)`**
 
 **`Build set of krags(char *kiff, game_infor *gi)`**
     1. For each line in the file:
-        1. Check there are no space
-        2. Create the krag
+        1. Get the left hand side and the right hand side of the equation
+        2. With the tokens, create the krag
         3. Add it to the set of krag stored in game_info 
-
-
-### Returning value operation
-**Common**
-0: Successfully handled message (can be error and ignore). Nothing to be done
--1: SH_ERROR_INVALID_MESSAGE
--2: SH_ERROR_INVALID_OPCODE
--3: SH_ERROR_INVALID_FIELD
--4: SH_ERROR_INVALID_GAME_ID
--5: SH_ERROR_INVALID_TEAMNAME
--6: SH_ERROR_INVALID_PLAYERNAME
--7: SH_ERROR_INVALID_ID
--8: SH_ERROR_DUPLICATE_FIELD
--9: SH_DUPLICATE_PLAYERNAME
--10: SH_CLAIMED
--11: SH_CLAIMED_ALREADY
--99: malloc error
-
-**FA_LOCATION**
-1: Respond with GAME_STATUS
-
-**FA_CLAIM**
-1: Respond with SH_CLAIMED, GS_CLUE, and GS_SECRET
-    - Send two (may be one or zero) randomly chosen clues, in the form of GS_CLUE messages to the GA on same team
-    - Update this team’s copy of the secret so as to reveal characters of the string
-    - Send the updated secret, via a GS_SECRET message to the GA on same team
-2: Respond with SH_CLAIMED and finish the game
-3: Respond with SH_CLAIMED_ALREADY
-
-**GA_STATUS**
-1: Respond with GAME_STATUS and GS_AGENT
-
-**GA_HINT**
-1: Send the message to all FA in the team
-2: Forward the message to the specified player
 
 
 ### Resource management and Persistent storage
