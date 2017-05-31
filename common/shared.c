@@ -907,9 +907,7 @@ static int gaHint(char* parameters[], int total){
 	}
 
 	//pebbleId
-	printf("The size: %d", (int)strlen(parameters[11]));
 	if(strlen(parameters[11])==1){
-		printf("THIS IS SUPPOSE TO BE HERE\n");
 		if(strcmp(parameters[11], "*") == 1){
 			printf("THIS IS NOT SUPPOSE TO BE HERE HI STAR\n");
 			return 3; 

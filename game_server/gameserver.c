@@ -118,13 +118,16 @@ main(const int argc, char *argv[]){
                 handle_socket(comm_sock, them, gi);
             }
             
+            #ifdef DEBUG
             // print a fresh prompt
             printf(": ");
+            #endif
             fflush(stdout);
         }
     }
-    
+    #ifdef DEBUG
     printf("game ended\n\n");
+    #endif
     send_team_record(comm_sock, gi);
     send_game_over(comm_sock, gi);
     
@@ -223,7 +226,9 @@ set_up_udp(int port, int *comm_sock, struct sockaddr_in *server){
 static void handle_stdin(int comm_sock, struct sockaddr_in *themp, game_info_t *gi){
     char* line = readlinep(stdin);
     if (line != NULL){
-       printf("input from stdin: %s\n", line);
+        #ifdef DEBUG
+        printf("input from stdin: %s\n", line);
+        #endif
     
         if (strcmp(line, "GAME OVER") == 0){
             game_info_change_game_status(gi);
@@ -283,7 +288,9 @@ static void handle_socket(int comm_sock, struct sockaddr_in them, game_info_t *g
                 }
             }
             if (dispatch[fn].opCode == NULL){
+                #ifdef DEBUG
                 printf("\n\nUnknown command\n\n");
+                #endif
             }
             
             // based on the result, respond correctly

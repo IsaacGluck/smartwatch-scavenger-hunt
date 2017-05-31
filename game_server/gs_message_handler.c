@@ -89,7 +89,10 @@ int fn_fa_location(char *rest_of_line, game_info_t *gi, struct sockaddr_in them)
     // create the array of the message fields
     do {
         token_next(token);
+        #ifdef DEBUG
         printf("%s %s \n\t%s\n", token->left, token->right, token->rest_of_line);
+        #endif
+        
         if (strcmp(token->left,"gameId") == 0){
             strcpy(gameId, token->right);
         }
@@ -223,6 +226,7 @@ int fn_fa_claim(char *rest_of_line, game_info_t *gi, struct sockaddr_in them){
         || kragId == NULL){
         free_message_fields(gameId, pebbleId, team_name,
                 player_name, latitude, longitude, NULL, kragId, NULL, NULL);
+        token_delete(token);
         return -99;
     }
 
@@ -255,6 +259,7 @@ int fn_fa_claim(char *rest_of_line, game_info_t *gi, struct sockaddr_in them){
         else {
             free_message_fields(gameId, pebbleId, team_name,
                 player_name, latitude, longitude, NULL, kragId, NULL, NULL);
+            token_delete(token);
             return -3;
         }
     } while(token->rest_of_line != '\0');
@@ -285,27 +290,31 @@ int fn_fa_claim(char *rest_of_line, game_info_t *gi, struct sockaddr_in them){
         free_message_fields(gameId, pebbleId, team_name,
             player_name, latitude, longitude, NULL, kragId, NULL, NULL);
         token_delete(token);
-#ifdef DEBUG
+        #ifdef DEBUG
         printf("latitude and longitude cannot be confirmed\n");
-#endif
+        #endif
         return -1;
     }
     
-#ifdef DEBUG
+    #ifdef DEBUG
     printf("latitude|longitude confirmed\n");
     krag_print(krag);
     printf("team_name: %s\n",team_name);
-#endif
+    #endif
     
     // If the krag has not been claimed by this team
     if ((status = krag_has_claimed(krag, team_name)) == 1){
+        #ifdef DEBUG
         printf("status: %d", status);
+        #endif
         // Mark it as ‘claimed’ and send a SH_CLAIMED response to the FA
         status = krag_mark_claimed(gi, krag, team_name);
         free_message_fields(gameId, pebbleId, team_name,
             player_name, latitude, longitude, NULL, kragId, NULL, NULL);
         token_delete(token);
+        #ifdef DEBUG
         printf("marked CLAIMED\n");
+        #endif
         return status;
     }
     else if (status == 0){

@@ -1042,7 +1042,9 @@ game_info_krag_distance(game_info_t *gi, char *kragId, char *latitude, char *lon
         double c = 2 * atan2(sqrt(a), sqrt(1-a));
         float dist = (float) (earthRadius * c);
         
+        #ifdef DEBUG
         printf("Distance is %f: ",dist);
+        #endif
         // if the distance is within 10m, return 0
         if (dist <= 10){
             return 0;

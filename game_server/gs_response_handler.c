@@ -187,6 +187,11 @@ handle_result_message(int result, int comm_sock, struct sockaddr_in them,
         strcpy(&(message[i]), "SH_ERROR_INVALID_OPCODE|text=opCode: ");
         i = strlen(message);
         char *token = get_token(message_from, "opCode");
+        if (token == NULL) {
+            free(gameId);
+            free(message);
+            return;
+        }
         strcpy(&(message[i]), token);
         free(token);
     }
@@ -197,6 +202,11 @@ handle_result_message(int result, int comm_sock, struct sockaddr_in them,
         strcpy(&(message[i]), "SH_ERROR_INVALID_GAME_ID|text=gameId: ");
         i = strlen(message);
         char *token = get_token(message_from, "gameId");
+        if (token == NULL) {
+            free(gameId);
+            free(message);
+            return;
+        }
         strcpy(&(message[i]), token);
         free(token);
     }
@@ -204,6 +214,11 @@ handle_result_message(int result, int comm_sock, struct sockaddr_in them,
         strcpy(&(message[i]), "SH_ERROR_INVALID_TEAMNAME|text=team name:");
         i = strlen(message);
         char *token = get_token(message_from, "team");
+        if (token == NULL) {
+            free(gameId);
+            free(message);
+            return;
+        }
         strcpy(&(message[i]), token);
         free(token);
     }
@@ -211,6 +226,11 @@ handle_result_message(int result, int comm_sock, struct sockaddr_in them,
         strcpy(&(message[i]), "SH_ERROR_INVALID_PLAYERNAME|text=player name: ");
         i = strlen(message);
         char *token = get_token(message_from, "player");
+        if (token == NULL) {
+            free(gameId);
+            free(message);
+            return;
+        }
         strcpy(&(message[i]), token);
         free(token);
     }
@@ -223,6 +243,11 @@ handle_result_message(int result, int comm_sock, struct sockaddr_in them,
         strcpy(&(message[i]), "SH_ERROR_DUPLICATE_PLAYERNAME|text=player name: ");
         i = strlen(message);
         char *token = get_token(message_from, "player");
+        if (token == NULL) {
+            free(gameId);
+            free(message);
+            return;
+        }
         strcpy(&(message[i]), token);
         free(token);
     }
@@ -674,6 +699,7 @@ send_hint_to_everyone_in_team(int comm_sock, struct sockaddr_in them, game_info_
 static void
 respond_with_ga_hint(int comm_sock, struct sockaddr_in them, char *message_from, game_info_t *gi){
     char *pebbleId = get_token(message_from, "pebbleId");
+    if (pebbleId == NULL) return;
     fa_t *fa = game_info_find_fa_pebbleId(gi, pebbleId);
     fa_send_to(fa, comm_sock, message_from);
     
