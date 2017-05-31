@@ -8,7 +8,7 @@
     *  split the string between these places and put the value in the array 
     *  do this for all portential values
     *  return array 
-* int print_log(char* message, char* filename, char* IPport, char* tofrom);
+* `int print_log(char* message, char* filename, char* IPport, char* tofrom);`
     * *Use:* prints the message to the speceified log file 
     * Calculates the time stamp 
     * Does string manipulation to get file and path 
