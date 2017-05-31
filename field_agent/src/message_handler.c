@@ -143,7 +143,6 @@ void incoming_message(char* message)
 // opCode=GAME_OVER|gameId=FEED|secret=computer science 50 rocks!
 void message_GAME_OVER(char** tokenized_message)
 {
-	// char** tokenized_message = tokenize(message);
 
 	char* message_gameId = NULL;
 	char* secret = NULL;
@@ -174,13 +173,11 @@ void message_GAME_OVER(char** tokenized_message)
 	FA_INFO->game_over_received = true;
 
 
-	// free(tokenized_message);
 }
 
 // opCode=GAME_STATUS|gameId=FEED|guideId=0707|numClaimed=5|numKrags=8
 void message_GAME_STATUS(char** tokenized_message)
 {
-	// char** tokenized_message = tokenize(message);
 
 	char* message_gameId = NULL;
 	char* numClaimed_s = NULL;
@@ -219,30 +216,12 @@ void message_GAME_STATUS(char** tokenized_message)
 	FA_INFO->num_claimed = numClaimed;
 	FA_INFO->num_left = numKrags - numClaimed;
 
-	// free(tokenized_message);
 }
 
-
-
-
-// SH_ERROR_INVALId_MESSAGE
-// SH_ERROR_INVALId_OPCODE
-// SH_ERROR_INVALId_FIELD
-// SH_ERROR_DUPLICATE_FIELD
-// SH_ERROR_INVALId_GAME_Id
-// SH_ERROR_INVALId_TEAMNAME
-// SH_ERROR_INVALId_Id
-
-
-// SH_ERROR_INVALId_PLAYERNAME
-// SH_ERROR_DUPLICATE_PLAYERNAME
-// SH_CLAIMED
-// SH_CLAIMED_ALREADY
 
 // opCode=GS_RESPONSE|gameId=0707|respCode=SH_ERROR_INVALId_OPCODE|text=Unrecognized opCode 'GA_FOO'
 void message_GS_RESPONSE(char** tokenized_message)
 {
-	// char** tokenized_message = tokenize(message);
 
 	char* message_gameId = NULL;
 	char* respCode = NULL;
@@ -292,14 +271,12 @@ void message_GS_RESPONSE(char** tokenized_message)
 	}
 
 
-	// free(tokenized_message);
 }
 
 
 // opCode=GA_HINT|gameId=FEED|guideId=0707|team=aqua|player=Alice|pebbleId=8080477D|hint=Bob, look inside the cafe!
 void message_GA_HINT(char** tokenized_message)
 {
-	// char** tokenized_message = tokenize(message);
 
 	char* message_gameId = NULL;
 	char* team = NULL;

@@ -629,6 +629,8 @@ If opCode=
         bool wrong_name;
         bool krag_claimed;
         bool krag_claimed_already;
+        bool invalid_krag_claimed;
+        bool invalid_message;
         bool submit_krag;
     } fieldagent_info_t;
     ```
@@ -680,104 +682,138 @@ If opCode=
     - If submit_krag is true, send an FA_CLAIM
     - If game_over_received is true, pop all the windows and push a dialog_message_window with a game over message
     - If wrong_name is true, pop windows, push the choose_name window, and push a dialog_message_window with a error_message
-    - If krag_claimed is true, push a dialog_message_window with a error_message message, update the FA_INFO struct
+    - If krag_claimed_already/invalid_krag_claimed/invalid_message/krag_claimed is true, push a dialog_message_window with a error_message message, update the FA_INFO struct
     - request a location update every 10 seconds
     - Every 15 seconds, if the game has started and the pebbleId has been fetched, send a FA_LOCATION, and update the time elapsed
 
+
 - `static void update_time();`
-    -
+    - Updates the elapsed time
 
 - `static void inbox_received_callback(DictionaryIterator *iterator, void *context);`
-    -
+    - Function called when something arrives in the inbox
+    - If the iterator has a AppKeyJSReady, log that the JS environment is ready
+    - If the iterator has a AppKeyRecvMsg, pass the message to message_handler.c via incoming_message(msg)
+    - If the iterator has a AppKeyLocation parse the location using location.c, and update the FA_INFO
+    - If the iterator has a AppKeyPebbleId, if pebbleId hasn't been set, set the pebbleId
+    - If the iterator has a AppKeySendError, log the send error
 
 - `static void outbox_sent_callback(DictionaryIterator *iterator, void *context);`
-    -
+    - Function called when something arrives in the outbox to be sent
+    - logs ^
 
 - `static void inbox_dropped_callback(AppMessageResult reason, void *context);`
-    -
+    - Function called when something is dropped from the inbox
+    - logs ^
 
 - `static void outbox_failed_callback(DictionaryIterator *iter, AppMessageResult reason, void *context);`
-    -
+    - Function called when something arrives in the outbox to be sent but can't be sent
+    - logs ^
 
 - `static void request_pebbleId();`
-    -
+    - puts a request for a pebbleId in the outbox as a AppKeyPebbleId and logs the result
 
 - `static void request_location();`
-    -
+    - puts a request for a location in the outbox as a AppKeyLocation and logs the result
 
 - `static void send_message(char *message);`
-    -
+    - puts a message in the outbox as a AppKeySendMsg and logs the result
 
 
 
 
 #### choose_name
+##### Variables
+- `static Window *s_main_window_choose_name;`
+- `static MenuLayer *choose_name_menulayer;`
+- `static char isaac[6] = "Isaac";`
+- `static char morgan[7] = "Morgan";`
+- `static char laya[5] = "Laya";`
+- `static char kazuma[7] = "Kazuma";`
+- `static int s_current_selection = 1;`
 
-// File global variables
-static Window *s_main_window_choose_name;
-static MenuLayer *choose_name_menulayer;
+##### Methods
+- `static uint16_t get_num_rows_callback_choose_name(MenuLayer *menu_layer, uint16_t section_index, void *context);`
+    - Returns the number of rows (CHOOSE_NAME_WINDOW_NUM_ROWS)
 
-// Variables to be used throughout the menu
-static char isaac[6] = "Isaac";
-static char morgan[7] = "Morgan";
-static char laya[5] = "Laya";
-static char kazuma[7] = "Kazuma";
-static int s_current_selection = 1; // for choosing the name, start at 1 from the menu
+- `static void draw_row_callback_choose_name(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *context);`
+    - Draws the text in each row with the correct name
+    - Draws the dots for the radio buttons
+    - Sets the current row to be highlighted
 
-// Setup the radion menu layer to choose a name
-//
-static uint16_t get_num_rows_callback_choose_name(MenuLayer *menu_layer, uint16_t section_index, void *context);
+- `static int16_t get_cell_height_callback_choose_name(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *context);`
+    - Returns the height of the cell being passed in
 
-//
-static void draw_row_callback_choose_name(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *context);
+- `static void select_callback_choose_name(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context);`
+    - The function called when a row is selected
+    - If it's a name row, the button is filled in
+    - If it's the submit row, the currently selected name row is submitted and the main window is pushed
 
-// 
-static int16_t get_cell_height_callback_choose_name(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *context);
+- `static void window_load_choose_name(Window *window);`
+    - Called when the window is created
+    - Sets up the layers, the bounds, and the callbacks
+    - Finally adds the window layer
 
-//
-static void select_callback_choose_name(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context);
+- `static void window_unload_choose_name(Window *window);`
+    - Called when the window is being deleted
+    - Destroys the layers and sets the pointers to NULL
 
-// main_window
-static void window_load_choose_name(Window *window);
+- `void choose_name_window_push();`
+    - Creates the window if it hasn't been created
+    - pushes the window onto the stack
 
-// window_unload_choose_name
-static void window_unload_choose_name(Window *window);
-
-
-void choose_name_window_push();
-
-void main_menu_reload_pass_up();
+- `void main_menu_reload_pass_up();`
+    - A function that will reload the data in the MenuLayer that can be called from outside
 
 
 
 
 
 #### main_menu
-
-static Window *s_main_window_main_menu = NULL;
-static MenuLayer *s_menu_layer_main_menu = NULL;
-static PinWindow *pin_window;
-
-static int s_current_selection_main_menu = 0;
-
-void pin_window_complete_callback(PIN pin, void *context);
-
-static uint16_t get_num_rows_callback_main_menu(MenuLayer *menu_layer, uint16_t section_index, void *context);
-
-static void draw_row_callback_main_menu(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *context);
-
-static int16_t get_cell_height_callback_main_menu(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *context);
-
-static void select_callback_main_menu(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context);
-
-static void window_load_main_menu(Window *window);
-
-static void window_unload_main_menu(Window *window);
+##### Variables
+-   `static Window *s_main_window_main_menu = NULL;`
+-   `static MenuLayer *s_menu_layer_main_menu = NULL;`
+-   `static PinWindow *pin_window;`
+-   `static int s_current_selection_main_menu = 0;`
 
 
-void main_menu_window_push();
+##### Methods
+    - `static uint16_t get_num_rows_callback_main_menu(MenuLayer *menu_layer, uint16_t section_index, void *context);`
+        - Returns the number of rows in the menu
 
-void main_menu_reload();
+    - `static void draw_row_callback_main_menu(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *context);`
+        - Draws the different rows getting data from the FA_INFO
+        - Sets the current row to be highlighted
+
+    - `static int16_t get_cell_height_callback_main_menu(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *context);`
+        - Returns the height of the selected cell
+
+    - `static void select_callback_main_menu(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context);`
+        - If the selected window are the bottom two push the hints window or the pin window
+        - Otherwise update the current selection
+
+    - `static void window_load_main_menu(Window *window);`
+        - Called when the window is created
+        - Sets up the layers, the bounds, and the callbacks
+        - Set up the pin window and its call backs
+        - Adds the window layer
+
+    - `static void window_unload_main_menu(Window *window);`
+        - Called when the window is being deleted
+        - Destroys the layers and sets the pointers to NULL
+        - Destroys the pin window and its pointer is set to NULL
+
+    - `void pin_window_complete_callback(PIN pin, void *context);`
+        - Called when the pin window is submitted
+        - Set submit_krag to true
+        - pop the pin window
+
+    - `void main_menu_window_push();`
+        - Creates the window if it hasn't been created
+        - pushes the window onto the stack
+
+    - `void main_menu_reload();`
+        - A function that will reload the data in the MenuLayer that can be called from outside
 
 
 
@@ -785,51 +821,68 @@ void main_menu_reload();
 
 
 #### pin_window
+##### Structs
+- ```c
+    typedef struct {
+      char digits[PIN_WINDOW_NUM_CELLS + 1];
+    } PIN;
 
-typedef struct {
-  char digits[PIN_WINDOW_NUM_CELLS + 1];
-} PIN;
+    typedef void (*PinWindowComplete)(PIN pin, void *context);
 
-typedef void (*PinWindowComplete)(PIN pin, void *context);
+    typedef struct PinWindowCallbacks {
+        PinWindowComplete pin_complete;
+    } PinWindowCallbacks;
 
-typedef struct PinWindowCallbacks {
-    PinWindowComplete pin_complete;
-} PinWindowCallbacks;
+    typedef struct {
+      Window *window;
+      TextLayer *main_text, *sub_text;
+      Layer *selection;
+      GColor highlight_color;
+      StatusBarLayer *status;
+      PinWindowCallbacks callbacks;
 
-typedef struct {
-  Window *window;
-  TextLayer *main_text, *sub_text;
-  Layer *selection;
-  GColor highlight_color;
-  StatusBarLayer *status;
-  PinWindowCallbacks callbacks;
+      PIN pin;
+      char field_buffs[PIN_WINDOW_NUM_CELLS][2];
+      int8_t field_selection;
+    } PinWindow;
+    ```
 
-  PIN pin;
-  char field_buffs[PIN_WINDOW_NUM_CELLS][2];
-  int8_t field_selection;
-} PinWindow;
+##### Methods
+    - `static char* selection_handle_get_text(int index, void *context);`
+        - Fills the pin digits
 
+    - `static void selection_handle_complete(void *context);`
+        - Sets the callback for the pin window fields
 
-static char* selection_handle_get_text(int index, void *context);
+    - `static void selection_handle_inc(int index, uint8_t clicks, void *context);`
+        - Increments the chosen pin when clicking the top right button
 
-static void selection_handle_complete(void *context);
+    - `static void selection_handle_dec(int index, uint8_t clicks, void *context);`
+        - Decrements the chosen pin when clicking the bottom right button
 
-static void selection_handle_inc(int index, uint8_t clicks, void *context);
+    - `PinWindow* pin_window_create(PinWindowCallbacks callbacks);`
+        - Creates the pin window
+        - Sets the callbacks
+        - Defines and adds the layers
+        - Returns a pointer to the pin window
+        - Logs if there was a failure
 
-static void selection_handle_dec(int index, uint8_t clicks, void *context);
+    - `void pin_window_destroy(PinWindow *pin_window);`
+        - Destroys all the layers of pin window
+        - Free the pin window memory
+        - Reset the pointer to NULL
 
+    - `void pin_window_push(PinWindow *pin_window, bool animated);`
+        - Push the pin window on the stack calling window_stack_push(pin_window->window, animated)
 
-PinWindow* pin_window_create(PinWindowCallbacks callbacks);
+    - `void pin_window_pop(PinWindow *pin_window, bool animated);`
+        - Pop the pin window from the stack calling window_stack_remove(pin_window->window, animated)
 
-void pin_window_destroy(PinWindow *pin_window);
+    - `bool pin_window_get_topmost_window(PinWindow *pin_window);`
+        - Return whether the topmost window is the pinwindow as a bool 
 
-void pin_window_push(PinWindow *pin_window, bool animated);
-
-void pin_window_pop(PinWindow *pin_window, bool animated);
-
-bool pin_window_get_topmost_window(PinWindow *pin_window);
-
-void pin_window_set_highlight_color(PinWindow *pin_window, GColor color);
+    - `void pin_window_set_highlight_color(PinWindow *pin_window, GColor color);`
+        - Sets the highlight color for the input boxes
 
 
 
@@ -837,85 +890,114 @@ void pin_window_set_highlight_color(PinWindow *pin_window, GColor color);
 
 
 #### hints_window
+##### Variables
+- `static Window *s_main_window_hints_window = NULL;`
+- `static MenuLayer *s_menu_layer_hints_window = NULL;`
+- `static int s_current_selection_main_menu = 0;`
 
-static Window *s_main_window_hints_window = NULL;
-static MenuLayer *s_menu_layer_hints_window = NULL;
-static int s_current_selection_main_menu = 0;
+##### Methods
+- `static uint16_t get_num_rows_callback_hints_window(MenuLayer *menu_layer, uint16_t section_index, void *context);`
+    - Returns the number of rows in the window
 
+- `static void draw_row_callback_hints_window(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *context);`
+    - Draws the hints reading from the FA_INFO
+    - Highlights the current cell row
 
-static uint16_t get_num_rows_callback_hints_window(MenuLayer *menu_layer, uint16_t section_index, void *context);
+- `static int16_t get_cell_height_callback_hints_window(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *context);`
+    - Returns the height of the current cell row
 
-static void draw_row_callback_hints_window(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *context);
+- `static void select_callback_hints_window(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context);`
+    - Logs which hint was selected
+    - Pushes a dialog window to show the whole hint
 
-static int16_t get_cell_height_callback_hints_window(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *context);
+- `static void window_load_hints_window(Window *window);`
+    - Create the layers and bounds
+    - Set the callbacks
+    - Add the layers to the window
 
-static void select_callback_hints_window(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context);
+- `static void window_unload_hints_window(Window *window);`
+    - Destroys the menu layer and the window
+    - Resets the pointer to NULL
 
-static void window_load_hints_window(Window *window);
-
-static void window_unload_hints_window(Window *window);
-
-
-void hints_window_window_push();
+- `void hints_window_window_push();`
+    - If the window hasn't been created, create it
+    - Push the window onto the stack
 
 
 
 
 #### message_dialog
+##### Variables
+- `static Window *s_window;`
+- `static TextLayer *s_text_layer;`
+- `static char* message = NULL;`
 
-static Window *s_window;
-static TextLayer *s_text_layer;
-static char* message = NULL;
+##### Methods
+- `static void window_load(Window *window);`
+    - Creates the text layer and the bounds
+    - Sets up the text layer properties reading the message in
+    - Adds the text layer
 
+- `static void window_unload(Window *window);`
+    - Destroys the text layer and the window
+    - Resets the pointers to NULL
 
-static void window_load(Window *window);
-
-static void window_unload(Window *window);
-
-
-void dialog_message_window_push(char* input_message);
+- `void dialog_message_window_push(char* input_message);`
+    - If the window hasn't been created create it, setting the callbacks
+    - Push the window onto the stack
 
 
 
 
 #### location
+##### Structs
+    - ```ctypedef struct location_struct {
+        char* latitude;
+        char* longitude;
+    } location_t;
+    ```
 
-typedef struct location_struct {
-    char* latitude;
-    char* longitude;
-} location_t;
-
-location_t *parse_location(char* location_s);
+##### Methods
+- `location_t *parse_location(char* location_s);`
+    - Tokenizes the inputted location string
+    - Creates a location struct and returns a pointer to it
 
 
 
 #### message_handler
-
-static char GAME_STATUS[12] = "GAME_STATUS";
-static char GS_RESPONSE[12] = "GS_RESPONSE";
-static char GAME_OVER[10] = "GAME_OVER";
-static char GA_HINT[8] = "GA_HINT";
-
-char* create_fa_location(char* statusReq);
-
-char* create_fa_claim(char* kragId);
-
-char* create_fa_log(char* text);
-
-void incoming_message(char* message);
-
-void message_GAME_OVER(char* message);
-
-void message_GAME_STATUS(char* message);
-
-void message_GS_RESPONSE(char* message);
-
-void message_GA_HINT(char* message);
+##### Variables
+- `static char GAME_STATUS[12] = "GAME_STATUS";`
+- `static char GS_RESPONSE[12] = "GS_RESPONSE";`
+- `static char GAME_OVER[10] = "GAME_OVER";`
+- `static char GA_HINT[8] = "GA_HINT";`
 
 
+##### Methods
+- `char* create_fa_location(char* statusReq);`
+    - Creates a FA_LOCATION message
 
+- `char* create_fa_claim(char* kragId);`
+    - Creates a FA_CLAIM message
 
+- `char* create_fa_log(char* text);`
+    - Creates a FA_LOG message
 
+- `void incoming_message(char* message);`
+    - Validates the message
+    - Handles the incoming message depending on the opcode
 
+- `void message_GAME_OVER(char* message);`
+    - Handles an incoming GAME_OVER message
+    - Sets game_over_received to true and fills the end message
 
+- `void message_GAME_STATUS(char* message);`
+    - Handles an incoming GAME_STATUS message
+    - Sets num claimed and num left
 
+- `void message_GS_RESPONSE(char* message);`
+    - Handles an incoming GS_RESPONSE message
+    - Changes the flags accordingly
+
+- `void message_GA_HINT(char* message);`
+    - Handles an incoming GS_RESPONSE message
+    - Updates the hint and pushes out the 10th if there are 10

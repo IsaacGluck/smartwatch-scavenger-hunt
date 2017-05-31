@@ -185,8 +185,7 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
         // Test Game Over
         // char secret_buff[200];
         // snprintf(secret_buff, sizeof(secret_buff), "Game over!\n The secret was: qwertyuiop");
-
-        // strcpy(FA_INFO->known_chars, secret_buff);
+        // strcpy(FA_INFO->end_message, secret_buff);
         // FA_INFO->game_over_received = true;
 
         // Test wrong name

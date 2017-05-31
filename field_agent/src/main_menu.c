@@ -51,9 +51,6 @@ static void draw_row_callback_main_menu(GContext *ctx, const Layer *cell_layer, 
     case 5 :
     	snprintf(s_buff, sizeof(s_buff), "KRAGS Left: %d", FA_INFO->num_left);
       break;
-    // case 6 :
-    // 	snprintf(s_buff, sizeof(s_buff), "Decoded: %s", FA_INFO->known_chars);
-    //   break;
     case 6 :
     	snprintf(s_buff, sizeof(s_buff), "Hints received");
       break;
