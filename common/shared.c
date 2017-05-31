@@ -772,7 +772,7 @@ static int gameStatus(char* parameters[], int total){
 }
 
 static int gsResponse(char* parameters[], int total){
-	return 100;
+	// return 100;
 
 	if(total != 8){
 		return 5;
@@ -907,7 +907,7 @@ static int gaHint(char* parameters[], int total){
 	}
 
 	//pebbleId
-	printf("The size: %f", strlen(parameters[11]));
+	printf("The size: %d", (int)strlen(parameters[11]));
 	if(strlen(parameters[11])==1){
 		printf("THIS IS SUPPOSE TO BE HERE\n");
 		if(strcmp(parameters[11], "*") == 1){

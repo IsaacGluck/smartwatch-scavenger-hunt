@@ -1,11 +1,11 @@
 /*
  * gameserver.c - game server for final project
  *
- * usage: ./gameserver gameID kiff sf port
+ * usage: ./gameserver gameID kff sf port
  *
  * inputs:
  *  gameID - the hexadecimal ID number of this game
- *  kiff - the path to the krag file, which contains coordinates and clues for each krag
+ *  kff - the path to the krag file, which contains coordinates and clues for each krag
  *  sf - the path to the secret file, which contains a single line of text representing the secret
  *  port - the port number of the Game Server
  *
@@ -18,7 +18,7 @@
  *  1 - Error during initializing parameters
  *  2 - Wrong nubmer of command line arguments
  *  3 - Wrong gameID
- *  4 - Wrong kiff
+ *  4 - Wrong kff
  *  5 - Wrong sf
  *  6 - Wrong port
  *  7 - Error during setting up UDP/DGRAM
@@ -142,7 +142,7 @@ main(const int argc, char *argv[]){
 static void parse_command_line_arguments(const int argc, char *argv[], game_info_t *gi, int *comm_sock, struct sockaddr_in *server){
     // command line arguments must be 4 (excluding ./gameserver)
     if (argc != 5){
-        fprintf(stderr, "./gameserver gameID kiff sf port\n");
+        fprintf(stderr, "./gameserver gameID kff sf port\n");
         exit(2);
     }
     
@@ -150,16 +150,16 @@ static void parse_command_line_arguments(const int argc, char *argv[], game_info
     char *gameID = argv[1];
     if (game_info_set_gameID(gi, gameID) != 0){
         fprintf(stderr, "Wrong gameID\n");
-        fprintf(stderr, "./gameserver gameID kiff sf port\n");
+        fprintf(stderr, "./gameserver gameID kff sf port\n");
         game_info_delete(gi);
         exit(3);
     }
     
-    // validate and set kiff
-    char *kiff = argv[2];
-    if (game_info_set_kiff(gi, kiff) != 0){
-        fprintf(stderr, "Wrong kiff\n");
-        fprintf(stderr, "./gameserver gameID kiff sf port\n");
+    // validate and set kff
+    char *kff = argv[2];
+    if (game_info_set_kff(gi, kff) != 0){
+        fprintf(stderr, "Wrong kff\n");
+        fprintf(stderr, "./gameserver gameID kff sf port\n");
         game_info_delete(gi);
         exit(4);
     }
@@ -168,7 +168,7 @@ static void parse_command_line_arguments(const int argc, char *argv[], game_info
     char *sf = argv[3];
     if (game_info_set_secret_code(gi, sf) != 0){
         fprintf(stderr, "Wrong sf\n");
-        fprintf(stderr, "./gameserver gameID kiff sf port\n");
+        fprintf(stderr, "./gameserver gameID kff sf port\n");
         game_info_delete(gi);
         exit(5);
     }
@@ -177,7 +177,7 @@ static void parse_command_line_arguments(const int argc, char *argv[], game_info
     for (int i = 0; i < strlen(argv[4]); i++){
         if (!isdigit(argv[4][i])){
             fprintf(stderr, "Port is not a number\n");
-            fprintf(stderr, "./gameserver gameID kiff sf port\n");
+            fprintf(stderr, "./gameserver gameID kff sf port\n");
             game_info_delete(gi);
             exit(6);
         }

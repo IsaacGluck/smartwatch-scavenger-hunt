@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# cgameserver.sh - test case for game_server
+# gameserver.sh - test case for game_server
 #
 # usage: gameserver.sh
 #
@@ -9,7 +9,7 @@
 #
 # exit:
 #   0: succeed
-#
+#   1: too many command line arguments
 #
 # Kazuma Honjo, May 2017
 
@@ -21,8 +21,12 @@ make
 # if there are any input, it'll be an error
 if [ $# -ne 0 ]
 then
-echo "usage: crawlertest.sh"
+echo "usage: gameserver.sh"
 exit 1
 fi
 
-valgrind --leak-check=full ./gameserver FEED ./kiff ./secret 2872
+valgrind --leak-check=full ./gameserver FEED ../examples/krags ./secret 2872
+
+
+echo "finished testing"
+exit 0

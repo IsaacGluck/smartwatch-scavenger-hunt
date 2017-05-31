@@ -30,6 +30,7 @@ To run pebble (the file in dev may be different on different systems), pebble in
 * server is running on the correct port
 * proxy is running on the correct port 
 * no 0000 guide agent ID 
+* hints and text dont have equals or pipes 
 
 ##### Non Assumptions:
 * if location is not connected, it remains at 00

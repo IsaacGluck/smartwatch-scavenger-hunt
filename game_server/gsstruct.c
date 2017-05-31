@@ -120,9 +120,9 @@ typedef struct find_krag{
 
 
 /**************** file-local functions ****************/
-static int handle_kiff_message(char *left, char *right,
+static int handle_kff_message(char *left, char *right,
                                game_info_t *gi, krag_t *new_krag);
-static void set_kiff_handle_error(char *left, char *right, FILE *fp, char *message);
+static void set_kff_handle_error(char *left, char *right, FILE *fp, char *message);
 static find_id_t * game_info_find_id(game_info_t *gi, char *id,
                   void (*itemfunc)(void *arg, const char *key, void *item));
 static void find_pebbleId(void *arg, const char *key, void *item);
@@ -457,6 +457,7 @@ game_info_set_gameID(game_info_t *gi, char *gameID_in_hex){
         return 1;
     }
     gi->gameID = stringHexToDec(gameID_in_hex);
+    if (gi->gameID == 0) return 1;
     return 0;
 }
 
@@ -485,20 +486,20 @@ game_info_change_game_status(game_info_t *gi){
     gi->game_status = 1;
 }
 
-/**************** game_info_set_kiff ****************/
-/* set the kiff and builds the set of krags
+/**************** game_info_set_kff ****************/
+/* set the kff and builds the set of krags
  * return 0 if success, 1 if error
  */
 int
-game_info_set_kiff(game_info_t *gi, char *kiff){
-    if (gi == NULL || kiff == NULL){
+game_info_set_kff(game_info_t *gi, char *kff){
+    if (gi == NULL || kff == NULL){
         return 1;
     }
     // Open the file. If it does not exist or cannot be read,
     // wrong file path name. Return 1
-    FILE *fp = fopen(kiff, "r");
+    FILE *fp = fopen(kff, "r");
     if (fp == NULL){
-        fprintf(stderr, "kiff cannot be opened or does not exist\n");
+        fprintf(stderr, "kff cannot be opened or does not exist\n");
         return 1;
     }
     
@@ -511,7 +512,7 @@ game_info_set_kiff(game_info_t *gi, char *kiff){
         char *left = malloc(strlen(line)+1);
         char *right = malloc(strlen(line)+1);
         if (left == NULL || right == NULL){
-            fprintf(stderr, "Error while allocating memory in game_info_set_kiff\n");
+            fprintf(stderr, "Error while allocating memory in game_info_set_kff\n");
             return 1;
         }
         int j = 0;
@@ -537,8 +538,8 @@ game_info_set_kiff(game_info_t *gi, char *kiff){
                 // if currently reading right hand side,
                 // the next non-alphabet/number character must be '|'
                 else {
-                    set_kiff_handle_error(left, right, fp,
-                                    "Error: '=' found consecutively in the kiff\n");
+                    set_kff_handle_error(left, right, fp,
+                                    "Error: '=' found consecutively in the kff\n");
                     return 1;
                 }
             }
@@ -548,8 +549,8 @@ game_info_set_kiff(game_info_t *gi, char *kiff){
                     state = 0;
                     right[j] = '\0';
                     j = 0;
-                    if (handle_kiff_message(left, right, gi, new_krag) != 0){
-                        set_kiff_handle_error(left, right, fp,
+                    if (handle_kff_message(left, right, gi, new_krag) != 0){
+                        set_kff_handle_error(left, right, fp,
                                               "Error: krag format error\n");
                         return 1;
                     }
@@ -557,8 +558,8 @@ game_info_set_kiff(game_info_t *gi, char *kiff){
                 // if currently reading left hand side,
                 // the next non-alphabet/number character must be '='
                 else {
-                    set_kiff_handle_error(left, right, fp,
-                                    "Error: '|' found consecutively in the kiff\n");
+                    set_kff_handle_error(left, right, fp,
+                                    "Error: '|' found consecutively in the kff\n");
                     return 1;
                 }
             }
@@ -567,14 +568,14 @@ game_info_set_kiff(game_info_t *gi, char *kiff){
                 // it should be reading the right hand side
                 if (state == 1){
                     right[j] = '\0';
-                    if (handle_kiff_message(left, right, gi, new_krag) != 0){
-                        set_kiff_handle_error(left, right, fp,
+                    if (handle_kff_message(left, right, gi, new_krag) != 0){
+                        set_kff_handle_error(left, right, fp,
                                               "Error: krag format error\n");
                         return 1;
                     }
                 }
                 else {
-                    set_kiff_handle_error(left, right, fp,
+                    set_kff_handle_error(left, right, fp,
                                           "Error: krag format error\n");
                     return 1;
                 }
@@ -611,24 +612,24 @@ game_info_set_kiff(game_info_t *gi, char *kiff){
     return 0;
 }
 
-/**************** set_kiff_handle_error ****************/
-/* handle the error (free memory) recieved for game_info_set_kiff
+/**************** set_kff_handle_error ****************/
+/* handle the error (free memory) recieved for game_info_set_kff
  */
 static void
-set_kiff_handle_error(char *left, char *right, FILE *fp, char *message){
+set_kff_handle_error(char *left, char *right, FILE *fp, char *message){
     if (left != NULL) free(left);
     if (right != NULL) free(right);
     if (fp != NULL) fclose(fp);
     if (message != NULL) fprintf(stderr, message);
 }
 
-/**************** handle_kiff_message ****************/
-/* helper function for game_info_set_kiff
+/**************** handle_kff_message ****************/
+/* helper function for game_info_set_kff
  * handle the message properly
  * return 0 if success, 1 if error
  */
 static int
-handle_kiff_message(char *left, char *right, game_info_t *gi, krag_t *new_krag){
+handle_kff_message(char *left, char *right, game_info_t *gi, krag_t *new_krag){
     if ((left == NULL) || (right == NULL) || (gi == NULL) || (new_krag == NULL)){
         return 1;
     }
@@ -1040,6 +1041,7 @@ game_info_krag_distance(game_info_t *gi, char *kragId, char *latitude, char *lon
         double c = 2 * atan2(sqrt(a), sqrt(1-a));
         float dist = (float) (earthRadius * c);
         
+        printf("Distance is %f: ",dist);
         // if the distance is within 10m, return 0
         if (dist <= 10){
             return 0;
@@ -1621,6 +1623,6 @@ fa_print(fa_t *fa){
         return;
     }
     printf("fa name: %s\n", fa->name);
-    printf("\tlongitude: %lf\n\tlatitude: %lf", fa->longitude, fa->latitude);
+    printf("\tlongitude: %lf\n\tlatitude: %lf\n", fa->longitude, fa->latitude);
 }
 #endif

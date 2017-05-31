@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 (Mon May 29 20:28:32 2017) FROM 129.170.214.115@54642: opCode=GAME_STATUS|gameId=FEED|guideId=0707|numClaimed=5|numKrags=8
 (Mon May 29 20:28:39 2017) FROM 129.170.214.115@54642: opCode=GS_AGENT|gameId=FEED|pebbleId=8080477D|team=aqua|player=Bob|latitude=43.706552|longitude=-72.287418|lastContact=28
 (Mon May 29 20:28:54 2017) FROM 129.170.214.115@54642: opCode=GS_AGENT|gameId=FEED|pebbleId=8080477D|team=fab4|player=Annika|latitude=43.706552|longitude=-72.287418|lastContact=28
@@ -578,3 +579,5 @@
 (Tue May 30 17:46:01 2017) FROM 129.170.214.115@2872: opCode=GAME_STATUS|gameId=feed|guideId=0134|numClaimed=0|numKrags=6
 (Tue May 30 17:46:01 2017) FROM 129.170.214.115@2872: opCode=GS_CLUE|gameId=feed|guideId=0134|kragId=89db|clue=five
 (Tue May 30 17:46:01 2017) FROM 129.170.214.115@2872: opCode=GS_CLUE|gameId=feed|guideId=0134|kragId=45da|clue=two
+=======
+>>>>>>> e26bac0b0fe5b51fb3224fb3a9febd312467c819

@@ -11,7 +11,7 @@ static char GAME_STATUS[12] = "GAME_STATUS";
 static char GS_RESPONSE[12] = "GS_RESPONSE";
 static char GAME_OVER[10] = "GAME_OVER";
 static char GA_HINT[8] = "GA_HINT";
-
+static char start_gameID[2] = "0";
 
 char* create_fa_location(char* statusReq)
 {
@@ -113,21 +113,25 @@ void incoming_message(char* message)
 		return; // ignore the message
 	}
 
-	char **opcode_data = getOpCode(message);
-	char *opCode = opcode_data[0];
+	// char **opcode_data = getOpCode(message);
+	// char *opCode = opcode_data[0];
+	char** opcode_data = tokenize(message);
+	char *opCode = opcode_data[1];
+
+
 
 	if (strcmp(opCode, GAME_OVER) == 0) {
 		APP_LOG(APP_LOG_LEVEL_INFO, "GAME_OVER received, ending game.\n");
-		message_GAME_OVER(message);
+		message_GAME_OVER(opcode_data);
 	} else if (strcmp(opCode, GAME_STATUS) == 0){
 		APP_LOG(APP_LOG_LEVEL_INFO, "GAME_STATUS received, updating...\n");
-		message_GAME_STATUS(message);
+		message_GAME_STATUS(opcode_data);
 	} else if (strcmp(opCode, GS_RESPONSE) == 0) {
-		APP_LOG(APP_LOG_LEVEL_INFO, "GAME_STATUS received, updating...\n");
-		message_GS_RESPONSE(message);
+		APP_LOG(APP_LOG_LEVEL_INFO, "GS_RESPONSE received with code %s\n", opCode);
+		message_GS_RESPONSE(opcode_data);
 	} else if (strcmp(opCode, GA_HINT) == 0) {
 		APP_LOG(APP_LOG_LEVEL_INFO, "GA_HINT received, updating list of hints.\n");
-		message_GA_HINT(message);
+		message_GA_HINT(opcode_data);
 	} else {
 		APP_LOG(APP_LOG_LEVEL_INFO, "Received message: %s\n", message); // just log don't do anything
 	}
@@ -137,15 +141,9 @@ void incoming_message(char* message)
 
 
 // opCode=GAME_OVER|gameId=FEED|secret=computer science 50 rocks!
-void message_GAME_OVER(char* message)
+void message_GAME_OVER(char** tokenized_message)
 {
-	int validated = validate_message(message);
-	if (validated != 0) {
-		APP_LOG(APP_LOG_LEVEL_INFO, "Could no validate message: %s\n", message);
-		return;
-	}
-
-	char** tokenized_message = tokenize(message);
+	// char** tokenized_message = tokenize(message);
 
 	char* message_gameId = NULL;
 	char* secret = NULL;
@@ -165,7 +163,7 @@ void message_GAME_OVER(char* message)
 	}
 
 	if (strcmp(message_gameId, FA_INFO->gameId) != 0) { // wrong gameId
-		APP_LOG(APP_LOG_LEVEL_INFO, "Wrong gameId in: %s\n", message); // just log don't do anything
+		APP_LOG(APP_LOG_LEVEL_INFO, "Wrong gameId in: %s\n", tokenized_message[1]); // just log don't do anything
 		return;
 	}
 
@@ -176,19 +174,13 @@ void message_GAME_OVER(char* message)
 	FA_INFO->game_over_received = true;
 
 
-	free(tokenized_message);
+	// free(tokenized_message);
 }
 
 // opCode=GAME_STATUS|gameId=FEED|guideId=0707|numClaimed=5|numKrags=8
-void message_GAME_STATUS(char* message)
+void message_GAME_STATUS(char** tokenized_message)
 {
-	int validated = validate_message(message);
-	if (validated != 0) {
-		APP_LOG(APP_LOG_LEVEL_INFO, "Could no validate message: %s\n", message);
-		return;
-	}
-
-	char** tokenized_message = tokenize(message);
+	// char** tokenized_message = tokenize(message);
 
 	char* message_gameId = NULL;
 	char* numClaimed_s = NULL;
@@ -212,9 +204,13 @@ void message_GAME_STATUS(char* message)
 		return;
 	}
 
-	if (strcmp(message_gameId, FA_INFO->gameId) != 0) { // wrong gameId
-		APP_LOG(APP_LOG_LEVEL_INFO, "Wrong gameId in: %s\n", message); // just log don't do anything
+	if (strcmp(message_gameId, FA_INFO->gameId) != 0 && strcmp(FA_INFO->gameId, start_gameID) != 0) { // wrong gameId
+		APP_LOG(APP_LOG_LEVEL_INFO, "Wrong gameId in: %s\n", tokenized_message[1]); // just log don't do anything
 		return;
+	}
+
+	if (strcmp(FA_INFO->gameId, start_gameID) == 0) {
+		strcpy(FA_INFO->gameId, message_gameId);
 	}
 
 	int numClaimed = string_to_int(numClaimed_s);
@@ -223,7 +219,7 @@ void message_GAME_STATUS(char* message)
 	FA_INFO->num_claimed = numClaimed;
 	FA_INFO->num_left = numKrags - numClaimed;
 
-	free(tokenized_message);
+	// free(tokenized_message);
 }
 
 
@@ -244,15 +240,9 @@ void message_GAME_STATUS(char* message)
 // SH_CLAIMED_ALREADY
 
 // opCode=GS_RESPONSE|gameId=0707|respCode=SH_ERROR_INVALId_OPCODE|text=Unrecognized opCode 'GA_FOO'
-void message_GS_RESPONSE(char* message)
+void message_GS_RESPONSE(char** tokenized_message)
 {
-	int validated = validate_message(message);
-	if (validated != 0) {
-		APP_LOG(APP_LOG_LEVEL_INFO, "Could no validate message: %s\n", message);
-		return;
-	}
-
-	char** tokenized_message = tokenize(message);
+	// char** tokenized_message = tokenize(message);
 
 	char* message_gameId = NULL;
 	char* respCode = NULL;
@@ -277,7 +267,7 @@ void message_GS_RESPONSE(char* message)
 	}
 
 	if (strcmp(message_gameId, FA_INFO->gameId) != 0) { // wrong gameId
-		APP_LOG(APP_LOG_LEVEL_INFO, "Wrong gameId in: %s\n", message); // just log don't do anything
+		APP_LOG(APP_LOG_LEVEL_INFO, "Wrong gameId in: %s\n", tokenized_message[1]); // just log don't do anything
 		return;
 	}
 
@@ -293,21 +283,23 @@ void message_GS_RESPONSE(char* message)
 		FA_INFO->krag_claimed = true;
 	}
 
+	if (strcmp(respCode, "SH_ERROR_INVALID_ID") == 0) {
+		FA_INFO->invalid_krag_claimed = true;
+	}
 
-	free(tokenized_message);
+	if (strcmp(respCode, "SH_ERROR_INVALID_MESSAGE") == 0) {
+		FA_INFO->invalid_message = true;
+	}
+
+
+	// free(tokenized_message);
 }
 
 
 // opCode=GA_HINT|gameId=FEED|guideId=0707|team=aqua|player=Alice|pebbleId=8080477D|hint=Bob, look inside the cafe!
-void message_GA_HINT(char* message)
+void message_GA_HINT(char** tokenized_message)
 {
-	int validated = validate_message(message);
-	if (validated != 0) {
-		APP_LOG(APP_LOG_LEVEL_INFO, "Could no validate message: %s\n", message);
-		return;
-	}
-
-	char** tokenized_message = tokenize(message);
+	// char** tokenized_message = tokenize(message);
 
 	char* message_gameId = NULL;
 	char* team = NULL;
@@ -342,31 +334,24 @@ void message_GA_HINT(char* message)
 	}
 
 	if(strcmp(FA_INFO->gameId, message_gameId) != 0) {
-		APP_LOG(APP_LOG_LEVEL_INFO, "Wrong gameId in: %s\n", message);
+		APP_LOG(APP_LOG_LEVEL_INFO, "Wrong gameId in: %s\n", tokenized_message[1]);
 		return;
 	}
 
 	if(strcmp(FA_INFO->team, team) != 0) {
-		APP_LOG(APP_LOG_LEVEL_INFO, "Wrong team in: %s\n", message);
-		return;
-	}
-
-	if(strcmp(FA_INFO->name, name) != 0) {
-		APP_LOG(APP_LOG_LEVEL_INFO, "Wrong name in: %s\n", message);
+		APP_LOG(APP_LOG_LEVEL_INFO, "Wrong team in: %s\n", tokenized_message[1]);
 		return;
 	}
 
 	if(strcmp(FA_INFO->pebbleId, pebbleId) != 0) {
-		APP_LOG(APP_LOG_LEVEL_INFO, "Wrong pebbleId in: %s\n", message);
+		APP_LOG(APP_LOG_LEVEL_INFO, "Wrong pebbleId in: %s\n", tokenized_message[1]);
 		return;
 	}
 
 	for(int i = 9; i > 0; i--) {
-		free(FA_INFO->hints_received[i]);
 		strcpy(FA_INFO->hints_received[i], FA_INFO->hints_received[i - 1]); // shift up
 	}
 
-	free(FA_INFO->hints_received[0]);
 	strcpy(FA_INFO->hints_received[0], hint);
 
 }
