@@ -358,24 +358,28 @@
 ### Data structures
 **Struct _game_info_**
 - Time the game has started (indicates the elapsed time since start of the game)
-- Number of krags
+- Number of krags (int)
 - Number of agents (#FA + #GA)
 - Number of teams (# of Struct Team)
-- Secret file name
+- Secret string (char *)
 - Set of krags (clue will be the key)
 - Set of Team (team name will be the key)
+- Game ID (unsigned int)
+- Game status (int) (0 indicates the game is ongoing)
 
 **Struct _Team_**
+- Team name (cahr *)
+- Number of agents int team (#FA + #GA)
 - GA
 - Set of FA
 - Number of krags claimed (int)
-- Revealed krags (set of char *)
+- Number of revealed krags (int)
 - Partly revealed secret string (char *)
 
 **Struct _FA_**
 - Name (char *)
 - pebbleId (int)
-- sockaddr (int)
+- Struct sockaddr_in
 - Longitude (float)
 - Latitude (float)
 - Last-contact-time (time_t)
@@ -389,8 +393,10 @@
 **Struct _krag_**
 - Latitude (float)
 - Longitude (float)
-- kragId (int)
+- kragId (unsigned int)
+- Clue (char *)
 - Set for keeping track the team that have claimed the krag
+- Set for keeping track the team that have revealed the krag
 
 
 ### Pseudo code
@@ -400,21 +406,27 @@
 2. While the game is not over, perform the following
     1. Listen to message
     2. If successfully received message:
-        1. Write the message in the log file (logs/gameserver.log) () 
+        1. Write the message in the log file (logs/gameserver.log) () 
         2. Parse message ()
         3. Handle message ()
             1.	Depending on the return value, respond correctly. Explained below.
         4. Present summary
-    3. Otherwise exit with non-zero status
-    4. If game over (All krags revieled or by input GAMEOVER):
-        1. Send a game summary (TEAM_RECORD) to all players
-        2. Send a message indicating the end-of-game (GAME_OVER) to all players
-        3. Break
-    5. Otherwise continue loop
-3. Free all memory
-4. Exit with 0 status
+    4. Otherwise exit with non-zero status
+    5. If "GAME OVER" is entered in stdin,  game over
+    6. If game over (All krags revieled or by input "GAME OVER"), get out of the loop 
+    7. Otherwise continue loop
+3. Send a game summary (TEAM_RECORD) to all players
+    1. Iterate the set of team in game_info
+        1. Iterate the set of FA in team, and send the record to each agent
+        2. Send record to the GA
+4. Send a message indicating the end-of-game (GAME_OVER) to all players
+    1. Iterate the set of team in game_info
+        1. Iterate the set of FA in team, and send the record to each agent
+        2. Send record to the GA
+5. Free all memory
+6. Exit with 0 status
 
-**`int handle_message(char *opcode, char *rest_of_line, game_infor *gi)`**
+**`int message_handler(char *opcode, char *rest_of_line, game_infor *gi)`**
 // Use dispatch table and common function
 If opCode=
 **FA_LOCATION**
@@ -422,7 +434,7 @@ If opCode=
 2. If gameId == 0
     1. If team is not known, register team
     2. If pebbleId is not known, register pebbleId and associate it with given player and team
-    3. If there is already a player with the same name in the team, ignore and return -6
+    3. If there is already a player with the same name in the team, ignore and return -8
         **Same name is not allowed in one team**
     4. Return 1
 3. If gameId != 0
@@ -508,6 +520,59 @@ If opCode=
 **not found**
 1. Return -2
 
+**`void respond(char *opCode, int result, int comm_sock, struct sockaddr_in them,
+game_info_t *gi, char *message_from)`**
+1. If result is < 0, error
+    If result = 
+        -1, respond with SH_ERROR_INVALID_MESSAGE to whom sent the message
+        -2, respond with SH_ERROR_INVALID_OPCODE to whom sent the message
+        -3, respond with SH_ERROR_INVALID_FIELD to whom sent the message
+        -4, respond with SH_ERROR_INVALID_GAME_ID to whom sent the message
+        -5, respond with SH_ERROR_INVALID_TEAMNAME to whom sent the message
+        -6, respond with SH_ERROR_INVALID_PLAYERNAME to whom sent the message
+        -7, respond with SH_ERROR_INVALID_ID to whom sent the message
+        -8, respond with SH_ERROR_DUPLICATE_PLAYERNAME to whom sent the message
+        -9, respond with SH_ERROR_DUPLICATE_FIELD to whom sent the message
+        -10, respond with SH_CLAIMED to whom sent the message
+        -11, respond with SH_CLAIMED_ALREADY to whom sent the message
+    Write the message in the log file (logs/gameserver.log)
+
+2. If opCode is
+    1. FA_LOCATION
+        1. respond with game status
+    2. FA_CLAIM
+        1. If result = 1
+            1. Respond with SH_CLAIMED to whom it sent the message
+            2. Respond with GS_CLAIMED to the guide
+            3. Respond with maximum two (may be one or none) GS_CLUE to the guide
+                1. Check how many clue have been revealed to this team
+                2. If this is less than the number of the krag in the game, send clue and increment the count of revealed krags
+                3. Do this again if condition satisfies
+            4. Respond with GS_SECRET to the guide
+        2. If result = 2
+            1. Respond with SH_CLAIMED to whom it sent the message
+            2. Respond with GS_CLAIMED to the guide
+            3. Change the game status and end the game
+        3. If result = 3
+            1. Respond with SH_CLAIMED_ALREADY to whom sent the message
+    3. GA_STATUS
+        1. If result = 1
+            1. Respond with GAME_STATUS to the guide
+            2. Respond with GS_AGENT to the guide
+        2. If result = 2
+            1. Respond with GAME_STATUS to the guide
+            2. Respond with GS_AGENT to the guide
+            3. Respond with maximum two (may be one or none) GS_CLUE to the guide
+    4. GA_HINT
+        1. If result = 1
+            1. Send GA_HINT to all field agent in the same team
+                1. Iterate the set of FA in team, and send the hint to each agent
+        2. If result = 2
+            1. Send GA_HINT to the specified field agent
+    5. FA_LOG
+        1. If result = 0
+            1. Write to the log file (fieldagents.log)
+    Write the message in the log file (logs/gameserver.log)
 
 #### Functions
 **`Parse command line argument(const int argc, char *argv[], game_infor *gi)`**
@@ -527,72 +592,9 @@ If opCode=
 
 **`Build set of krags(char *kiff, game_infor *gi)`**
     1. For each line in the file:
-        1. Check there are no space
-        2. Create the krag
+        1. Get the left hand side and the right hand side of the equation
+        2. With the tokens, create the krag
         3. Add it to the set of krag stored in game_info 
-
-**`void send message to(char *responseCode, char *name, char *team, game_infor *gi)`**
-    If responseCode = 
-        GAME_STATUS (sends to GA)
-            opCode=GAME_STATUS|gameId=|guideId=|numClaimed=|numKrags=
-            Write the message in the log file (logs/gameserver.log)
-
-        GS_AGENT (sends to GA)
-            opCode=GA_AGENT|gameId=|pebbleId=|team=|player=|latitude=|longitude=|lastContact=
-            Write the message in the log file (logs/gameserver.log)
-
-        GS_CLUE (sends to GA)  
-            opCode=GS_CLUE|gameId=|guideId=|latitude=|longitude=|clue=
-            Write the message in the log file (logs/gameserver.log)
-
-        GS_SECRET (sends to GA)
-            opCode=GS_SECRET|gmaId=|guideId=|secret=
-            Write the message in the log file (logs/gameserver.log)
-
-        GS_RESPONSE (sends to GA/FA)
-            opCode=GS_RESPONSE|gameId=|respCode=|test=
-            Write the message in the log file (logs/gameserver.log)
-
-        GAME_OVER (sends to GA/FA)
-            opCode=GAME_OVER|gameId=|secret=
-            Write the message in the log file (logs/gameserver.log)
-
-        TEAM_RECORD (sends to GA/FA)
-            opCode=TEAM_RECORD|gameId=|team=|numClaimed=|numPlayers=
-            Write the message in the log file (logs/gameserver.log)
-
-
-### Returning value operation
-**Common**
-0: Successfully handled message (can be error and ignore). Nothing to be done
--1: SH_ERROR_INVALID_MESSAGE
--2: SH_ERROR_INVALID_OPCODE
--3: SH_ERROR_INVALID_FIELD
--4: SH_ERROR_INVALID_GAME_ID
--5: SH_ERROR_INVALID_TEAMNAME
--6: SH_ERROR_INVALID_PLAYERNAME
--7: SH_ERROR_INVALID_ID
--8: SH_ERROR_DUPLICATE_FIELD
--9: SH_DUPLICATE_PLAYERNAME
--99: malloc error
-
-**FA_LOCATION**
-1: Respond with GAME_STATUS
-
-**FA_CLAIM**
-1: Respond with SH_CLAIMED, GS_CLUE, and GS_SECRET
-    - Send two (may be one or zero) randomly chosen clues, in the form of GS_CLUE messages to the GA on same team
-    - Update this team’s copy of the secret so as to reveal characters of the string
-    - Send the updated secret, via a GS_SECRET message to the GA on same team
-2: Respond with SH_CLAIMED and finish the game
-3: Respond with SH_CLAIMED_ALREADY
-
-**GA_STATUS**
-1: Respond with GAME_STATUS and GS_AGENT
-
-**GA_HINT**
-1: Send the message to all FA in the team
-2: Forward the message to the specified player
 
 
 ### Resource management and Persistent storage

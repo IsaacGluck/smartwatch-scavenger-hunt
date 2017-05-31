@@ -567,7 +567,8 @@ game_info_set_kff(game_info_t *gi, char *kff){
             else if (i == strlen(line)-1){
                 // it should be reading the right hand side
                 if (state == 1){
-                    right[j] = '\0';
+                    right[j] = line[i];
+                    right[j+1] = '\0';
                     if (handle_kff_message(left, right, gi, new_krag) != 0){
                         set_kff_handle_error(left, right, fp,
                                               "Error: krag format error\n");
@@ -898,7 +899,7 @@ team_register_ga(game_info_t *gi, team_t *team, char *guideId,
 /**************** team_register_fa ****************/
 /* register fa to the team
  * return 0 if successfully registered
- * return -7 if the pebbleId is already registered
+ * return -8 if the pebbleId is already registered
  * return -8 if player with same name exists in the team
  */
 int
@@ -929,7 +930,7 @@ team_register_fa(game_info_t *gi, team_t *team, char *pebbleId,
     // if the player with the given pebbleId is found, it will not be registered
     // invalid id
     else {
-        return -7;
+        return -8;
     }
 }
 

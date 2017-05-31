@@ -301,7 +301,7 @@ static char* GA_HINTReturn(void* g, char* h){
 
 		}
 		print_log(returnstr, "guideagent.log", game->ipaddress, "TO"); //add to log 
-		printf("hint: %s\n", returnstr);
+		//printf("hint: %s\n", returnstr);
 		return returnstr; 
 
 	}
@@ -336,7 +336,7 @@ static char* GA_STATUSReturn(void* g){
 	strcat(returnstr, game->playerName);
 	strcat(returnstr, "|statusReq=");
 	char str[10]; 
-	sprintf(str,"%d", game->update);
+	//sprintf(str,"%d", game->update);
 	strcat(returnstr, str);
 
 	return returnstr; //return the final string 
@@ -639,7 +639,7 @@ static void gameStatus(char* parameters[], void* g){
 
 	//if this is the first game status, must set the game ID and the krag information 
 	if(game->firstGameStatus==0 && strcmp(parameters[2], game->guideID)== 0){
-		printf("This is the game ID why isnt it working: %s \n", parameters[1]);
+		//printf("This is the game ID why isnt it working: %s \n", parameters[1]);
 		char* gid = malloc(strlen(parameters[1])+1); 
 		strcpy(gid, parameters[1]);
 		game->gameID = gid; //set game id 
@@ -784,12 +784,12 @@ static void gameOver(char* parameters[], void* g){
 //This is the method that update the game struct wehn the teamRecord op code is here 
 static void teamRecord(char* parameters[], void* g){
 	//create a new node for the end bag 
-	printf("here ending stuff\n");
+	//printf("here ending stuff\n");
 	struct gameOver* end = malloc(sizeof(struct gameOver)); 
 	//set the parameters for all the new end node 
 	end->gameID= parameters[1];
-	end->team = parameters[2];
-	end->numClaimed = atoi(parameters[3]);
+	end->team = parameters[3];
+	end->numClaimed = atoi(parameters[2]);
 	end->numPlayers = atoi(parameters[4]); 
 	struct gameStruct* game = g; 
 	bag_insert(game->gameOverInfo, end);  //insert the end data into the bag 
@@ -836,7 +836,7 @@ static void agentPrint(void *arg, const char *key, void *item){
 static void unfoundkragPrint(void *arg, const char *key, void *item){
 	struct krag* currkrag = item;
 	if(strcmp(currkrag->idOfClaimer,"") == 0 && currkrag->lat == 0 && currkrag->lon==0){ //checls if the found id is still empty 
-		printf("There is this clue: %s for an unfound krag\n", currkrag->clue);
+		printf("There is this clue: '%s' for an unfound krag\n", currkrag->clue);
 	} 
 	
 }
@@ -852,7 +852,7 @@ static void foundkragPrint(void *arg, const char *key, void *item){
 //prints all the game over strings at the end 
 static void endingPrint(FILE *fp, void *item){
 	struct gameOver* end = item;
-	printf("gameID: %s, team: %s, num players: %d, num found: %d\n", end->gameID, end->team, end->numPlayers, end->numClaimed);
+	printf("\ngameID: %s, team: %s, num players: %d, num found: %d\n", end->gameID, end->team, end->numPlayers, end->numClaimed);
 }
 
 
@@ -939,7 +939,7 @@ handle_socket(int comm_sock, struct sockaddr_in *themp, void* g)
       if (sender.sin_addr.s_addr == themp->sin_addr.s_addr && 
 	  sender.sin_port == themp->sin_port) {
 	// print the message
-      	printf("got this message: %s, validate gives: %d\n", buf, validate_message(buf));
+      	//printf("got this message: %s, validate gives: %d\n", buf, validate_message(buf));
       	if(validate_message(buf)==0){
 
 			dealWithInfo(g, buf, inet_ntoa(sender.sin_addr), ntohs(sender.sin_port));
