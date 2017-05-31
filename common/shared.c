@@ -23,6 +23,8 @@ char** tokenize(char* message);
 #ifdef NOPEBBLE // we are *not* building for pebble
 int print_log(char* message, char* filename, char* IPport, char* tofrom);
 
+
+//method in function table 
 static int gsAgent(char* parameters[], int total);
 static int gsClue(char* parameters[], int total);
 static int gsClaimed(char* parameters[], int total);
@@ -78,6 +80,7 @@ void print_shared() {
 }
 
 
+//validates the message and calls the proper fucntion 
 int validate_message(char* m){
 	// printf("IN THIS METHOD MEH\n");
 	//check size max is 8191, if not, return -1 
@@ -96,7 +99,8 @@ int validate_message(char* m){
 			total++; 
 		}
 	}
-
+ 
+ 	//split array 
 	char** array = tokenize(message);
 	if (array == NULL) {
     
@@ -112,7 +116,7 @@ int validate_message(char* m){
 			return 1; 
 		}
 	}
-
+	//send to right spot in function table 
 	int fn;
 	for (fn = 0; codes[fn].opCodes != NULL; fn++) {
   		if (strcmp(array[1], codes[fn].opCodes) == 0) {
@@ -139,10 +143,11 @@ int validate_message(char* m){
 	return 0;
 }
 
-
+//split everything into the proper tockets 
 char** tokenize(char* message)
 {
 	int total = 0; 
+	//find amount of bars 
 	for(int i = 0; i< (int)strlen(message); i++){
 		if(message[i] == '|' || message[i] == '='){
 			total++; 
@@ -153,6 +158,7 @@ char** tokenize(char* message)
 		return NULL; 
 	}
 	
+	//create array 
 	char** array = malloc(sizeof(char*) * (total + 1));
 	if(array == NULL){
 		return NULL; 
@@ -162,6 +168,7 @@ char** tokenize(char* message)
 
 	int message_length = strlen(message);
 
+	//place each split into the array 
 	int count = 1; 
 	array[0] = pointer;
 	for(int i = 0; i < message_length; i++){
@@ -178,6 +185,11 @@ char** tokenize(char* message)
 
 #ifdef NOPEBBLE // we are *not* building for pebble
 
+
+//checks that the Gs agent has the right parameters 
+//Check all parameters are of the right type for this op code, if not, return 3
+//Check all parameters are present and only the right ones are present, if not, return 3
+//Check there are the right amount of parameters, if not, return 5
 static int gsAgent(char* parameters[], int total){
 	if(total != 16){
 		return 5;
@@ -295,6 +307,9 @@ static int gsAgent(char* parameters[], int total){
 	return 0;
 }
 
+//Check all parameters are of the right type for this op code, if not, return 3
+//Check all parameters are present and only the right ones are present, if not, return 3
+//Check there are the right amount of parameters, if not, return 5
 static int gsClue(char* parameters[], int total){
 	if(total != 10){
 		return 5;
@@ -370,7 +385,9 @@ static int gsClue(char* parameters[], int total){
 
 	return 0;
 }
-
+//Check all parameters are of the right type for this op code, if not, return 3
+//Check all parameters are present and only the right ones are present, if not, return 3
+//Check there are the right amount of parameters, if not, return 5
 static int gsClaimed(char* parameters[], int total){
 	if(total != 14){
 		return 5;
@@ -483,7 +500,9 @@ static int gsClaimed(char* parameters[], int total){
 
 	return 0;
 }
-
+//Check all parameters are of the right type for this op code, if not, return 3
+//Check all parameters are present and only the right ones are present, if not, return 3
+//Check there are the right amount of parameters, if not, return 5
 static int gsSecret(char* parameters[], int total){
 	if(total != 8){
 		return 5;
@@ -545,7 +564,9 @@ static int gsSecret(char* parameters[], int total){
 
 	return 0;
 }
-
+//Check all parameters are of the right type for this op code, if not, return 3
+//Check all parameters are present and only the right ones are present, if not, return 3
+//Check there are the right amount of parameters, if not, return 5
 static int teamRecord(char* parameters[], int total){
 	if(total != 10){
 		return 5;
@@ -597,7 +618,9 @@ static int teamRecord(char* parameters[], int total){
 
 	return 0;
 }
-
+//Check all parameters are of the right type for this op code, if not, return 3
+//Check all parameters are present and only the right ones are present, if not, return 3
+//Check there are the right amount of parameters, if not, return 5
 static int gaStatus(char* parameters[], int total){
 	if(total != 12){
 		return 5;
@@ -681,7 +704,9 @@ static int gaStatus(char* parameters[], int total){
 
 	return 0;
 }
-
+//Check all parameters are of the right type for this op code, if not, return 3
+//Check all parameters are present and only the right ones are present, if not, return 3
+//Check there are the right amount of parameters, if not, return 5
 int print_log(char* message, char* filename, char* IPport, char* tofrom){
 	char timestamp[27];
   time_t clk = time(NULL);
@@ -712,7 +737,9 @@ int print_log(char* message, char* filename, char* IPport, char* tofrom){
 
 
 // FA required
-
+//Check all parameters are of the right type for this op code, if not, return 3
+//Check all parameters are present and only the right ones are present, if not, return 3
+//Check there are the right amount of parameters, if not, return 5
 static int gameStatus(char* parameters[], int total){
 	if(total != 10){
 		return 5;
@@ -772,8 +799,12 @@ static int gameStatus(char* parameters[], int total){
 
 	return 0;
 }
-
+//Check all parameters are of the right type for this op code, if not, return 3
+//Check all parameters are present and only the right ones are present, if not, return 3
+//Check there are the right amount of parameters, if not, return 5
 static int gsResponse(char* parameters[], int total){
+	// return 100;
+
 	if(total != 8){
 		return 5;
 	}
@@ -834,7 +865,9 @@ static int gsResponse(char* parameters[], int total){
 	}
 	return 1; 
 }
-
+//Check all parameters are of the right type for this op code, if not, return 3
+//Check all parameters are present and only the right ones are present, if not, return 3
+//Check there are the right amount of parameters, if not, return 5
 static int gaHint(char* parameters[], int total){
 	if(total != 14){
 		return 5;
@@ -953,7 +986,9 @@ static int gaHint(char* parameters[], int total){
 
 	return 0;
 }
-
+//Check all parameters are of the right type for this op code, if not, return 3
+//Check all parameters are present and only the right ones are present, if not, return 3
+//Check there are the right amount of parameters, if not, return 5
 static int faLocation(char* parameters[], int total){
 	if(total != 16){
 		return 5;
@@ -1068,7 +1103,9 @@ static int faLocation(char* parameters[], int total){
 
 	return 0;
 }
-
+//Check all parameters are of the right type for this op code, if not, return 3
+//Check all parameters are present and only the right ones are present, if not, return 3
+//Check there are the right amount of parameters, if not, return 5
 static int faClaim(char* parameters[], int total){
 	if(total != 16){
 		return 5;
@@ -1191,7 +1228,9 @@ static int faClaim(char* parameters[], int total){
 
 	return 0;
 }
-
+//Check all parameters are of the right type for this op code, if not, return 3
+//Check all parameters are present and only the right ones are present, if not, return 3
+//Check there are the right amount of parameters, if not, return 5
 static int faLog(char* parameters[], int total){
 	if(total != 6){
 		return 5;
@@ -1235,7 +1274,9 @@ static int faLog(char* parameters[], int total){
 
 	return 0;
 }
-
+//Check all parameters are of the right type for this op code, if not, return 3
+//Check all parameters are present and only the right ones are present, if not, return 3
+//Check there are the right amount of parameters, if not, return 5
 static int gameOver(char* parameters[], int total){
 	if(total != 6){
 		return 5;
