@@ -129,16 +129,80 @@ player=Alice host=flume port=56307
     **Test claimed**
     FA_INFO->krag_claimed = true;
  
+### Game Server
+*Enter valid codes
+
+*Register FA
+opCode=FA_LOCATION|gameId=0|pebbleId=8080477D|team=aqua|player=Alice|latitude=43.706552|longitude=-72.287418|statusReq=1
+opCode=FA_LOCATION|gameId=0|pebbleId=80804774|team=aqua|player=Charlie|latitude=43.736552|longitude=-72.257418|statusReq=1
+
+*Register GA
+opCode=GA_STATUS|gameId=0|guideId=0707|team=aqua|player=Bob|statusReq=1
+opCode=GA_STATUS|gameId=0|guideId=0897|team=views6|player=David|statusReq=1
+
+*Claim from Alice
+opCode=FA_CLAIM|gameId=FEED|pebbleId=8080477D|team=aqua|player=Alice|latitude=43.706552|longitude=-72.287418|kragId=89DB
+opCode=FA_CLAIM|gameId=FEED|pebbleId=8080477D|team=aqua|player=Alice|latitude=43.706552|longitude=-72.287418|kragId=02da
+opCode=FA_CLAIM|gameId=FEED|pebbleId=8080477D|team=aqua|player=Alice|latitude=43.706552|longitude=-72.287418|kragId=89BA
+opCode=FA_CLAIM|gameId=FEED|pebbleId=8080477D|team=aqua|player=Alice|latitude=43.706552|longitude=-72.287418|kragId=82D3
+
+*Write in Log
+opCode=FA_LOG|pebbleId=8080477D|text=displayed hint "go west"
+
+
+*Update Alice
+opCode=FA_LOCATION|gameId=FEED|pebbleId=8080477D|team=aqua|player=Alice|latitude=43.706552|longitude=-72.287418|statusReq=1
+opCode=FA_LOCATION|gameId=FEED|pebbleId=8080477D|team=aqua|player=Alice|latitude=43.706552|longitude=-72.287418|statusReq=0
+opCode=FA_LOCATION|gameId=FEED|pebbleId=80804774|team=aqua|player=Charlie|latitude=43.736552|longitude=-72.257418|statusReq=1
+
+*Update Bob
+opCode=GA_STATUS|gameId=FEED|guideId=0707|team=aqua|player=Bob|statusReq=1
+
+*Hint
+opCode=GA_HINT|gameId=FEED|guideId=0707|team=aqua|player=Bob|pebbleId=8080477D|hint=Alice, look inside the cafe!
+opCode=GA_HINT|gameId=FEED|guideId=0707|team=aqua|player=Bob|pebbleId=*|hint=Everyone, look inside the cafe!
+
+
+*Error cases
+*Duplicate player
+opCode=FA_LOCATION|gameId=0|pebbleId=8080477D|team=alpha|player=Alice|latitude=43.706552|longitude=-72.287418|statusReq=1
+
+*Update error
+opCode=FA_LOCATION|gameId=0|pebbleId=8080477D|team=aqua|player=Alice|latitude=43.706552|longitude=-72.287418|statusReq=1
+opCode=FA_LOCATION|gameId=FEED|pebbleId=12345678|team=aqua|player=Alice|latitude=43.706552|longitude=-72.287418|statusReq=1
+opCode=FA_LOCATION|gameId=FEED|pebbleId=8080477D|team=alpha|player=Alice|latitude=43.706552|longitude=-72.287418|statusReq=1
+opCode=FA_LOCATION|gameId=FEED|pebbleId=8080477D|team=aqua|player=Charlie|latitude=43.706552|longitude=-72.287418|statusReq=1
+opCode=FA_LOCATION|gameId=FEED|pebbleId=8080477D|team=aqua|player=Alice|latitude=43.706552|longitude=-72.287418|statusReq=1
+
+*Wrong Hint
+opCode=GA_HINT|gameId=FEED|guideId=0897|team=views6|player=David|pebbleId=12345678|hint=It's working!
+opCode=GA_HINT|gameId=feed|guideId=0897|team=views6|player=David|pebbleId=12345678|hint=It's working!
+
+*Wrong GA added
+opCode=GA_STATUS|gameId=0|guideId=0897|team=aqua|player=David|statusReq=1
+
+*Duplicate Claim
+opCode=FA_CLAIM|gameId=FEED|pebbleId=8080477D|team=aqua|player=Alice|latitude=43.706552|longitude=-72.287418|kragId=89DB
+
+*Claim Error
+opCode=FA_CLAIM|gameId=FEED|pebbleId=8080477D|team=aqua|player=Alice|latitude=30.706552|longitude=-50.287418|kragId=45DA
+
+*Claim all krags and end game
+opCode=FA_CLAIM|gameId=FEED|pebbleId=8080477D|team=aqua|player=Alice|latitude=43.706552|longitude=-72.287418|kragId=45DA
+opCode=FA_CLAIM|gameId=FEED|pebbleId=8080477D|team=aqua|player=Alice|latitude=43.706552|longitude=-72.287418|kragId=86DA`
+
 
 ### Integratin Testing: 
 * We had two major parts of intergration testing 
 * *Testing the guide agent with the server*
     * Had the server and guide agent send eachother the proper methods that were suppose to be send and saw how they responded
-    * when the Guide agent joined the game, the server would send a status and the clues
+    * When the Guide agent joined the game, the server would send a status and the clues
     * When the guide agent sent a hint, the server would receive that hint and get ready to send it to the field agent 
     * when the guide agent sent update, the game server would respond by sending the whole game update again. 
     * When the server sent any message to the guide agent, it would output the correct output and update its internal structures. We tested this by printing the outputs 
 * *Testing the field gent with the server* 
+    * Had teh sever and guide agetn send each other the proper methods that were suppose to be sent and saw how they responded
+    * Used chat client to put inputs in game server and made intentional conflicts so that field agen will receive error
 
 
 ### System Testing: 
