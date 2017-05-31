@@ -788,8 +788,8 @@ static void teamRecord(char* parameters[], void* g){
 	struct gameOver* end = malloc(sizeof(struct gameOver)); 
 	//set the parameters for all the new end node 
 	end->gameID= parameters[1];
-	end->team = parameters[2];
-	end->numClaimed = atoi(parameters[3]);
+	end->team = parameters[3];
+	end->numClaimed = atoi(parameters[2]);
 	end->numPlayers = atoi(parameters[4]); 
 	struct gameStruct* game = g; 
 	bag_insert(game->gameOverInfo, end);  //insert the end data into the bag 
@@ -852,7 +852,7 @@ static void foundkragPrint(void *arg, const char *key, void *item){
 //prints all the game over strings at the end 
 static void endingPrint(FILE *fp, void *item){
 	struct gameOver* end = item;
-	printf("gameID: %s, team: %s, num players: %d, num found: %d\n", end->gameID, end->team, end->numPlayers, end->numClaimed);
+	printf("\ngameID: %s, team: %s, num players: %d, num found: %d\n", end->gameID, end->team, end->numPlayers, end->numClaimed);
 }
 
 
