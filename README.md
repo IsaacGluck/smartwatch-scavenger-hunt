@@ -12,6 +12,8 @@ Views
 - Isaac Gluck
 - Kazuma Honjo
 
+### Make the environment to run the game server, guide agent, and field agents, run views_krag.sh 
+
 
 ### To Run: type make 
 
